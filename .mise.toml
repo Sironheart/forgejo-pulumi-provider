@@ -2,6 +2,7 @@
 go = "1.26.2"
 pulumi = "3.232.0"
 jq = "1.8.1"
+git-cliff = "2.13.1"
 goreleaser = "2.15.4"
 golangci-lint = "2.11.4"
 
@@ -21,9 +22,13 @@ run = "go test ./..."
 description = "Run Go linters"
 run = "golangci-lint run ./cmd/... ./internal/..."
 
+[tasks.version]
+description = "Calculate the next semantic version"
+run = "git-cliff --bumped-version"
+
 [tasks.build]
 description = "Build the Pulumi provider plugin"
-run = "mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION:-0.0.0-dev} && version=${version#v} && go build -trimpath -ldflags \"-s -w -X main.version=$version\" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo"
+run = "mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION:-$(git-cliff --bumped-version)} && version=${version#v} && go build -trimpath -ldflags \"-s -w -X main.version=$version\" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo"
 
 [tasks.schema]
 description = "Build plugin and export Pulumi schema"
@@ -59,7 +64,7 @@ hide = true
 [tasks.check-build]
 description = "Build provider after preparation"
 depends = ["check-prepare"]
-run = "mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION:-0.0.0-dev} && version=${version#v} && go build -trimpath -ldflags \"-s -w -X main.version=$version\" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo"
+run = "mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION:-$(git-cliff --bumped-version)} && version=${version#v} && go build -trimpath -ldflags \"-s -w -X main.version=$version\" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo"
 hide = true
 
 [tasks.check-schema]

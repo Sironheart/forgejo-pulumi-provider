@@ -254,6 +254,7 @@ Useful tasks:
 | `mise run fmt` | Format Go code with `golangci-lint fmt` using `.golangci.yml`. |
 | `mise run lint` | Run `golangci-lint`. |
 | `mise run test` | Run Go tests. |
+| `mise run version` | Calculate the next semantic version with `git-cliff`. |
 | `mise run build` | Build `bin/pulumi-resource-forgejo`. |
 | `mise run schema` | Export `schema.json`. |
 | `mise run sdk` | Generate all standard Pulumi SDKs. |
@@ -266,7 +267,7 @@ Build release artifacts locally:
 mise exec -- goreleaser release --snapshot --clean --skip=publish
 ```
 
-Forgejo Actions run validation on pushes and pull requests. The CI workflow installs Go, Pulumi, and `golangci-lint` directly from explicit versions in `.forgejo/workflows/ci.yml`; `mise` is only used for local tasks and release automation.
+Forgejo Actions run validation on pushes and pull requests. The CI workflow installs Go, Pulumi, `golangci-lint`, and `git-cliff` directly from explicit versions or actions in `.forgejo/workflows/ci.yml`; `mise` is only used for local tasks and release automation. CI calculates the provider version with `git-cliff --bumped-version` before building the provider and SDKs.
 
 ## Release Automation
 

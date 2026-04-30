@@ -4,6 +4,7 @@ env:
   GO_VERSION: "1.26.2"
   PULUMI_VERSION: "3.232.0"
   GOLANGCI_LINT_VERSION: v2.11.4
+  GIT_CLIFF_VERSION: 2.13.1
 
 on:
   push:
@@ -18,6 +19,8 @@ jobs:
       image: node:20-bookworm
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install system tools
         run: |
@@ -48,6 +51,24 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
             | sh -s -- -b /usr/local/bin "$GOLANGCI_LINT_VERSION"
 
+      - uses: https://github.com/taiki-e/install-action@v2
+        with:
+          tool: git-cliff@${{ env.GIT_CLIFF_VERSION }}
+
+      - name: Determine provider version
+        id: version
+        run: |
+          set -eu
+          version=$(git-cliff --bumped-version)
+          version=${version#v}
+          output_file=${FORGEJO_OUTPUT:-${GITHUB_OUTPUT:-}}
+          if [ -z "$output_file" ]; then
+            printf 'No action output file is available\n'
+            exit 1
+          fi
+          printf 'Provider version: %s\n' "$version"
+          printf 'version=%s\n' "$version" >> "$output_file"
+
       - name: Tidy Go modules
         run: go mod tidy
 
@@ -61,10 +82,12 @@ jobs:
         run: go test ./...
 
       - name: Build provider
+        env:
+          FORGEJO_PROVIDER_VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -eu
           mkdir -p bin
-          version=${FORGEJO_PROVIDER_VERSION:-0.0.0-dev}
+          version=$FORGEJO_PROVIDER_VERSION
           version=${version#v}
           go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
 
@@ -72,6 +95,8 @@ jobs:
         run: pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
 
       - name: Generate SDKs
+        env:
+          FORGEJO_PROVIDER_VERSION: ${{ steps.version.outputs.version }}
         run: scripts/gen-sdk.sh
 
       - name: Check generated files

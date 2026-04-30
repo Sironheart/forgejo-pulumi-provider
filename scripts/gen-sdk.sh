@@ -4,8 +4,9 @@ set -euo pipefail
 ROOT_DIR=$(git rev-parse --show-toplevel)
 cd "$ROOT_DIR"
 
-VERSION=${FORGEJO_PROVIDER_VERSION:-${GITHUB_REF_NAME:-0.0.0-dev}}
+VERSION=${FORGEJO_PROVIDER_VERSION:-$(git-cliff --bumped-version)}
 VERSION=${VERSION#v}
+printf 'Generating SDKs with version %s\n' "$VERSION"
 
 pulumi package gen-sdk ./bin/pulumi-resource-forgejo --language all --version "$VERSION"
 
