@@ -25,8 +25,16 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &DeployKey{}
 	case "forgejo:index:Organization":
 		r = &Organization{}
+	case "forgejo:index:OrganizationTeam":
+		r = &OrganizationTeam{}
+	case "forgejo:index:PublicKey":
+		r = &PublicKey{}
 	case "forgejo:index:Repository":
 		r = &Repository{}
+	case "forgejo:index:RepositoryActionVariable":
+		r = &RepositoryActionVariable{}
+	case "forgejo:index:RepositoryTagProtection":
+		r = &RepositoryTagProtection{}
 	default:
 		return nil, fmt.Errorf("unknown resource type: %s", typ)
 	}

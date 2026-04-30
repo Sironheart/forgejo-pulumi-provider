@@ -7,7 +7,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "com.sironheart.pulumi"
+group = "casa.siron.pulumi"
 
 def resolvedVersion = System.getenv("PACKAGE_VERSION") ?:
     (project.version == "unspecified"
@@ -84,7 +84,7 @@ jar.configure {
 publishing {
     publications {
         mainPublication(MavenPublication) {
-            groupId = "com.sironheart.pulumi"
+            groupId = "casa.siron.pulumi"
             artifactId = "forgejo"
             version = resolvedVersion
             from components.java

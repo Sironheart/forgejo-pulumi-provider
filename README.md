@@ -14,7 +14,7 @@ The provider schema generates SDKs for all standard Pulumi languages:
 | Python | `sdk/python` | `pulumi_forgejo` |
 | Go | `sdk/go` | `forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go` |
 | .NET | `sdk/dotnet` | `Pulumi.Forgejo` |
-| Java | `sdk/java` | `com.sironheart.pulumi.forgejo` |
+| Java | `sdk/java` | `casa.siron.pulumi.forgejo` |
 | YAML | no SDK required | uses the provider schema directly |
 
 ## Provider Resources
@@ -31,11 +31,35 @@ Inputs: `name`, `fullName`, `description`, `website`, `location`, `visibility`.
 
 Outputs: `avatarUrl`.
 
+`forgejo:index:OrganizationTeam` manages a Forgejo organization team.
+
+Inputs: `organization`, `name`, `description`, `permission`, `canCreateOrgRepo`, `includesAllRepositories`, `unitsMap`.
+
+Outputs: `teamId`.
+
 `forgejo:index:DeployKey` manages a repository deploy key.
 
 Inputs: `owner`, `repository`, `title`, `key`, `readOnly`.
 
 Outputs: `keyId`, `url`, `fingerprint`.
+
+`forgejo:index:PublicKey` manages an SSH public key for the authenticated user.
+
+Inputs: `title`, `key`, `readOnly`.
+
+Outputs: `keyId`, `url`, `fingerprint`, `keyType`, `owner`.
+
+`forgejo:index:RepositoryActionVariable` manages a Forgejo Actions variable for a repository.
+
+Inputs: `owner`, `repository`, `name`, `value`.
+
+Outputs: `ownerId`, `repoId`.
+
+`forgejo:index:RepositoryTagProtection` manages a repository tag protection rule.
+
+Inputs: `owner`, `repository`, `namePattern`, `whitelistUsernames`, `whitelistTeams`.
+
+Outputs: `protectionId`.
 
 `forgejo:index:getCurrentUser` returns information about the authenticated Forgejo user.
 
@@ -111,7 +135,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.sironheart.pulumi:forgejo:0.1.0"
+    implementation "casa.siron.pulumi:forgejo:0.1.0"
 }
 ```
 
@@ -202,8 +226,8 @@ return await Deployment.RunAsync(() =>
 package myproject;
 
 import com.pulumi.Pulumi;
-import com.sironheart.pulumi.forgejo.Repository;
-import com.sironheart.pulumi.forgejo.RepositoryArgs;
+import casa.siron.pulumi.forgejo.Repository;
+import casa.siron.pulumi.forgejo.RepositoryArgs;
 
 public class App {
     public static void main(String[] args) {
@@ -267,7 +291,7 @@ Build release artifacts locally:
 mise exec -- goreleaser release --snapshot --clean --skip=publish
 ```
 
-Forgejo Actions run validation on pushes and pull requests. The CI workflow installs Go, Pulumi, `golangci-lint`, and `git-cliff` directly from explicit versions or actions in `.forgejo/workflows/ci.yml`; `mise` is only used for local tasks and release automation. CI calculates the provider version with `git-cliff --bumped-version` before building the provider and SDKs.
+Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `git-cliff` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI calculates the provider version with `git-cliff --bumped-version` before building the provider and SDKs.
 
 ## Release Automation
 
@@ -276,8 +300,9 @@ Pushing a version tag such as `v0.1.0` triggers `.forgejo/workflows/release.yml`
 The release workflow:
 
 - Checks out the requested release tag.
+- Runs Go linting through `https://github.com/golangci/golangci-lint-action`.
 - Generates the schema and SDKs for that version.
-- Uses GoReleaser to build provider plugin archives, generate the changelog, and create or replace the Forgejo Release.
+- Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, and create or replace the Forgejo Release.
 - Publishes SDK packages to the local Forgejo registries for npm, PyPI, NuGet, Maven, and Go.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.

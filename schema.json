@@ -24,7 +24,7 @@
       "rootPackageName": "forgejo"
     },
     "java": {
-      "basePackage": "com.sironheart.pulumi",
+      "basePackage": "casa.siron.pulumi",
       "buildFiles": "gradle"
     },
     "nodejs": {
@@ -256,6 +256,148 @@
         "name"
       ]
     },
+    "forgejo:index:OrganizationTeam": {
+      "description": "A Forgejo organization team.",
+      "properties": {
+        "canCreateOrgRepo": {
+          "type": "boolean",
+          "description": "Whether team members can create organization repositories."
+        },
+        "description": {
+          "type": "string",
+          "description": "Team description."
+        },
+        "includesAllRepositories": {
+          "type": "boolean",
+          "description": "Whether the team includes all organization repositories."
+        },
+        "name": {
+          "type": "string",
+          "description": "Team name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization username/slug."
+        },
+        "permission": {
+          "type": "string",
+          "description": "Team repository permission: read, write, or admin.",
+          "default": "read"
+        },
+        "teamId": {
+          "type": "integer"
+        },
+        "unitsMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Per-repository-unit permissions, for example repo.code=read or repo.issues=write."
+        }
+      },
+      "required": [
+        "organization",
+        "name",
+        "teamId"
+      ],
+      "inputProperties": {
+        "canCreateOrgRepo": {
+          "type": "boolean",
+          "description": "Whether team members can create organization repositories."
+        },
+        "description": {
+          "type": "string",
+          "description": "Team description."
+        },
+        "includesAllRepositories": {
+          "type": "boolean",
+          "description": "Whether the team includes all organization repositories."
+        },
+        "name": {
+          "type": "string",
+          "description": "Team name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization username/slug."
+        },
+        "permission": {
+          "type": "string",
+          "description": "Team repository permission: read, write, or admin.",
+          "default": "read"
+        },
+        "unitsMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Per-repository-unit permissions, for example repo.code=read or repo.issues=write."
+        }
+      },
+      "requiredInputs": [
+        "organization",
+        "name"
+      ]
+    },
+    "forgejo:index:PublicKey": {
+      "description": "A Forgejo SSH public key for the authenticated user.",
+      "properties": {
+        "fingerprint": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "description": "OpenSSH public key material."
+        },
+        "keyId": {
+          "type": "integer"
+        },
+        "keyType": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Whether the key has read-only access."
+        },
+        "title": {
+          "type": "string",
+          "description": "Public key title."
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "key",
+        "keyId",
+        "url",
+        "fingerprint",
+        "keyType",
+        "owner"
+      ],
+      "inputProperties": {
+        "key": {
+          "type": "string",
+          "description": "OpenSSH public key material."
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Whether the key has read-only access."
+        },
+        "title": {
+          "type": "string",
+          "description": "Public key title."
+        }
+      },
+      "requiredInputs": [
+        "title",
+        "key"
+      ]
+    },
     "forgejo:index:Repository": {
       "description": "A Forgejo repository.",
       "properties": {
@@ -369,6 +511,138 @@
       },
       "requiredInputs": [
         "name"
+      ]
+    },
+    "forgejo:index:RepositoryActionVariable": {
+      "description": "A Forgejo Actions variable for a repository.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Actions variable name."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "ownerId": {
+          "type": "integer"
+        },
+        "repoId": {
+          "type": "integer"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions variable value."
+        }
+      },
+      "required": [
+        "owner",
+        "repository",
+        "name",
+        "value",
+        "ownerId",
+        "repoId"
+      ],
+      "inputProperties": {
+        "name": {
+          "type": "string",
+          "description": "Actions variable name."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions variable value."
+        }
+      },
+      "requiredInputs": [
+        "owner",
+        "repository",
+        "name",
+        "value"
+      ]
+    },
+    "forgejo:index:RepositoryTagProtection": {
+      "description": "A Forgejo tag protection rule for a repository.",
+      "properties": {
+        "namePattern": {
+          "type": "string",
+          "description": "Protected tag name pattern, for example v*."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "protectionId": {
+          "type": "integer"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "whitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams allowed to create matching tags."
+        },
+        "whitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users allowed to create matching tags."
+        }
+      },
+      "required": [
+        "owner",
+        "repository",
+        "namePattern",
+        "protectionId"
+      ],
+      "inputProperties": {
+        "namePattern": {
+          "type": "string",
+          "description": "Protected tag name pattern, for example v*."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "whitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams allowed to create matching tags."
+        },
+        "whitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users allowed to create matching tags."
+        }
+      },
+      "requiredInputs": [
+        "owner",
+        "repository",
+        "namePattern"
       ]
     }
   },

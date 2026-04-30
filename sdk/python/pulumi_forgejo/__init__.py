@@ -9,8 +9,12 @@ import typing
 from .deploy_key import *
 from .get_current_user import *
 from .organization import *
+from .organization_team import *
 from .provider import *
+from .public_key import *
 from .repository import *
+from .repository_action_variable import *
+from .repository_tag_protection import *
 
 # Make subpackages available:
 if typing.TYPE_CHECKING:
@@ -29,7 +33,11 @@ _utilities.register(
   "classes": {
    "forgejo:index:DeployKey": "DeployKey",
    "forgejo:index:Organization": "Organization",
-   "forgejo:index:Repository": "Repository"
+   "forgejo:index:OrganizationTeam": "OrganizationTeam",
+   "forgejo:index:PublicKey": "PublicKey",
+   "forgejo:index:Repository": "Repository",
+   "forgejo:index:RepositoryActionVariable": "RepositoryActionVariable",
+   "forgejo:index:RepositoryTagProtection": "RepositoryTagProtection"
   }
  }
 ]

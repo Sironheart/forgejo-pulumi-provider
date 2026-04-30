@@ -45,12 +45,6 @@ jobs:
           curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
-      - name: Install golangci-lint
-        run: |
-          set -eu
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
-            | sh -s -- -b /usr/local/bin "$GOLANGCI_LINT_VERSION"
-
       - uses: https://github.com/taiki-e/install-action@v2
         with:
           tool: git-cliff@${{ env.GIT_CLIFF_VERSION }}
@@ -72,11 +66,16 @@ jobs:
       - name: Tidy Go modules
         run: go mod tidy
 
+      - name: Lint Go code
+        uses: https://github.com/golangci/golangci-lint-action@v8.0.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: ./cmd/... ./internal/...
+          github-token: ""
+          skip-cache: true
+
       - name: Format Go code
         run: golangci-lint fmt
-
-      - name: Lint Go code
-        run: golangci-lint run ./cmd/... ./internal/...
 
       - name: Run Go tests
         run: go test ./...

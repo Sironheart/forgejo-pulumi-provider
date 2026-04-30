@@ -20,15 +20,35 @@ export type Organization = import("./organization").Organization;
 export const Organization: typeof import("./organization").Organization = null as any;
 utilities.lazyLoad(exports, ["Organization"], () => require("./organization"));
 
+export { OrganizationTeamArgs } from "./organizationTeam";
+export type OrganizationTeam = import("./organizationTeam").OrganizationTeam;
+export const OrganizationTeam: typeof import("./organizationTeam").OrganizationTeam = null as any;
+utilities.lazyLoad(exports, ["OrganizationTeam"], () => require("./organizationTeam"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
 utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
 
+export { PublicKeyArgs } from "./publicKey";
+export type PublicKey = import("./publicKey").PublicKey;
+export const PublicKey: typeof import("./publicKey").PublicKey = null as any;
+utilities.lazyLoad(exports, ["PublicKey"], () => require("./publicKey"));
+
 export { RepositoryArgs } from "./repository";
 export type Repository = import("./repository").Repository;
 export const Repository: typeof import("./repository").Repository = null as any;
 utilities.lazyLoad(exports, ["Repository"], () => require("./repository"));
+
+export { RepositoryActionVariableArgs } from "./repositoryActionVariable";
+export type RepositoryActionVariable = import("./repositoryActionVariable").RepositoryActionVariable;
+export const RepositoryActionVariable: typeof import("./repositoryActionVariable").RepositoryActionVariable = null as any;
+utilities.lazyLoad(exports, ["RepositoryActionVariable"], () => require("./repositoryActionVariable"));
+
+export { RepositoryTagProtectionArgs } from "./repositoryTagProtection";
+export type RepositoryTagProtection = import("./repositoryTagProtection").RepositoryTagProtection;
+export const RepositoryTagProtection: typeof import("./repositoryTagProtection").RepositoryTagProtection = null as any;
+utilities.lazyLoad(exports, ["RepositoryTagProtection"], () => require("./repositoryTagProtection"));
 
 
 // Export sub-modules:
@@ -46,8 +66,16 @@ const _module = {
                 return new DeployKey(name, <any>undefined, { urn })
             case "forgejo:index:Organization":
                 return new Organization(name, <any>undefined, { urn })
+            case "forgejo:index:OrganizationTeam":
+                return new OrganizationTeam(name, <any>undefined, { urn })
+            case "forgejo:index:PublicKey":
+                return new PublicKey(name, <any>undefined, { urn })
             case "forgejo:index:Repository":
                 return new Repository(name, <any>undefined, { urn })
+            case "forgejo:index:RepositoryActionVariable":
+                return new RepositoryActionVariable(name, <any>undefined, { urn })
+            case "forgejo:index:RepositoryTagProtection":
+                return new RepositoryTagProtection(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

@@ -28,7 +28,11 @@ func Provider() p.Provider {
 		Resources: []infer.InferredResource{
 			infer.Resource(Repository{}),
 			infer.Resource(Organization{}),
+			infer.Resource(OrganizationTeam{}),
 			infer.Resource(DeployKey{}),
+			infer.Resource(PublicKey{}),
+			infer.Resource(RepositoryActionVariable{}),
+			infer.Resource(RepositoryTagProtection{}),
 		},
 		Functions: []infer.InferredFunction{
 			infer.Function(GetCurrentUser{}),
@@ -63,7 +67,7 @@ func Provider() p.Provider {
 					"rootNamespace": "Pulumi",
 				},
 				"java": map[string]any{
-					"basePackage": "com.sironheart.pulumi",
+					"basePackage": "casa.siron.pulumi",
 					"buildFiles":  "gradle",
 				},
 			},
