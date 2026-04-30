@@ -1,13 +1,15 @@
 name: CI
 
+env:
+  GO_VERSION: "1.26.2"
+  PULUMI_VERSION: "3.232.0"
+  GOLANGCI_LINT_VERSION: v2.11.4
+
 on:
   push:
     branches:
       - main
   pull_request:
-
-permissions:
-  contents: read
 
 jobs:
   validate:
@@ -15,7 +17,62 @@ jobs:
     container:
       image: node:20-bookworm
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
-      - run: mise run check
-      - run: git diff --exit-code
+      - uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Install system tools
+        run: |
+          set -eu
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates \
+            curl \
+            git \
+            jq \
+            perl \
+            unzip
+          rm -rf /var/lib/apt/lists/*
+
+      - uses: https://github.com/actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Pulumi
+        run: |
+          set -eu
+          curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
+          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
+
+      - name: Install golangci-lint
+        run: |
+          set -eu
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
+            | sh -s -- -b /usr/local/bin "$GOLANGCI_LINT_VERSION"
+
+      - name: Tidy Go modules
+        run: go mod tidy
+
+      - name: Format Go code
+        run: golangci-lint fmt
+
+      - name: Lint Go code
+        run: golangci-lint run ./cmd/... ./internal/...
+
+      - name: Run Go tests
+        run: go test ./...
+
+      - name: Build provider
+        run: |
+          set -eu
+          mkdir -p bin
+          version=${FORGEJO_PROVIDER_VERSION:-0.0.0-dev}
+          version=${version#v}
+          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
+
+      - name: Export schema
+        run: pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
+
+      - name: Generate SDKs
+        run: scripts/gen-sdk.sh
+
+      - name: Check generated files
+        run: git diff --exit-code

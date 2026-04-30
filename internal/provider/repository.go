@@ -226,7 +226,7 @@ func createRepository(client *forgejo.Client, owner string, opt forgejo.CreateRe
 
 func editRepository(client *forgejo.Client, repo *forgejo.Repository, opt forgejo.EditRepoOption) (*forgejo.Repository, error) {
 	if repo == nil {
-		return nil, fmt.Errorf("Forgejo repository response was empty")
+		return nil, fmt.Errorf("forgejo repository response was empty")
 	}
 	state := repositoryStateFromAPI(repo)
 	updated, _, err := client.EditRepo(state.Owner, state.Name, opt)

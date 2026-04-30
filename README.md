@@ -251,14 +251,14 @@ Useful tasks:
 
 | Task | Purpose |
 | --- | --- |
-| `mise run fmt` | Format Go code. |
+| `mise run fmt` | Format Go code with `golangci-lint fmt` using `.golangci.yml`. |
+| `mise run lint` | Run `golangci-lint`. |
 | `mise run test` | Run Go tests. |
 | `mise run build` | Build `bin/pulumi-resource-forgejo`. |
 | `mise run schema` | Export `schema.json`. |
 | `mise run sdk` | Generate all standard Pulumi SDKs. |
-| `mise run changelog` | Preview the unreleased changelog with `git-cliff`. |
 | `mise run release-check` | Validate the GoReleaser configuration. |
-| `mise run check` | Run formatting, tests, schema export, and SDK generation. |
+| `mise run check` | Run formatting, linting, tests, schema export, and SDK generation. |
 
 Build release artifacts locally:
 
@@ -266,19 +266,17 @@ Build release artifacts locally:
 mise exec -- goreleaser release --snapshot --clean --skip=publish
 ```
 
-Forgejo Actions run validation on pushes and pull requests.
+Forgejo Actions run validation on pushes and pull requests. The CI workflow installs Go, Pulumi, and `golangci-lint` directly from explicit versions in `.forgejo/workflows/ci.yml`; `mise` is only used for local tasks and release automation.
 
 ## Release Automation
 
-Merging a pull request into `main` triggers `.forgejo/workflows/release.yml`.
+Pushing a version tag such as `v0.1.0` triggers `.forgejo/workflows/release.yml`. The workflow can also be run manually for an existing tag by passing the version with or without the leading `v`.
 
 The release workflow:
 
-- Uses `git-cliff` and Conventional Commits to calculate the next version.
-- Generates the release changelog with `git-cliff`.
-- Creates a sticky pull request comment containing the released version and changelog.
-- Builds provider plugin archives with GoReleaser.
-- Creates the Forgejo Git tag and Release with the generated changelog.
+- Checks out the requested release tag.
+- Generates the schema and SDKs for that version.
+- Uses GoReleaser to build provider plugin archives, generate the changelog, and create or replace the Forgejo Release.
 - Publishes SDK packages to the local Forgejo registries for npm, PyPI, NuGet, Maven, and Go.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.

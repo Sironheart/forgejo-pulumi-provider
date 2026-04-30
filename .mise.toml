@@ -2,16 +2,24 @@
 go = "1.26.2"
 pulumi = "3.232.0"
 jq = "1.8.1"
-git-cliff = "2.13.1"
 goreleaser = "2.15.4"
+golangci-lint = "2.11.4"
 
 [tasks.fmt]
-description = "Format Go sources"
-run = "go fmt ./..."
+description = "Format Go sources with golangci-lint"
+run = "golangci-lint fmt"
+
+[tasks.tidy]
+description = "Synchronize Go module files"
+run = "go mod tidy"
 
 [tasks.test]
 description = "Run Go tests"
 run = "go test ./..."
+
+[tasks.lint]
+description = "Run Go linters"
+run = "golangci-lint run ./cmd/... ./internal/..."
 
 [tasks.build]
 description = "Build the Pulumi provider plugin"
@@ -27,14 +35,45 @@ description = "Generate SDKs for all standard Pulumi languages"
 depends = ["schema"]
 run = "scripts/gen-sdk.sh"
 
-[tasks.changelog]
-description = "Preview the unreleased changelog"
-run = "git-cliff --unreleased --strip header"
-
 [tasks.release-check]
 description = "Validate the GoReleaser configuration"
 run = "goreleaser check"
 
+[tasks.check-prepare]
+description = "Prepare sources for validation"
+depends = ["tidy", "fmt"]
+hide = true
+
+[tasks.check-lint]
+description = "Run linters after preparation"
+depends = ["check-prepare"]
+run = "golangci-lint run ./cmd/... ./internal/..."
+hide = true
+
+[tasks.check-test]
+description = "Run tests after preparation"
+depends = ["check-prepare"]
+run = "go test ./..."
+hide = true
+
+[tasks.check-build]
+description = "Build provider after preparation"
+depends = ["check-prepare"]
+run = "mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION:-0.0.0-dev} && version=${version#v} && go build -trimpath -ldflags \"-s -w -X main.version=$version\" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo"
+hide = true
+
+[tasks.check-schema]
+description = "Export schema after check build"
+depends = ["check-build"]
+run = "pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json"
+hide = true
+
+[tasks.check-sdk]
+description = "Generate SDKs after check schema export"
+depends = ["check-schema"]
+run = "scripts/gen-sdk.sh"
+hide = true
+
 [tasks.check]
-description = "Run formatting, tests, schema export, and all SDK generation"
-run = "go mod tidy && go fmt ./... && go test ./... && mise run sdk"
+description = "Run formatting, linting, tests, schema export, and all SDK generation"
+depends = ["check-lint", "check-test", "check-sdk"]

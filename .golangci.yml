@@ -1,0 +1,15 @@
+version: "2"
+
+linters:
+  default: standard
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+    goimports:
+      local-prefixes:
+        - forgejo.siron.casa/sironheart/forgejo-pulumi-provider

@@ -2,6 +2,10 @@ version: 2
 
 project_name: pulumi-resource-forgejo
 
+gitea_urls:
+  api: https://forgejo.siron.casa/api/v1
+  download: https://forgejo.siron.casa
+
 builds:
   - id: pulumi-resource-forgejo
     main: ./cmd/pulumi-resource-forgejo
@@ -36,7 +40,33 @@ checksum:
   name_template: checksums.txt
 
 changelog:
-  disable: true
+  use: git
+  sort: asc
+  abbrev: -1
+  groups:
+    - title: Features
+      regexp: '^.*feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Bug Fixes
+      regexp: '^.*fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Documentation
+      regexp: '^.*docs(\(.+\))??!?:.+$'
+      order: 2
+    - title: Maintenance
+      regexp: '^.*(chore|ci|build|refactor|test)(\(.+\))??!?:.+$'
+      order: 3
+    - title: Other Changes
+      order: 999
+  filters:
+    exclude:
+      - '^chore\(release\):'
 
 release:
-  disable: true
+  gitea:
+    owner: sironheart
+    name: forgejo-pulumi-provider
+  mode: replace
+  prerelease: auto
+  extra_files:
+    - glob: schema.json

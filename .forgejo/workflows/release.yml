@@ -1,112 +1,92 @@
 name: Release
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       version:
-        description: Optional version override, with or without leading v
-        required: false
+        description: Existing release tag, with or without leading v
+        required: true
+        type: string
 
-permissions:
-  contents: write
-  packages: write
-  pull-requests: write
-  issues: write
+concurrency:
+  group: release-main
+  cancel-in-progress: false
 
 jobs:
   release:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: docker
     container:
       image: node:20-bookworm
     env:
-      PACKAGE_OWNER: ${{ github.repository_owner }}
-      PACKAGE_USERNAME: ${{ github.actor }}
+      PACKAGE_OWNER: ${{ forgejo.repository_owner }}
+      PACKAGE_USERNAME: ${{ forgejo.actor }}
       PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
-      REGISTRY_URL: ${{ github.server_url }}/api/packages/${{ github.repository_owner }}
+      REGISTRY_URL: ${{ forgejo.server_url }}/api/packages/${{ forgejo.repository_owner }}
+      GITEA_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: https://data.forgejo.org/actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
 
-      - uses: jdx/mise-action@v2
-
-      - name: Determine release version
+      - name: Resolve release tag
         id: version
         run: |
-          set -euo pipefail
-          version="${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}"
+          set -eu
+          version="${{ inputs.version }}"
           if [ -z "$version" ]; then
-            version=$(git-cliff --bumped-version)
+            version="$FORGEJO_REF_NAME"
           fi
           version=${version#v}
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=v$version" >> "$GITHUB_OUTPUT"
-          echo "release_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/v$version" >> "$GITHUB_OUTPUT"
+          tag="v$version"
+          git fetch --tags --force
+          if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            printf 'release tag %s does not exist\n' "$tag"
+            exit 1
+          fi
+          git checkout "$tag"
+          {
+            printf 'version=%s\n' "$version"
+            printf 'tag=%s\n' "$tag"
+          } >> "$FORGEJO_OUTPUT"
 
-      - name: Generate release changelog
-        id: git-cliff
-        uses: orhun/git-cliff-action@v4
-        with:
-          version: v2.13.1
-          config: cliff.toml
-          args: --unreleased --tag ${{ steps.version.outputs.tag }} --strip header
-          github_token: ""
-        env:
-          OUTPUT: RELEASE_NOTES.md
-          GITHUB_REPO: ${{ github.repository }}
+      - name: Install system tools
+        run: |
+          set -eu
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates \
+            curl \
+            git \
+            openjdk-17-jdk-headless \
+            python3 \
+            python3-pip \
+            python3-venv \
+            unzip
+          rm -rf /var/lib/apt/lists/*
 
-      - name: Build provider release archives
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: 2.15.4
-          args: release --clean --skip=publish
-        env:
-          GORELEASER_CURRENT_TAG: ${{ steps.version.outputs.tag }}
+      - name: Install mise
+        run: |
+          set -eu
+          curl -fsSL https://mise.run | sh
+          echo "$HOME/.local/bin" >> "$FORGEJO_PATH"
+          echo "$HOME/.local/share/mise/shims" >> "$FORGEJO_PATH"
+
+      - name: Install project toolchain
+        run: mise install
 
       - name: Generate release SDKs and schema
         run: FORGEJO_PROVIDER_VERSION="${{ steps.version.outputs.version }}" mise run sdk
 
-      - name: Create Forgejo release and tag
-        uses: akkuman/gitea-release-action@v1
-        with:
-          server_url: ${{ github.server_url }}
-          repository: ${{ github.repository }}
-          token: ${{ secrets.FORGEJO_TOKEN }}
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ steps.version.outputs.tag }}
-          target_commitish: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
-          body_path: RELEASE_NOTES.md
-          files: |-
-            dist/*.tar.gz
-            dist/checksums.txt
-            schema.json
-
-      - name: Comment release version on merged PR
-        if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v3
-        with:
-          header: release-version
-          message: |
-            Release `${{ steps.version.outputs.tag }}` was created for this merge.
-
-            Release: ${{ steps.version.outputs.release_url }}
-
-            Changelog:
-
-            ${{ steps.git-cliff.outputs.content }}
+      - name: Create Forgejo release with GoReleaser
+        run: mise exec -- goreleaser release --clean
 
       - name: Publish Go SDK module package
         run: |
-          set -euo pipefail
-          module=$(go list -m)
+          set -eu
+          module=$(mise exec -- go list -m)
           tag="${{ steps.version.outputs.tag }}"
           archive="pulumi-forgejo-go-${tag}.zip"
           git add -A sdk schema.json
@@ -117,63 +97,54 @@ jobs:
             --upload-file "$archive" \
             "${REGISTRY_URL}/go/upload"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: ${{ env.REGISTRY_URL }}/npm/
-
-      - name: Build Node.js SDK package
-        run: npm install --ignore-scripts && npm run build
+      - name: Build and publish Node.js SDK package
         working-directory: sdk/nodejs
+        run: |
+          set -eu
+          auth_path=${REGISTRY_URL#https:}
+          auth_path=${auth_path#http:}
+          npm config set @sironheart:registry "${REGISTRY_URL}/npm/"
+          npm config set -- "${auth_path}/npm/:_authToken" "$PACKAGE_TOKEN"
+          npm install --ignore-scripts
+          npm run build
+          npm publish --access public --registry "${REGISTRY_URL}/npm/"
 
-      - name: Publish Node.js SDK package
-        uses: JS-DevTools/npm-publish@v4
-        with:
-          package: sdk/nodejs/package.json
-          registry: ${{ env.REGISTRY_URL }}/npm/
-          token: ${{ secrets.FORGEJO_TOKEN }}
-          access: public
-          strategy: all
+      - name: Build and publish Python SDK package
+        run: |
+          set -eu
+          rm -rf sdk/python/dist
+          python3 -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip build twine
+          python -m build sdk/python
+          python -m twine upload \
+            --repository-url "${REGISTRY_URL}/pypi" \
+            --username "$PACKAGE_USERNAME" \
+            --password "$PACKAGE_TOKEN" \
+            --skip-existing \
+            sdk/python/dist/*
 
-      - name: Build Python SDK package
-        uses: hynek/build-and-inspect-python-package@v2
-        with:
-          path: sdk/python
+      - name: Install .NET SDK
+        run: |
+          set -eu
+          curl -fsSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh
+          sh dotnet-install.sh --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> "$FORGEJO_PATH"
 
-      - name: Download Python SDK package artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: Packages
-          path: sdk/python/dist
+      - name: Pack and publish .NET SDK package
+        run: |
+          set -eu
+          rm -rf sdk/dotnet/nupkg
+          dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --output sdk/dotnet/nupkg -p:Version=${{ steps.version.outputs.version }}
+          dotnet nuget push sdk/dotnet/nupkg/*.nupkg --source "${REGISTRY_URL}/nuget/index.json" --api-key "$PACKAGE_TOKEN" --skip-duplicate
 
-      - name: Publish Python SDK package
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: sdk/python/dist
-          repository-url: ${{ env.REGISTRY_URL }}/pypi
-          user: ${{ env.PACKAGE_USERNAME }}
-          password: ${{ secrets.FORGEJO_TOKEN }}
-          skip-existing: true
-          attestations: false
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Pack .NET SDK package
-        run: dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --output sdk/dotnet/nupkg -p:Version=${{ steps.version.outputs.version }}
-
-      - name: Publish .NET SDK package
-        run: dotnet nuget push "sdk/dotnet/nupkg/*.nupkg" --source "${{ env.REGISTRY_URL }}/nuget/index.json" --api-key "${{ secrets.FORGEJO_TOKEN }}" --skip-duplicate
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: 8.10
+      - name: Install Gradle
+        run: |
+          set -eu
+          mkdir -p "$HOME/.local/opt"
+          curl -fsSL https://services.gradle.org/distributions/gradle-8.10-bin.zip --output gradle.zip
+          unzip -q gradle.zip -d "$HOME/.local/opt"
+          echo "$HOME/.local/opt/gradle-8.10/bin" >> "$FORGEJO_PATH"
 
       - name: Publish Java SDK package
         run: gradle --no-daemon -p sdk/java publish
