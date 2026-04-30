@@ -1,0 +1,42 @@
+version: 2
+
+project_name: pulumi-resource-forgejo
+
+builds:
+  - id: pulumi-resource-forgejo
+    main: ./cmd/pulumi-resource-forgejo
+    binary: pulumi-resource-forgejo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - id: pulumi-resource-forgejo
+    ids:
+      - pulumi-resource-forgejo
+    name_template: "pulumi-resource-forgejo-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    formats:
+      - tar.gz
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  disable: true
+
+release:
+  disable: true

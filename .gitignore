@@ -1,0 +1,6 @@
+bin/
+dist/
+node_modules/
+__pycache__/
+*.test
+.DS_Store

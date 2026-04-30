@@ -1,0 +1,30 @@
+{
+    "name": "@sironheart/pulumi-forgejo",
+    "version": "0.0.0-dev",
+    "description": "A Pulumi provider for managing Forgejo resources.",
+    "keywords": [
+        "pulumi",
+        "forgejo",
+        "git",
+        "gitea"
+    ],
+    "homepage": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+    "repository": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+    "license": "Apache-2.0",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@pulumi/pulumi": "^3.142.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "typescript": "^4.7.0"
+    },
+    "pulumi": {
+        "resource": true,
+        "name": "forgejo",
+        "version": "0.0.0-dev",
+        "server": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}"
+    }
+}

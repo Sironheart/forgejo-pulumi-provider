@@ -1,0 +1,6 @@
+{
+  "resource": true,
+  "name": "forgejo",
+  "version": "0.0.0-dev",
+  "server": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}"
+}

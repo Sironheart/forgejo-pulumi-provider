@@ -1,0 +1,410 @@
+{
+  "name": "forgejo",
+  "displayName": "Forgejo",
+  "version": "0.0.0-dev",
+  "description": "A Pulumi provider for managing Forgejo resources.",
+  "keywords": [
+    "pulumi",
+    "forgejo",
+    "git",
+    "gitea"
+  ],
+  "homepage": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+  "license": "Apache-2.0",
+  "repository": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+  "pluginDownloadURL": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}",
+  "publisher": "sironheart",
+  "language": {
+    "csharp": {
+      "rootNamespace": "Pulumi"
+    },
+    "go": {
+      "importBasePath": "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
+      "modulePath": "forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+      "rootPackageName": "forgejo"
+    },
+    "java": {
+      "basePackage": "com.sironheart.pulumi",
+      "buildFiles": "gradle"
+    },
+    "nodejs": {
+      "packageDescription": "A Pulumi provider for managing Forgejo resources.",
+      "packageName": "@sironheart/pulumi-forgejo",
+      "respectSchemaVersion": true
+    },
+    "python": {
+      "packageName": "pulumi_forgejo",
+      "pythonRequires": "\u003e=3.9",
+      "respectSchemaVersion": true
+    }
+  },
+  "config": {
+    "variables": {
+      "token": {
+        "type": "string",
+        "description": "Forgejo API token. Can also be set with FORGEJO_TOKEN.",
+        "defaultInfo": {
+          "environment": [
+            "FORGEJO_TOKEN"
+          ]
+        },
+        "secret": true
+      },
+      "url": {
+        "type": "string",
+        "description": "Base URL of the Forgejo instance. Can also be set with FORGEJO_URL.",
+        "defaultInfo": {
+          "environment": [
+            "FORGEJO_URL"
+          ]
+        }
+      }
+    },
+    "defaults": [
+      "url",
+      "token"
+    ]
+  },
+  "provider": {
+    "properties": {
+      "token": {
+        "type": "string",
+        "description": "Forgejo API token. Can also be set with FORGEJO_TOKEN.",
+        "defaultInfo": {
+          "environment": [
+            "FORGEJO_TOKEN"
+          ]
+        },
+        "secret": true
+      },
+      "url": {
+        "type": "string",
+        "description": "Base URL of the Forgejo instance. Can also be set with FORGEJO_URL.",
+        "defaultInfo": {
+          "environment": [
+            "FORGEJO_URL"
+          ]
+        }
+      }
+    },
+    "required": [
+      "url",
+      "token"
+    ],
+    "inputProperties": {
+      "token": {
+        "type": "string",
+        "description": "Forgejo API token. Can also be set with FORGEJO_TOKEN.",
+        "defaultInfo": {
+          "environment": [
+            "FORGEJO_TOKEN"
+          ]
+        },
+        "secret": true
+      },
+      "url": {
+        "type": "string",
+        "description": "Base URL of the Forgejo instance. Can also be set with FORGEJO_URL.",
+        "defaultInfo": {
+          "environment": [
+            "FORGEJO_URL"
+          ]
+        }
+      }
+    },
+    "requiredInputs": [
+      "url",
+      "token"
+    ]
+  },
+  "resources": {
+    "forgejo:index:DeployKey": {
+      "description": "A Forgejo deploy key for a repository.",
+      "properties": {
+        "fingerprint": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "description": "OpenSSH public key material."
+        },
+        "keyId": {
+          "type": "integer"
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Whether the deploy key is read-only.",
+          "default": true
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "title": {
+          "type": "string",
+          "description": "Deploy key title."
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "owner",
+        "repository",
+        "title",
+        "key",
+        "keyId",
+        "url",
+        "fingerprint"
+      ],
+      "inputProperties": {
+        "key": {
+          "type": "string",
+          "description": "OpenSSH public key material."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Whether the deploy key is read-only.",
+          "default": true
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "title": {
+          "type": "string",
+          "description": "Deploy key title."
+        }
+      },
+      "requiredInputs": [
+        "owner",
+        "repository",
+        "title",
+        "key"
+      ]
+    },
+    "forgejo:index:Organization": {
+      "description": "A Forgejo organization.",
+      "properties": {
+        "avatarUrl": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "description": "Organization description."
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Organization display name."
+        },
+        "location": {
+          "type": "string",
+          "description": "Organization location."
+        },
+        "name": {
+          "type": "string",
+          "description": "Organization username/slug."
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Organization visibility, for example public, limited, or private. Leave empty to use Forgejo's default."
+        },
+        "website": {
+          "type": "string",
+          "description": "Organization website URL."
+        }
+      },
+      "required": [
+        "name",
+        "avatarUrl"
+      ],
+      "inputProperties": {
+        "description": {
+          "type": "string",
+          "description": "Organization description."
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Organization display name."
+        },
+        "location": {
+          "type": "string",
+          "description": "Organization location."
+        },
+        "name": {
+          "type": "string",
+          "description": "Organization username/slug."
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Organization visibility, for example public, limited, or private. Leave empty to use Forgejo's default."
+        },
+        "website": {
+          "type": "string",
+          "description": "Organization website URL."
+        }
+      },
+      "requiredInputs": [
+        "name"
+      ]
+    },
+    "forgejo:index:Repository": {
+      "description": "A Forgejo repository.",
+      "properties": {
+        "cloneUrl": {
+          "type": "string"
+        },
+        "defaultBranch": {
+          "type": "string",
+          "description": "Default branch name. Leave empty to use Forgejo's default."
+        },
+        "description": {
+          "type": "string",
+          "description": "Repository description."
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "htmlUrl": {
+          "type": "string"
+        },
+        "issues": {
+          "type": "boolean",
+          "description": "Whether the repository issue tracker is enabled.",
+          "default": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository."
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Whether the repository is private."
+        },
+        "projects": {
+          "type": "boolean",
+          "description": "Whether repository projects are enabled.",
+          "default": true
+        },
+        "sshUrl": {
+          "type": "string"
+        },
+        "template": {
+          "type": "boolean",
+          "description": "Whether the repository can be used as a template."
+        },
+        "website": {
+          "type": "string",
+          "description": "Repository website URL."
+        },
+        "wiki": {
+          "type": "boolean",
+          "description": "Whether the repository wiki is enabled.",
+          "default": true
+        }
+      },
+      "required": [
+        "name",
+        "fullName",
+        "htmlUrl",
+        "sshUrl",
+        "cloneUrl"
+      ],
+      "inputProperties": {
+        "defaultBranch": {
+          "type": "string",
+          "description": "Default branch name. Leave empty to use Forgejo's default."
+        },
+        "description": {
+          "type": "string",
+          "description": "Repository description."
+        },
+        "issues": {
+          "type": "boolean",
+          "description": "Whether the repository issue tracker is enabled.",
+          "default": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository."
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Whether the repository is private."
+        },
+        "projects": {
+          "type": "boolean",
+          "description": "Whether repository projects are enabled.",
+          "default": true
+        },
+        "template": {
+          "type": "boolean",
+          "description": "Whether the repository can be used as a template."
+        },
+        "website": {
+          "type": "string",
+          "description": "Repository website URL."
+        },
+        "wiki": {
+          "type": "boolean",
+          "description": "Whether the repository wiki is enabled.",
+          "default": true
+        }
+      },
+      "requiredInputs": [
+        "name"
+      ]
+    }
+  },
+  "functions": {
+    "forgejo:index:getCurrentUser": {
+      "description": "Returns the authenticated Forgejo user.",
+      "inputs": {
+        "type": "object"
+      },
+      "outputs": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "login": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "userId",
+          "login",
+          "fullName",
+          "email",
+          "isAdmin"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

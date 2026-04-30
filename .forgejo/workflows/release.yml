@@ -1,0 +1,184 @@
+name: Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional version override, with or without leading v
+        required: false
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: docker
+    container:
+      image: node:20-bookworm
+    env:
+      PACKAGE_OWNER: ${{ github.repository_owner }}
+      PACKAGE_USERNAME: ${{ github.actor }}
+      PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+      REGISTRY_URL: ${{ github.server_url }}/api/packages/${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: jdx/mise-action@v2
+
+      - name: Determine release version
+        id: version
+        run: |
+          set -euo pipefail
+          version="${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}"
+          if [ -z "$version" ]; then
+            version=$(git-cliff --bumped-version)
+          fi
+          version=${version#v}
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "release_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release changelog
+        id: git-cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          version: v2.13.1
+          config: cliff.toml
+          args: --unreleased --tag ${{ steps.version.outputs.tag }} --strip header
+          github_token: ""
+        env:
+          OUTPUT: RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Build provider release archives
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: 2.15.4
+          args: release --clean --skip=publish
+        env:
+          GORELEASER_CURRENT_TAG: ${{ steps.version.outputs.tag }}
+
+      - name: Generate release SDKs and schema
+        run: FORGEJO_PROVIDER_VERSION="${{ steps.version.outputs.version }}" mise run sdk
+
+      - name: Create Forgejo release and tag
+        uses: akkuman/gitea-release-action@v1
+        with:
+          server_url: ${{ github.server_url }}
+          repository: ${{ github.repository }}
+          token: ${{ secrets.FORGEJO_TOKEN }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+          body_path: RELEASE_NOTES.md
+          files: |-
+            dist/*.tar.gz
+            dist/checksums.txt
+            schema.json
+
+      - name: Comment release version on merged PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: release-version
+          message: |
+            Release `${{ steps.version.outputs.tag }}` was created for this merge.
+
+            Release: ${{ steps.version.outputs.release_url }}
+
+            Changelog:
+
+            ${{ steps.git-cliff.outputs.content }}
+
+      - name: Publish Go SDK module package
+        run: |
+          set -euo pipefail
+          module=$(go list -m)
+          tag="${{ steps.version.outputs.tag }}"
+          archive="pulumi-forgejo-go-${tag}.zip"
+          git add -A sdk schema.json
+          tree=$(git write-tree)
+          git archive --format=zip --prefix="${module}@${tag}/" "$tree" --output="$archive"
+          curl --fail --silent --show-error \
+            --user "${PACKAGE_USERNAME}:${PACKAGE_TOKEN}" \
+            --upload-file "$archive" \
+            "${REGISTRY_URL}/go/upload"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: ${{ env.REGISTRY_URL }}/npm/
+
+      - name: Build Node.js SDK package
+        run: npm install --ignore-scripts && npm run build
+        working-directory: sdk/nodejs
+
+      - name: Publish Node.js SDK package
+        uses: JS-DevTools/npm-publish@v4
+        with:
+          package: sdk/nodejs/package.json
+          registry: ${{ env.REGISTRY_URL }}/npm/
+          token: ${{ secrets.FORGEJO_TOKEN }}
+          access: public
+          strategy: all
+
+      - name: Build Python SDK package
+        uses: hynek/build-and-inspect-python-package@v2
+        with:
+          path: sdk/python
+
+      - name: Download Python SDK package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Packages
+          path: sdk/python/dist
+
+      - name: Publish Python SDK package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdk/python/dist
+          repository-url: ${{ env.REGISTRY_URL }}/pypi
+          user: ${{ env.PACKAGE_USERNAME }}
+          password: ${{ secrets.FORGEJO_TOKEN }}
+          skip-existing: true
+          attestations: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Pack .NET SDK package
+        run: dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --output sdk/dotnet/nupkg -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Publish .NET SDK package
+        run: dotnet nuget push "sdk/dotnet/nupkg/*.nupkg" --source "${{ env.REGISTRY_URL }}/nuget/index.json" --api-key "${{ secrets.FORGEJO_TOKEN }}" --skip-duplicate
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10
+
+      - name: Publish Java SDK package
+        run: gradle --no-daemon -p sdk/java publish
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+          PUBLISH_REPO_URL: ${{ env.REGISTRY_URL }}/maven
+          PUBLISH_REPO_USERNAME: ${{ env.PACKAGE_USERNAME }}
+          PUBLISH_REPO_PASSWORD: ${{ secrets.FORGEJO_TOKEN }}
