@@ -291,17 +291,19 @@ Build release artifacts locally:
 mise exec -- goreleaser release --snapshot --clean --skip=publish
 ```
 
-Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `git-cliff` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI calculates the provider version with `git-cliff --bumped-version` before building the provider and SDKs.
+Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `git-cliff` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI calculates the provider version with `git-cliff --bumped-version`, posts it as a sticky merge request comment through `https://github.com/marocchino/sticky-pull-request-comment`, and uses it before building the provider and SDKs.
 
 ## Release Automation
 
-Pushing a version tag such as `v0.1.0` triggers `.forgejo/workflows/release.yml`. The workflow can also be run manually for an existing tag by passing the version with or without the leading `v`.
+Merging into `main` triggers `.forgejo/workflows/release.yml`. The workflow calculates the next semantic version with `git-cliff --bumped-version`, creates the corresponding `vX.Y.Z` Git tag, and publishes the release. The workflow can also be run manually with an optional version override, with or without the leading `v`.
 
 The release workflow:
 
-- Checks out the requested release tag.
+- Checks out the merge commit on `main`.
+- Calculates the next semantic version with `git-cliff`.
 - Runs Go linting through `https://github.com/golangci/golangci-lint-action`.
 - Generates the schema and SDKs for that version.
+- Creates and pushes the release Git tag after validation and SDK generation succeed.
 - Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, and create or replace the Forgejo Release.
 - Publishes SDK packages to the local Forgejo registries for npm, PyPI, NuGet, Maven, and Go.
 
