@@ -291,7 +291,7 @@ Build release artifacts locally:
 mise exec -- goreleaser release --snapshot --clean --skip=publish
 ```
 
-Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `git-cliff` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI calculates the provider version with `git-cliff --bumped-version`, posts it as a sticky merge request comment through `https://github.com/marocchino/sticky-pull-request-comment`, and uses it before building the provider and SDKs.
+Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `git-cliff` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI is split into version/comment, Go validation, and SDK validation jobs with Go, Pulumi, and linter caches where applicable.
 
 ## Release Automation
 
@@ -305,6 +305,6 @@ The release workflow:
 - Generates the schema and SDKs for that version.
 - Creates and pushes the release Git tag after validation and SDK generation succeed.
 - Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, and create or replace the Forgejo Release.
-- Publishes SDK packages to the local Forgejo registries for npm, PyPI, NuGet, Maven, and Go.
+- Publishes SDK packages through separate cached jobs for Go, npm, PyPI, NuGet, and Maven.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.

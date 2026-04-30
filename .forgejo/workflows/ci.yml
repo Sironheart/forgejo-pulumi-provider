@@ -13,37 +13,23 @@ on:
   pull_request:
 
 jobs:
-  validate:
+  version:
     runs-on: docker
     container:
       image: node:20-bookworm
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install system tools
+      - name: Install version tools
         run: |
           set -eu
           apt-get update
-          apt-get install -y --no-install-recommends \
-            ca-certificates \
-            curl \
-            git \
-            jq \
-            perl \
-            unzip
+          apt-get install -y --no-install-recommends ca-certificates curl git jq
           rm -rf /var/lib/apt/lists/*
-
-      - uses: https://github.com/actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Install Pulumi
-        run: |
-          set -eu
-          curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
-          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
       - uses: https://github.com/taiki-e/install-action@v2
         with:
@@ -64,15 +50,81 @@ jobs:
           printf 'version=%s\n' "$version" >> "$output_file"
 
       - name: Comment expected release version
-        if: ${{ forgejo.event_name == 'pull_request' }}
-        uses: https://github.com/marocchino/sticky-pull-request-comment@v2
-        with:
-          GITHUB_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
-          header: release-version
-          message: |
-            Expected next release version: `v${{ steps.version.outputs.version }}`
+        env:
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -eu
+          event_name=${FORGEJO_EVENT_NAME:-${GITHUB_EVENT_NAME:-}}
+          if [ "$event_name" != "pull_request" ]; then
+            exit 0
+          fi
+          if [ -z "${FORGEJO_TOKEN:-}" ]; then
+            printf 'FORGEJO_TOKEN is not available; skipping merge request comment\n'
+            exit 0
+          fi
+          event_path=${FORGEJO_EVENT_PATH:-${GITHUB_EVENT_PATH:-}}
+          if [ -z "$event_path" ] || [ ! -f "$event_path" ]; then
+            printf 'No action event payload is available; skipping merge request comment\n'
+            exit 0
+          fi
 
-            This version is calculated with `git-cliff --bumped-version` from the current merge request state.
+          pr_number=$(jq -r '.pull_request.number // .pull_request.index // .number // empty' "$event_path")
+          if [ -z "$pr_number" ]; then
+            printf 'No merge request number found; skipping merge request comment\n'
+            exit 0
+          fi
+
+          marker='<!-- forgejo-pulumi-provider-release-version -->'
+          body=$(cat <<EOF
+          $marker
+          Expected next release version: \`v$RELEASE_VERSION\`
+
+          This version is calculated with \`git-cliff --bumped-version\` from the current merge request state.
+          EOF
+          )
+          api_url="${{ forgejo.server_url }}/api/v1/repos/${{ forgejo.repository }}/issues/$pr_number/comments"
+          comments=$(curl --fail --silent --show-error \
+            --header "Authorization: token $FORGEJO_TOKEN" \
+            "$api_url?limit=100")
+          comment_id=$(printf '%s' "$comments" | jq -r --arg marker "$marker" 'first(.[] | select(.body | contains($marker)) | .id) // empty')
+
+          payload=$(jq -n --arg body "$body" '{body: $body}')
+          if [ -n "$comment_id" ]; then
+            curl --fail --silent --show-error \
+              --request PATCH \
+              --header "Authorization: token $FORGEJO_TOKEN" \
+              --header 'Content-Type: application/json' \
+              --data "$payload" \
+              "${{ forgejo.server_url }}/api/v1/repos/${{ forgejo.repository }}/issues/comments/$comment_id" >/dev/null
+          else
+            curl --fail --silent --show-error \
+              --request POST \
+              --header "Authorization: token $FORGEJO_TOKEN" \
+              --header 'Content-Type: application/json' \
+              --data "$payload" \
+              "$api_url" >/dev/null
+          fi
+
+  go-validation:
+    runs-on: docker
+    container:
+      image: node:20-bookworm
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Install Go validation tools
+        run: |
+          set -eu
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl git
+          rm -rf /var/lib/apt/lists/*
+
+      - uses: https://github.com/actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
 
       - name: Tidy Go modules
         run: go mod tidy
@@ -83,7 +135,6 @@ jobs:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           args: ./cmd/... ./internal/...
           github-token: ""
-          skip-cache: true
 
       - name: Format Go code
         run: golangci-lint fmt
@@ -91,9 +142,55 @@ jobs:
       - name: Run Go tests
         run: go test ./...
 
+      - name: Check source files
+        run: |
+          set -eu
+          if [ -n "$(git status --short)" ]; then
+            git status --short
+            git diff
+            exit 1
+          fi
+
+  sdk-validation:
+    needs:
+      - version
+      - go-validation
+    runs-on: docker
+    container:
+      image: node:20-bookworm
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Install SDK validation tools
+        run: |
+          set -eu
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
+          rm -rf /var/lib/apt/lists/*
+
+      - uses: https://github.com/actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
+
+      - uses: https://github.com/actions/cache@v4
+        with:
+          path: ~/.pulumi/bin
+          key: pulumi-${{ env.PULUMI_VERSION }}
+
+      - name: Install Pulumi
+        run: |
+          set -eu
+          export PATH="$HOME/.pulumi/bin:$PATH"
+          if ! command -v pulumi >/dev/null; then
+            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
+          fi
+          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
+
       - name: Build provider
         env:
-          FORGEJO_PROVIDER_VERSION: ${{ steps.version.outputs.version }}
+          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
         run: |
           set -eu
           mkdir -p bin
@@ -106,7 +203,7 @@ jobs:
 
       - name: Generate SDKs
         env:
-          FORGEJO_PROVIDER_VERSION: ${{ steps.version.outputs.version }}
+          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
         run: scripts/gen-sdk.sh
 
       - name: Check generated files
