@@ -1,0 +1,84 @@
+name: Package Java
+
+on:
+  push:
+    tags:
+      - v*
+
+concurrency:
+  group: package-java-${{ forgejo.ref_name }}
+  cancel-in-progress: false
+
+env:
+  GO_VERSION: "1.26.2"
+  JAVA_VERSION: "11"
+  GRADLE_VERSION: "8.10"
+  PULUMI_VERSION: "3.232.0"
+  PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
+  PACKAGE_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+  REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Install system tools
+        run: |
+          set -eu
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
+
+      - uses: https://github.com/actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
+
+      - uses: https://github.com/actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - uses: https://github.com/gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - uses: https://github.com/actions/cache@v4
+        with:
+          path: ~/.pulumi/bin
+          key: pulumi-${{ env.PULUMI_VERSION }}
+
+      - name: Install Pulumi
+        run: |
+          set -eu
+          export PATH="$HOME/.pulumi/bin:$PATH"
+          if ! command -v pulumi >/dev/null; then
+            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
+          fi
+          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
+
+      - name: Generate Java SDK
+        env:
+          FORGEJO_PROVIDER_VERSION: ${{ forgejo.ref_name }}
+          FORGEJO_SDK_LANGUAGES: java
+        run: |
+          set -eu
+          version=${FORGEJO_PROVIDER_VERSION#v}
+          mkdir -p bin
+          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
+          pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
+          scripts/gen-sdk.sh
+
+      - name: Publish Java package
+        env:
+          FORGEJO_PROVIDER_VERSION: ${{ forgejo.ref_name }}
+          PACKAGE_VERSION: ${{ forgejo.ref_name }}
+          PUBLISH_REPO_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}/maven
+          PUBLISH_REPO_USERNAME: ${{ env.PACKAGE_USERNAME }}
+          PUBLISH_REPO_PASSWORD: ${{ env.PACKAGE_TOKEN }}
+        run: |
+          set -eu
+          PACKAGE_VERSION=${FORGEJO_PROVIDER_VERSION#v} gradle --no-daemon -p sdk/java publish

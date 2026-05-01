@@ -1,0 +1,81 @@
+name: Package .NET
+
+on:
+  push:
+    tags:
+      - v*
+
+concurrency:
+  group: package-dotnet-${{ forgejo.ref_name }}
+  cancel-in-progress: false
+
+env:
+  GO_VERSION: "1.26.2"
+  DOTNET_VERSION: "8.0.x"
+  PULUMI_VERSION: "3.232.0"
+  PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
+  PACKAGE_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+  REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Install system tools
+        run: |
+          set -eu
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
+
+      - uses: https://github.com/actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
+
+      - uses: https://github.com/actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: https://github.com/actions/cache@v4
+        with:
+          path: ~/.pulumi/bin
+          key: pulumi-${{ env.PULUMI_VERSION }}
+
+      - name: Install Pulumi
+        run: |
+          set -eu
+          export PATH="$HOME/.pulumi/bin:$PATH"
+          if ! command -v pulumi >/dev/null; then
+            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
+          fi
+          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
+
+      - name: Generate .NET SDK
+        env:
+          FORGEJO_PROVIDER_VERSION: ${{ forgejo.ref_name }}
+          FORGEJO_SDK_LANGUAGES: dotnet
+        run: |
+          set -eu
+          version=${FORGEJO_PROVIDER_VERSION#v}
+          mkdir -p bin
+          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
+          pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
+          scripts/gen-sdk.sh
+
+      - name: Publish .NET package
+        env:
+          FORGEJO_PROVIDER_VERSION: ${{ forgejo.ref_name }}
+          DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+          DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+        run: |
+          set -eu
+          version=${FORGEJO_PROVIDER_VERSION#v}
+          rm -rf sdk/dotnet/nupkg
+          dotnet build sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release -p:Version="$version" -p:GeneratePackageOnBuild=false
+          dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --no-build --output sdk/dotnet/nupkg -p:Version="$version" -p:GeneratePackageOnBuild=false
+          dotnet nuget remove source forgejo >/dev/null 2>&1 || true
+          dotnet nuget add source "${REGISTRY_URL}/nuget/index.json" --name forgejo --username "$PACKAGE_USERNAME" --password "$PACKAGE_TOKEN" --store-password-in-clear-text
+          dotnet nuget push sdk/dotnet/nupkg/*.nupkg --source forgejo --api-key "$PACKAGE_TOKEN" --skip-duplicate

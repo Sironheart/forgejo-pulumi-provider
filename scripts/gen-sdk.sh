@@ -9,11 +9,13 @@ VERSION=${VERSION#v}
 printf 'Generating SDKs with version %s\n' "$VERSION"
 
 rm -rf sdk/python
-for language in nodejs go dotnet java; do
+languages=${FORGEJO_SDK_LANGUAGES:-"nodejs go dotnet java"}
+for language in $languages; do
   pulumi package gen-sdk ./bin/pulumi-resource-forgejo --language "$language" --version "$VERSION"
 done
 
-node <<'EOF'
+case " $languages " in
+  *" nodejs "*) node <<'EOF'
 const fs = require("fs")
 const packagePath = "sdk/nodejs/package.json";
 const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
@@ -37,17 +39,27 @@ pkg.files = [
 ];
 fs.writeFileSync(packagePath, `${JSON.stringify(pkg, null, 4)}\n`);
 EOF
+  ;;
+esac
 
-if [ ! -f sdk/go/go.mod ] || ! grep -qx 'module forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go' sdk/go/go.mod; then
-  rm -f sdk/go/go.mod sdk/go/go.sum
-  go -C sdk/go mod init forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go
-fi
-go -C sdk/go get github.com/pulumi/pulumi/sdk/v3@v3.232.0
-go -C sdk/go mod tidy
+case " $languages " in
+  *" go "*)
+    if [ ! -f sdk/go/go.mod ] || ! grep -qx 'module forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go' sdk/go/go.mod; then
+      rm -f sdk/go/go.mod sdk/go/go.sum
+      go -C sdk/go mod init forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go
+    fi
+    go -C sdk/go get github.com/pulumi/pulumi/sdk/v3@v3.232.0
+    go -C sdk/go mod tidy
+  ;;
+esac
 
 # pulumi-java-gen writes the plugin URL into a Gradle GString; keep Pulumi's
 # ${VERSION} placeholder literal instead of letting Gradle resolve it.
-perl -0pi -e 's/(?<!\\)\$\{VERSION\}/\\\$\{VERSION\}/g' sdk/java/build.gradle
+case " $languages " in
+  *" java "*) perl -0pi -e 's/(?<!\\)\$\{VERSION\}/\\\$\{VERSION\}/g' sdk/java/build.gradle ;;
+esac
 
 # The .NET SDK project embeds this file so the SDK can report the provider plugin version.
-printf '%s\n' "$VERSION" > sdk/dotnet/version.txt
+case " $languages " in
+  *" dotnet "*) printf '%s\n' "$VERSION" > sdk/dotnet/version.txt ;;
+esac

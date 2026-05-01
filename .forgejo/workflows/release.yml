@@ -27,14 +27,10 @@ env:
   SVU_VERSION: v3.4.0
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
   PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
-  PACKAGE_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
-  REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
 
 jobs:
   version:
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
@@ -47,9 +43,8 @@ jobs:
       - name: Install version tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
       - uses: https://github.com/actions/setup-go@v5
         with:
@@ -116,18 +111,15 @@ jobs:
   go-validation:
     needs: version
     if: needs.version.outputs.should_release == 'true'
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
       - name: Install Go validation tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
       - uses: https://github.com/actions/setup-go@v5
         with:
@@ -165,18 +157,15 @@ jobs:
       - version
       - go-validation
     if: needs.version.outputs.should_release == 'true'
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
       - name: Install SDK validation tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
 
       - uses: https://github.com/actions/setup-go@v5
         with:
@@ -237,9 +226,7 @@ jobs:
       - version
       - sdk-validation
     if: needs.version.outputs.should_release == 'true'
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
         with:
@@ -249,34 +236,14 @@ jobs:
       - name: Install release tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
 
       - uses: https://github.com/actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: go.sum
-
-      - uses: https://github.com/actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - uses: https://github.com/actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - uses: https://github.com/actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: gradle
-
-      - uses: https://github.com/gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
       - uses: https://github.com/actions/cache@v4
         with:
           path: ~/.pulumi/bin
@@ -321,11 +288,3 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
           FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
-
-      - name: Publish SDK packages
-        run: scripts/publish-sdks.sh
-        env:
-          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
-          PACKAGE_USERNAME: ${{ env.PACKAGE_USERNAME }}
-          PACKAGE_TOKEN: ${{ env.PACKAGE_TOKEN }}
-          REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}

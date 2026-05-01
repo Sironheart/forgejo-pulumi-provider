@@ -11,9 +11,7 @@ on:
 
 jobs:
   version:
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -24,9 +22,8 @@ jobs:
       - name: Install version tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git jq
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git jq
 
       - uses: https://github.com/actions/setup-go@v5
         with:
@@ -108,18 +105,15 @@ jobs:
           fi
 
   go-validation:
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
       - name: Install Go validation tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
       - uses: https://github.com/actions/setup-go@v5
         with:
@@ -156,18 +150,15 @@ jobs:
     needs:
       - version
       - go-validation
-    runs-on: docker
-    container:
-      image: node:20-bookworm
+    runs-on: ubuntu-latest
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
       - name: Install SDK validation tools
         run: |
           set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
-          rm -rf /var/lib/apt/lists/*
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
 
       - uses: https://github.com/actions/setup-go@v5
         with:
