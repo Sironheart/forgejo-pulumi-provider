@@ -281,6 +281,7 @@ The release workflow:
 - Runs Go linting through `https://github.com/golangci/golangci-lint-action`.
 - Generates the schema and SDKs for that version.
 - Creates and pushes the release Git tag after validation and SDK generation succeed.
-- Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, create the Forgejo Release, and publish the SDK packages for Go, npm, NuGet, and Maven.
+- Uses the GoReleaser CLI to build provider plugin archives, generate the changelog, and create the Forgejo Release.
+- Publishes the SDK packages for Go, npm, NuGet, and Maven after the Forgejo Release is created.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.

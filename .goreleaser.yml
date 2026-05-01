@@ -76,14 +76,3 @@ release:
   prerelease: auto
   extra_files:
     - glob: schema.json
-
-publishers:
-  - name: sdks
-    ids:
-      - pulumi-resource-forgejo
-    cmd: sh -c 'if ! mkdir dist/sdk-publish.lock 2>/dev/null; then exit 0; fi; scripts/publish-sdks.sh'
-    env:
-      - PACKAGE_USERNAME={{ .Env.PACKAGE_USERNAME }}
-      - PACKAGE_TOKEN={{ .Env.PACKAGE_TOKEN }}
-      - REGISTRY_URL={{ .Env.REGISTRY_URL }}
-      - FORGEJO_PROVIDER_VERSION={{ .Version }}

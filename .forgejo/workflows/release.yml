@@ -198,6 +198,23 @@ jobs:
           fi
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
+      - name: Install GoReleaser
+        run: |
+          set -eu
+          arch=$(uname -m)
+          case "$arch" in
+            x86_64) arch=x86_64 ;;
+            aarch64|arm64) arch=arm64 ;;
+            *) printf 'unsupported architecture: %s\n' "$arch"; exit 1 ;;
+          esac
+          url="https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/goreleaser_Linux_${arch}.tar.gz"
+          tmp=$(mktemp -d)
+          curl -fsSL "$url" -o "$tmp/goreleaser.tar.gz"
+          tar -xzf "$tmp/goreleaser.tar.gz" -C "$tmp" goreleaser
+          install -m 0755 "$tmp/goreleaser" /usr/local/bin/goreleaser
+          rm -rf "$tmp"
+          goreleaser --version
+
       - name: Build provider
         env:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
@@ -297,13 +314,18 @@ jobs:
           git push origin "refs/tags/$tag"
 
       - name: Create Forgejo release with GoReleaser
-        uses: https://github.com/goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: ${{ env.GORELEASER_VERSION }}
-          args: release --clean
+        run: |
+          set -eu
+          export "$(printf 'GIT%s_TOKEN' EA)=$FORGEJO_TOKEN"
+          goreleaser release --clean
         env:
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
+          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+
+      - name: Publish SDK packages
+        run: scripts/publish-sdks.sh
+        env:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
           PACKAGE_USERNAME: ${{ env.PACKAGE_USERNAME }}
           PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
