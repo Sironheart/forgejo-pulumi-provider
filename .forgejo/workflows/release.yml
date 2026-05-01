@@ -304,7 +304,6 @@ jobs:
           args: release --clean
         env:
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
-          GITEA_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
           PACKAGE_USERNAME: ${{ env.PACKAGE_USERNAME }}
           PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
