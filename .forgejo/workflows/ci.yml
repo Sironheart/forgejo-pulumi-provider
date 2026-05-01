@@ -4,7 +4,7 @@ env:
   GO_VERSION: "1.26.2"
   PULUMI_VERSION: "3.232.0"
   GOLANGCI_LINT_VERSION: v2.11.4
-  GIT_CLIFF_VERSION: 2.13.1
+  SVU_VERSION: v3.4.0
 
 on:
   push:
@@ -31,15 +31,19 @@ jobs:
           apt-get install -y --no-install-recommends ca-certificates curl git jq
           rm -rf /var/lib/apt/lists/*
 
-      - uses: https://github.com/taiki-e/install-action@v2
+      - uses: https://github.com/actions/setup-go@v5
         with:
-          tool: git-cliff@${{ env.GIT_CLIFF_VERSION }}
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+
+      - name: Install svu
+        run: go install github.com/caarlos0/svu/v3@${{ env.SVU_VERSION }}
 
       - name: Determine provider version
         id: version
         run: |
           set -eu
-          version=$(git-cliff --bumped-version)
+          version=$(svu next)
           version=${version#v}
           output_file=${FORGEJO_OUTPUT:-${GITHUB_OUTPUT:-}}
           if [ -z "$output_file" ]; then
@@ -80,7 +84,7 @@ jobs:
           $marker
           Expected next release version: \`v$RELEASE_VERSION\`
 
-          This version is calculated with \`git-cliff --bumped-version\` from the current merge request state.
+          This version is calculated with \`svu next\` from the current merge request state.
           EOF
           )
           api_url="${{ forgejo.server_url }}/api/v1/repos/${{ forgejo.repository }}/issues/$pr_number/comments"

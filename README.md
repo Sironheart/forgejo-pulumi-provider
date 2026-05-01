@@ -278,7 +278,7 @@ Useful tasks:
 | `mise run fmt` | Format Go code with `golangci-lint fmt` using `.golangci.yml`. |
 | `mise run lint` | Run `golangci-lint`. |
 | `mise run test` | Run Go tests. |
-| `mise run version` | Calculate the next semantic version with `git-cliff`. |
+| `mise run version` | Calculate the next semantic version with `svu`. |
 | `mise run build` | Build `bin/pulumi-resource-forgejo`. |
 | `mise run schema` | Export `schema.json`. |
 | `mise run sdk` | Generate all standard Pulumi SDKs. |
@@ -291,20 +291,19 @@ Build release artifacts locally:
 mise exec -- goreleaser release --snapshot --clean --skip=publish
 ```
 
-Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `git-cliff` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI is split into version/comment, Go validation, and SDK validation jobs with Go, Pulumi, and linter caches where applicable.
+Forgejo Actions run validation on pushes and pull requests. Workflows install Go, Pulumi, GoReleaser, and `svu` directly from explicit versions or actions, and run `golangci-lint` through `https://github.com/golangci/golangci-lint-action`. `mise` is only used for local tasks. CI is split into version/comment, Go validation, and SDK validation jobs with Go, Pulumi, and linter caches where applicable.
 
 ## Release Automation
 
-Merging into `main` triggers `.forgejo/workflows/release.yml`. The workflow calculates the next semantic version with `git-cliff --bumped-version`, creates the corresponding `vX.Y.Z` Git tag, and publishes the release. The workflow can also be run manually with an optional version override, with or without the leading `v`.
+Merging into `main` triggers `.forgejo/workflows/release.yml`. The workflow calculates the next semantic version with `svu next`, skips the release when the calculated version already exists, creates the corresponding `vX.Y.Z` Git tag, and publishes the release. The workflow can also be run manually with an optional version override, with or without the leading `v`.
 
 The release workflow:
 
 - Checks out the merge commit on `main`.
-- Calculates the next semantic version with `git-cliff`.
+- Calculates the next semantic version with `svu`.
 - Runs Go linting through `https://github.com/golangci/golangci-lint-action`.
 - Generates the schema and SDKs for that version.
 - Creates and pushes the release Git tag after validation and SDK generation succeed.
-- Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, and create or replace the Forgejo Release.
-- Publishes SDK packages through separate cached jobs for Go, npm, PyPI, NuGet, and Maven.
+- Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, create the Forgejo Release, and publish the SDK packages for Go, npm, PyPI, NuGet, and Maven.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.

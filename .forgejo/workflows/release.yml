@@ -25,7 +25,7 @@ env:
   PULUMI_VERSION: "3.232.0"
   GORELEASER_VERSION: "2.15.4"
   GOLANGCI_LINT_VERSION: v2.11.4
-  GIT_CLIFF_VERSION: 2.13.1
+  SVU_VERSION: v3.4.0
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
   PACKAGE_USERNAME: ${{ forgejo.actor }}
   PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
@@ -39,6 +39,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
+      should_release: ${{ steps.version.outputs.should_release }}
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
         with:
@@ -51,33 +52,71 @@ jobs:
           apt-get install -y --no-install-recommends ca-certificates curl git
           rm -rf /var/lib/apt/lists/*
 
-      - uses: https://github.com/taiki-e/install-action@v2
+      - uses: https://github.com/actions/setup-go@v5
         with:
-          tool: git-cliff@${{ env.GIT_CLIFF_VERSION }}
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+
+      - name: Install svu
+        run: go install github.com/caarlos0/svu/v3@${{ env.SVU_VERSION }}
 
       - name: Determine release version
         id: version
+        env:
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
         run: |
           set -eu
           version="${{ inputs.version }}"
           if [ -z "$version" ]; then
-            version=$(git-cliff --bumped-version)
+            version=$(svu next)
           fi
           version=${version#v}
           tag="v$version"
+          should_release=true
+
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            printf 'Release tag %s already exists; skipping release pipeline\n' "$tag"
+            should_release=false
+          fi
+
+          if [ "$should_release" = true ]; then
+            auth_header=
+            if [ -n "${FORGEJO_TOKEN:-}" ]; then
+              auth_header="Authorization: token ${FORGEJO_TOKEN}"
+            fi
+            if [ -n "$auth_header" ]; then
+              http_status=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+                --header "$auth_header" \
+                "${{ forgejo.server_url }}/api/v1/repos/${{ forgejo.repository }}/releases/tags/$tag")
+            else
+              http_status=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+                "${{ forgejo.server_url }}/api/v1/repos/${{ forgejo.repository }}/releases/tags/$tag")
+            fi
+            if [ "$http_status" = "200" ]; then
+              printf 'Forgejo release %s already exists; skipping release pipeline\n' "$tag"
+              should_release=false
+            elif [ "$http_status" != "404" ]; then
+              printf 'Could not check Forgejo release %s, API returned HTTP %s\n' "$tag" "$http_status"
+              exit 1
+            fi
+          fi
+
           output_file=${FORGEJO_OUTPUT:-${GITHUB_OUTPUT:-}}
           if [ -z "$output_file" ]; then
             printf 'No action output file is available\n'
             exit 1
           fi
-          printf 'Release version: %s\n' "$version"
+          printf 'Release version: %s (should_release=%s)\n' "$version" "$should_release"
           {
             printf 'version=%s\n' "$version"
             printf 'tag=%s\n' "$tag"
+            printf 'should_release=%s\n' "$should_release"
           } >> "$output_file"
 
   go-validation:
     needs: version
+    if: needs.version.outputs.should_release == 'true'
     runs-on: docker
     container:
       image: node:20-bookworm
@@ -126,6 +165,7 @@ jobs:
     needs:
       - version
       - go-validation
+    if: needs.version.outputs.should_release == 'true'
     runs-on: docker
     container:
       image: node:20-bookworm
@@ -190,6 +230,7 @@ jobs:
     needs:
       - version
       - sdk-validation
+    if: needs.version.outputs.should_release == 'true'
     runs-on: docker
     container:
       image: node:20-bookworm
@@ -203,7 +244,7 @@ jobs:
         run: |
           set -eu
           apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
+          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
           rm -rf /var/lib/apt/lists/*
 
       - uses: https://github.com/actions/setup-go@v5
@@ -212,20 +253,50 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
+      - uses: https://github.com/actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: https://github.com/actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: https://github.com/actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: https://github.com/actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - uses: https://github.com/gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - uses: https://github.com/actions/cache@v4
+        with:
+          path: ~/.pulumi/bin
+          key: pulumi-${{ env.PULUMI_VERSION }}
+
+      - name: Install Pulumi
+        run: |
+          set -eu
+          export PATH="$HOME/.pulumi/bin:$PATH"
+          if ! command -v pulumi >/dev/null; then
+            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
+          fi
+          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
+
       - name: Create release tag
         run: |
           set -eu
           tag="${{ needs.version.outputs.tag }}"
           git fetch --tags --force
           if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-            tagged_commit=$(git rev-list -n 1 "$tag")
-            head_commit=$(git rev-parse HEAD)
-            if [ "$tagged_commit" != "$head_commit" ]; then
-              printf 'release tag %s already exists at %s, expected %s\n' "$tag" "$tagged_commit" "$head_commit"
-              exit 1
-            fi
-            printf 'release tag %s already exists at HEAD\n' "$tag"
-            exit 0
+            printf 'release tag %s already exists; refusing to release\n' "$tag"
+            exit 1
           fi
           git tag "$tag"
           git push origin "refs/tags/$tag"
@@ -238,183 +309,8 @@ jobs:
           args: release --clean
         env:
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
-
-  publish-go-sdk:
-    needs:
-      - version
-      - forgejo-release
-    runs-on: docker
-    container:
-      image: node:20-bookworm
-    steps:
-      - uses: https://data.forgejo.org/actions/checkout@v4
-
-      - name: Install Go SDK publish tools
-        run: |
-          set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
-
-      - uses: https://github.com/actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-          cache-dependency-path: go.sum
-
-      - name: Publish Go SDK module package
-        run: |
-          set -eu
-          module=$(go list -m)
-          tag="${{ needs.version.outputs.tag }}"
-          archive="pulumi-forgejo-go-${tag}.zip"
-          git archive --format=zip --prefix="${module}@${tag}/" HEAD --output="$archive"
-          curl --fail --silent --show-error \
-            --user "${PACKAGE_USERNAME}:${PACKAGE_TOKEN}" \
-            --upload-file "$archive" \
-            "${REGISTRY_URL}/go/upload"
-
-  publish-nodejs-sdk:
-    needs:
-      - version
-      - forgejo-release
-    runs-on: docker
-    container:
-      image: node:20-bookworm
-    steps:
-      - uses: https://data.forgejo.org/actions/checkout@v4
-
-      - name: Install Node.js publish tools
-        run: |
-          set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
-
-      - uses: https://github.com/actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - uses: https://github.com/actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-node-${{ env.NODE_VERSION }}
-
-      - name: Build and publish Node.js SDK package
-        working-directory: sdk/nodejs
-        run: |
-          set -eu
-          auth_path=${REGISTRY_URL#https:}
-          auth_path=${auth_path#http:}
-          npm config set @sironheart:registry "${REGISTRY_URL}/npm/"
-          npm config set -- "${auth_path}/npm/:_authToken" "$PACKAGE_TOKEN"
-          npm install --ignore-scripts --cache "$HOME/.npm"
-          npm run build
-          npm publish --access public --registry "${REGISTRY_URL}/npm/"
-
-  publish-python-sdk:
-    needs:
-      - version
-      - forgejo-release
-    runs-on: docker
-    container:
-      image: node:20-bookworm
-    steps:
-      - uses: https://data.forgejo.org/actions/checkout@v4
-
-      - name: Install Python publish tools
-        run: |
-          set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
-
-      - uses: https://github.com/actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - uses: https://github.com/actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: pip-python-${{ env.PYTHON_VERSION }}
-
-      - name: Build and publish Python SDK package
-        run: |
-          set -eu
-          rm -rf sdk/python/dist
-          python -m pip install --upgrade pip build twine
-          python -m build sdk/python
-          python -m twine upload \
-            --repository-url "${REGISTRY_URL}/pypi" \
-            --username "$PACKAGE_USERNAME" \
-            --password "$PACKAGE_TOKEN" \
-            --skip-existing \
-            sdk/python/dist/*
-
-  publish-dotnet-sdk:
-    needs:
-      - version
-      - forgejo-release
-    runs-on: docker
-    container:
-      image: node:20-bookworm
-    steps:
-      - uses: https://data.forgejo.org/actions/checkout@v4
-
-      - name: Install .NET publish tools
-        run: |
-          set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
-
-      - uses: https://github.com/actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - uses: https://github.com/actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: nuget-dotnet-${{ env.DOTNET_VERSION }}
-
-      - name: Pack and publish .NET SDK package
-        run: |
-          set -eu
-          rm -rf sdk/dotnet/nupkg
-          dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --output sdk/dotnet/nupkg -p:Version=${{ needs.version.outputs.version }}
-          dotnet nuget push sdk/dotnet/nupkg/*.nupkg --source "${REGISTRY_URL}/nuget/index.json" --api-key "$PACKAGE_TOKEN" --skip-duplicate
-
-  publish-java-sdk:
-    needs:
-      - version
-      - forgejo-release
-    runs-on: docker
-    container:
-      image: node:20-bookworm
-    steps:
-      - uses: https://data.forgejo.org/actions/checkout@v4
-
-      - name: Install Java publish tools
-        run: |
-          set -eu
-          apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git
-          rm -rf /var/lib/apt/lists/*
-
-      - uses: https://github.com/actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: gradle
-
-      - uses: https://github.com/gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Publish Java SDK package
-        run: gradle --no-daemon -p sdk/java publish
-        env:
-          PACKAGE_VERSION: ${{ needs.version.outputs.version }}
-          PUBLISH_REPO_URL: ${{ env.REGISTRY_URL }}/maven
-          PUBLISH_REPO_USERNAME: ${{ env.PACKAGE_USERNAME }}
-          PUBLISH_REPO_PASSWORD: ${{ secrets.FORGEJO_TOKEN }}
+          GITEA_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
+          PACKAGE_USERNAME: ${{ env.PACKAGE_USERNAME }}
+          PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+          REGISTRY_URL: ${{ env.REGISTRY_URL }}

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR=$(git rev-parse --show-toplevel)
 cd "$ROOT_DIR"
 
-VERSION=${FORGEJO_PROVIDER_VERSION:-$(git-cliff --bumped-version)}
+VERSION=${FORGEJO_PROVIDER_VERSION:-$(svu next)}
 VERSION=${VERSION#v}
 printf 'Generating SDKs with version %s\n' "$VERSION"
 

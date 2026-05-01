@@ -6,6 +6,12 @@ gitea_urls:
   api: https://forgejo.siron.casa/api/v1
   download: https://forgejo.siron.casa
 
+before:
+  hooks:
+    - sh -c 'mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION#v} && go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo'
+    - sh -c 'pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json'
+    - scripts/gen-sdk.sh
+
 builds:
   - id: pulumi-resource-forgejo
     main: ./cmd/pulumi-resource-forgejo
@@ -66,7 +72,18 @@ release:
   gitea:
     owner: sironheart
     name: forgejo-pulumi-provider
-  mode: replace
+  mode: keep
   prerelease: auto
   extra_files:
     - glob: schema.json
+
+publishers:
+  - name: sdks
+    ids:
+      - pulumi-resource-forgejo
+    cmd: sh -c 'if ! mkdir dist/sdk-publish.lock 2>/dev/null; then exit 0; fi; scripts/publish-sdks.sh'
+    env:
+      - PACKAGE_USERNAME={{ .Env.PACKAGE_USERNAME }}
+      - PACKAGE_TOKEN={{ .Env.PACKAGE_TOKEN }}
+      - REGISTRY_URL={{ .Env.REGISTRY_URL }}
+      - FORGEJO_PROVIDER_VERSION={{ .Version }}
