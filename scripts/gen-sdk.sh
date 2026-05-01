@@ -13,15 +13,20 @@ for language in nodejs go dotnet java; do
   pulumi package gen-sdk ./bin/pulumi-resource-forgejo --language "$language" --version "$VERSION"
 done
 
-go -C sdk/go mod tidy
-
 node <<'EOF'
 const fs = require("fs")
 const packagePath = "sdk/nodejs/package.json";
 const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
 pkg.repository = {
   type: "git",
-  url: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+  url: "git+https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider.git",
+};
+pkg.bugs = {
+  url: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/issues",
+};
+pkg.publishConfig = {
+  "@sironheart:registry": "https://forgejo.siron.casa/api/packages/sironheart/npm/",
+  access: "public",
 };
 pkg.main = "bin/index.js";
 pkg.types = "bin/index.d.ts";
@@ -32,6 +37,13 @@ pkg.files = [
 ];
 fs.writeFileSync(packagePath, `${JSON.stringify(pkg, null, 4)}\n`);
 EOF
+
+if [ ! -f sdk/go/go.mod ] || ! grep -qx 'module forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go' sdk/go/go.mod; then
+  rm -f sdk/go/go.mod sdk/go/go.sum
+  go -C sdk/go mod init forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go
+fi
+go -C sdk/go get github.com/pulumi/pulumi/sdk/v3@v3.232.0
+go -C sdk/go mod tidy
 
 # pulumi-java-gen writes the plugin URL into a Gradle GString; keep Pulumi's
 # ${VERSION} placeholder literal instead of letting Gradle resolve it.
