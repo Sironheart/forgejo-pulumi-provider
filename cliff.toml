@@ -6,3 +6,12 @@ initial_tag = "0.1.0"
 [git]
 conventional_commits = true
 filter_unconventional = false
+
+commit_parsers = [
+	{ message = "^feat", group = "Features" },
+	{ message = "^fix", group = "Bug Fixes" },
+
+	{ message = "^docs?", skip = true },
+	{ message = "^ci", skip = true },
+	{ message = "^chore", skip = true },
+]
