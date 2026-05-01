@@ -15,6 +15,7 @@ TAG="v$VERSION"
 : "${PACKAGE_USERNAME:?PACKAGE_USERNAME must be set}"
 : "${PACKAGE_TOKEN:?PACKAGE_TOKEN must be set}"
 : "${REGISTRY_URL:?REGISTRY_URL must be set}"
+NPM_SCOPE=${NPM_SCOPE:-@${PACKAGE_USERNAME}}
 
 printf 'Publishing SDKs for %s\n' "$TAG"
 
@@ -34,11 +35,11 @@ curl --fail --silent --show-error \
   cd sdk/nodejs
   auth_path=${REGISTRY_URL#https:}
   auth_path=${auth_path#http:}
-  npm config set @sironheart:registry "${REGISTRY_URL}/npm/"
+  npm config set "${NPM_SCOPE}:registry" "${REGISTRY_URL}/npm/"
   npm config set -- "${auth_path}/npm/:_authToken" "$PACKAGE_TOKEN"
   npm install --ignore-scripts
   npm run build
-  npm publish --access public --registry "${REGISTRY_URL}/npm/"
+  npm publish --scope="$NPM_SCOPE" --registry="${REGISTRY_URL}/npm/"
 )
 
 rm -rf sdk/dotnet/nupkg
