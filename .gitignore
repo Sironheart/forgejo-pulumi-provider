@@ -4,3 +4,6 @@ node_modules/
 __pycache__/
 *.test
 .DS_Store
+
+# used in CI
+.goreleaser-forgejo-token

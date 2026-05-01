@@ -18,11 +18,15 @@ TAG="v$VERSION"
 
 printf 'Publishing SDKs for %s\n' "$TAG"
 
-module=$(go list -m)
+module=$(go -C sdk/go list -m)
 go_archive="pulumi-forgejo-go-${TAG}.zip"
-git archive --format=zip --prefix="${module}@${TAG}/" HEAD --output="$go_archive"
+tmp_go_archive_dir=$(mktemp -d)
+trap 'rm -rf "$tmp_go_archive_dir"' EXIT
+mkdir -p "${tmp_go_archive_dir}/${module}@${TAG}"
+cp -R sdk/go/. "${tmp_go_archive_dir}/${module}@${TAG}/"
+(cd "$tmp_go_archive_dir" && zip -qr "$ROOT_DIR/$go_archive" "${module}@${TAG}")
 curl --fail --silent --show-error \
-  --user "${PACKAGE_USERNAME}:${PACKAGE_TOKEN}" \
+  --header "Authorization: token ${PACKAGE_TOKEN}" \
   --upload-file "$go_archive" \
   "${REGISTRY_URL}/go/upload"
 
@@ -38,7 +42,10 @@ curl --fail --silent --show-error \
 )
 
 rm -rf sdk/dotnet/nupkg
-dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --output sdk/dotnet/nupkg -p:Version="$VERSION"
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+dotnet build sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release -p:Version="$VERSION" -p:GeneratePackageOnBuild=false
+dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --no-build --output sdk/dotnet/nupkg -p:Version="$VERSION" -p:GeneratePackageOnBuild=false
 dotnet nuget push sdk/dotnet/nupkg/*.nupkg --source "${REGISTRY_URL}/nuget/index.json" --api-key "$PACKAGE_TOKEN" --skip-duplicate
 
 PACKAGE_VERSION="$VERSION" \

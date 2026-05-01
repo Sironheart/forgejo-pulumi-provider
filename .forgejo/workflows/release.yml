@@ -19,16 +19,16 @@ env:
   GO_VERSION: "1.26.2"
   NODE_VERSION: "20"
   DOTNET_VERSION: "8.0.x"
-  JAVA_VERSION: "17"
+  JAVA_VERSION: "11"
   GRADLE_VERSION: "8.10"
   PULUMI_VERSION: "3.232.0"
   GORELEASER_VERSION: "2.15.4"
   GOLANGCI_LINT_VERSION: v2.11.4
   SVU_VERSION: v3.4.0
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
-  PACKAGE_USERNAME: ${{ forgejo.actor }}
-  PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
-  REGISTRY_URL: ${{ forgejo.server_url }}/api/packages/${{ forgejo.repository_owner }}
+  PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
+  PACKAGE_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+  REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
 
 jobs:
   version:
@@ -199,21 +199,11 @@ jobs:
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
       - name: Install GoReleaser
-        run: |
-          set -eu
-          arch=$(uname -m)
-          case "$arch" in
-            x86_64) arch=x86_64 ;;
-            aarch64|arm64) arch=arm64 ;;
-            *) printf 'unsupported architecture: %s\n' "$arch"; exit 1 ;;
-          esac
-          url="https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/goreleaser_Linux_${arch}.tar.gz"
-          tmp=$(mktemp -d)
-          curl -fsSL "$url" -o "$tmp/goreleaser.tar.gz"
-          tar -xzf "$tmp/goreleaser.tar.gz" -C "$tmp" goreleaser
-          install -m 0755 "$tmp/goreleaser" /usr/local/bin/goreleaser
-          rm -rf "$tmp"
-          goreleaser --version
+        uses: https://github.com/goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: ${{ env.GORELEASER_VERSION }}
+          install-only: true
 
       - name: Build provider
         env:
@@ -260,7 +250,7 @@ jobs:
         run: |
           set -eu
           apt-get update
-          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
+          apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
           rm -rf /var/lib/apt/lists/*
 
       - uses: https://github.com/actions/setup-go@v5
@@ -301,6 +291,13 @@ jobs:
           fi
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
+      - name: Install GoReleaser
+        uses: https://github.com/goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: ${{ env.GORELEASER_VERSION }}
+          install-only: true
+
       - name: Create release tag
         run: |
           set -eu
@@ -316,9 +313,11 @@ jobs:
       - name: Create Forgejo release with GoReleaser
         run: |
           set -eu
-          export "$(printf 'GIT%s_TOKEN' EA)=$FORGEJO_TOKEN"
+          printf '%s' "$FORGEJO_TOKEN" > .goreleaser-forgejo-token
+          trap 'rm -f .goreleaser-forgejo-token' EXIT
           goreleaser release --clean
         env:
+          GORELEASER_FORCE_TOKEN: gitea
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
           FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
@@ -328,5 +327,5 @@ jobs:
         env:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
           PACKAGE_USERNAME: ${{ env.PACKAGE_USERNAME }}
-          PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
-          REGISTRY_URL: ${{ env.REGISTRY_URL }}
+          PACKAGE_TOKEN: ${{ env.PACKAGE_TOKEN }}
+          REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}

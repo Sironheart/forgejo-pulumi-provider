@@ -55,7 +55,7 @@ func Provider() p.Provider {
 				},
 				"go": map[string]any{
 					"importBasePath":  "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
-					"modulePath":      "forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+					"modulePath":      "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
 					"rootPackageName": "forgejo",
 				},
 				"csharp": map[string]any{

@@ -2,8 +2,11 @@ version: 2
 
 project_name: pulumi-resource-forgejo
 
+env_files:
+  gitea_token: .goreleaser-forgejo-token
+
 gitea_urls:
-  api: https://forgejo.siron.casa/api/v1
+  api: http://forgejo-http:3000/api/v1
   download: https://forgejo.siron.casa
 
 before:
@@ -72,7 +75,7 @@ release:
   gitea:
     owner: sironheart
     name: forgejo-pulumi-provider
-  mode: keep
+  mode: keep-existing
   prerelease: auto
   extra_files:
     - glob: schema.json

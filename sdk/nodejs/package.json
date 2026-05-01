@@ -9,7 +9,10 @@
         "gitea"
     ],
     "homepage": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
-    "repository": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
+    "repository": {
+        "type": "git",
+        "url": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider"
+    },
     "license": "Apache-2.0",
     "scripts": {
         "build": "tsc"
@@ -26,5 +29,12 @@
         "name": "forgejo",
         "version": "0.1.0",
         "server": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}"
-    }
+    },
+    "main": "bin/index.js",
+    "types": "bin/index.d.ts",
+    "files": [
+        "bin",
+        "package.json",
+        "README.md"
+    ]
 }
