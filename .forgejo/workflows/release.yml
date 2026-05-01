@@ -344,7 +344,6 @@ jobs:
           scripts/gen-sdk.sh
 
       - name: Publish Node.js package
-        working-directory: sdk/nodejs
         run: |
           set -eu
           NPM_SCOPE="@${PACKAGE_USERNAME}"
@@ -352,9 +351,9 @@ jobs:
           auth_path=${auth_path#http:}
           npm config set "${NPM_SCOPE}:registry" "${REGISTRY_URL}/npm/"
           npm config set -- "${auth_path}/npm/:_authToken" "$PACKAGE_TOKEN"
-          npm install --ignore-scripts
-          npm run build
-          npm publish --scope="$NPM_SCOPE" --registry="${REGISTRY_URL}/npm/"
+          npm install --ignore-scripts --prefix sdk/nodejs
+          npm run build --prefix sdk/nodejs
+          npm publish sdk/nodejs --scope="$NPM_SCOPE" --registry="${REGISTRY_URL}/npm/"
 
   package-go:
     needs:
@@ -418,7 +417,7 @@ jobs:
           trap 'rm -rf "$tmp"' EXIT
           mkdir -p "${tmp}/${module}@${tag}"
           cp -R sdk/go/. "${tmp}/${module}@${tag}/"
-          (cd "$tmp" && zip -qr "$archive" "${module}@${tag}")
+          (cd "$tmp" && zip -D -qr "$archive" "${module}@${tag}")
           curl --fail --silent --show-error \
             --user "${PACKAGE_USERNAME}:${PACKAGE_TOKEN}" \
             --upload-file "$archive" \
