@@ -37,16 +37,6 @@ curl --fail --silent --show-error \
   npm publish --access public --registry "${REGISTRY_URL}/npm/"
 )
 
-rm -rf sdk/python/dist
-python -m pip install --upgrade pip build twine
-python -m build sdk/python
-python -m twine upload \
-  --repository-url "${REGISTRY_URL}/pypi" \
-  --username "$PACKAGE_USERNAME" \
-  --password "$PACKAGE_TOKEN" \
-  --skip-existing \
-  sdk/python/dist/*
-
 rm -rf sdk/dotnet/nupkg
 dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release --output sdk/dotnet/nupkg -p:Version="$VERSION"
 dotnet nuget push sdk/dotnet/nupkg/*.nupkg --source "${REGISTRY_URL}/nuget/index.json" --api-key "$PACKAGE_TOKEN" --skip-duplicate

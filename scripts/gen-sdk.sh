@@ -8,7 +8,10 @@ VERSION=${FORGEJO_PROVIDER_VERSION:-$(svu next)}
 VERSION=${VERSION#v}
 printf 'Generating SDKs with version %s\n' "$VERSION"
 
-pulumi package gen-sdk ./bin/pulumi-resource-forgejo --language all --version "$VERSION"
+rm -rf sdk/python
+for language in nodejs go dotnet java; do
+  pulumi package gen-sdk ./bin/pulumi-resource-forgejo --language "$language" --version "$VERSION"
+done
 
 # pulumi-java-gen writes the plugin URL into a Gradle GString; keep Pulumi's
 # ${VERSION} placeholder literal instead of letting Gradle resolve it.

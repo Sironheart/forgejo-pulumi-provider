@@ -36,7 +36,7 @@ depends = ["build"]
 run = "pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json"
 
 [tasks.sdk]
-description = "Generate SDKs for all standard Pulumi languages"
+description = "Generate SDKs for published Pulumi languages"
 depends = ["schema"]
 run = "scripts/gen-sdk.sh"
 
@@ -80,5 +80,5 @@ run = "scripts/gen-sdk.sh"
 hide = true
 
 [tasks.check]
-description = "Run formatting, linting, tests, schema export, and all SDK generation"
+description = "Run formatting, linting, tests, schema export, and published SDK generation"
 depends = ["check-lint", "check-test", "check-sdk"]

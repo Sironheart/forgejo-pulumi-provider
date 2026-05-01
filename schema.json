@@ -31,11 +31,6 @@
       "packageDescription": "A Pulumi provider for managing Forgejo resources.",
       "packageName": "@sironheart/pulumi-forgejo",
       "respectSchemaVersion": true
-    },
-    "python": {
-      "packageName": "pulumi_forgejo",
-      "pythonRequires": "\u003e=3.9",
-      "respectSchemaVersion": true
     }
   },
   "config": {

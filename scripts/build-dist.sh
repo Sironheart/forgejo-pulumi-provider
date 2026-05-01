@@ -47,7 +47,7 @@ for target in "${targets[@]}"; do
 done
 
 cp schema.json dist/schema.json
-for sdk in go nodejs python dotnet java; do
+for sdk in go nodejs dotnet java; do
   tar -czf "dist/pulumi-forgejo-sdk-${sdk}-v${VERSION}.tar.gz" -C "sdk/$sdk" .
 done
 if command -v sha256sum >/dev/null 2>&1; then

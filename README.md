@@ -6,12 +6,11 @@ This provider is released only through this repository's Forgejo instance. Provi
 
 ## Supported Languages
 
-The provider schema generates SDKs for all standard Pulumi languages:
+The provider schema generates SDKs for the published Pulumi languages:
 
 | Language | SDK path | Package or namespace |
 | --- | --- | --- |
 | TypeScript / JavaScript | `sdk/nodejs` | `@sironheart/pulumi-forgejo` |
-| Python | `sdk/python` | `pulumi_forgejo` |
 | Go | `sdk/go` | `forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go` |
 | .NET | `sdk/dotnet` | `Pulumi.Forgejo` |
 | Java | `sdk/java` | `casa.siron.pulumi.forgejo` |
@@ -108,12 +107,6 @@ npm config set @sironheart:registry https://forgejo.siron.casa/api/packages/siro
 npm install @sironheart/pulumi-forgejo
 ```
 
-Python:
-
-```sh
-python -m pip install --index-url https://forgejo.siron.casa/api/packages/sironheart/pypi/simple pulumi_forgejo
-```
-
 Go:
 
 ```sh
@@ -152,22 +145,6 @@ const repo = new forgejo.Repository("example", {
 });
 
 export const cloneUrl = repo.cloneUrl;
-```
-
-## Python Example
-
-```python
-import pulumi
-import pulumi_forgejo as forgejo
-
-repo = forgejo.Repository(
-    "example",
-    name="example",
-    description="Managed by Pulumi",
-    private=True,
-)
-
-pulumi.export("cloneUrl", repo.clone_url)
 ```
 
 ## Go Example
@@ -304,6 +281,6 @@ The release workflow:
 - Runs Go linting through `https://github.com/golangci/golangci-lint-action`.
 - Generates the schema and SDKs for that version.
 - Creates and pushes the release Git tag after validation and SDK generation succeed.
-- Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, create the Forgejo Release, and publish the SDK packages for Go, npm, PyPI, NuGet, and Maven.
+- Uses `https://github.com/goreleaser/goreleaser-action` to build provider plugin archives, generate the changelog, create the Forgejo Release, and publish the SDK packages for Go, npm, NuGet, and Maven.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.

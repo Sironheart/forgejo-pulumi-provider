@@ -53,11 +53,6 @@ func Provider() p.Provider {
 					"packageDescription":   "A Pulumi provider for managing Forgejo resources.",
 					"respectSchemaVersion": true,
 				},
-				"python": map[string]any{
-					"packageName":          "pulumi_forgejo",
-					"pythonRequires":       ">=3.9",
-					"respectSchemaVersion": true,
-				},
 				"go": map[string]any{
 					"importBasePath":  "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
 					"modulePath":      "forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
