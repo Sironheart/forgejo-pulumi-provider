@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -21,7 +21,7 @@
     "go": {
       "importBasePath": "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
       "modulePath": "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
-      "rootPackageName": "forgejo"
+      "rootPackageName": "forgejo-pulumi-provider"
     },
     "java": {
       "basePackage": "casa.siron.pulumi",
@@ -29,7 +29,7 @@
     },
     "nodejs": {
       "packageDescription": "A Pulumi provider for managing Forgejo resources.",
-      "packageName": "@sironheart/pulumi-forgejo",
+      "packageName": "sironheart/pulumi-forgejo",
       "respectSchemaVersion": true
     }
   },
