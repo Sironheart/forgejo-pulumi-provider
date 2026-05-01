@@ -30,7 +30,6 @@ env:
   PACKAGE_USERNAME: ${{ forgejo.actor }}
   PACKAGE_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   REGISTRY_URL: ${{ forgejo.server_url }}/api/packages/${{ forgejo.repository_owner }}
-  GITEA_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
   version:
@@ -238,7 +237,6 @@ jobs:
           version: ${{ env.GORELEASER_VERSION }}
           args: release --clean
         env:
-          GITEA_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
 
   publish-go-sdk:
