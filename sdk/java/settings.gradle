@@ -10,4 +10,4 @@ pluginManagement {
   }
 }
 
-rootProject.name = "casa.siron.pulumi.forgejo"
+rootProject.name = "casa.siron.forgejo.forgejo"

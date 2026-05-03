@@ -4,7 +4,7 @@
 package config
 
 import (
-	"forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go/internal"
+	"forgejo-pulumi-provider/internal"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
