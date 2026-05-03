@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
-  "displayName": "Forgejo",
-  "version": "0.1.11",
+  "displayName": "Forgejo Pulumi Provider",
+  "version": "0.1.12",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -29,7 +29,7 @@
     },
     "nodejs": {
       "packageDescription": "A Pulumi provider for managing Forgejo resources.",
-      "packageName": "pulumi-forgejo",
+      "packageName": "pulumi-forgejo-provider",
       "respectSchemaVersion": true
     }
   },

@@ -39,7 +39,7 @@ func Provider() p.Provider {
 		},
 		Config: infer.Config(&Config{}),
 		Metadata: schema.Metadata{
-			DisplayName:       "Forgejo",
+			DisplayName:       "Forgejo Pulumi Provider",
 			Description:       "A Pulumi provider for managing Forgejo resources.",
 			Keywords:          []string{"pulumi", "forgejo", "git", "gitea"},
 			Homepage:          "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
@@ -49,7 +49,7 @@ func Provider() p.Provider {
 			PluginDownloadURL: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}",
 			LanguageMap: map[string]any{
 				"nodejs": map[string]any{
-					"packageName":          "pulumi-forgejo",
+					"packageName":          "pulumi-forgejo-provider",
 					"packageDescription":   "A Pulumi provider for managing Forgejo resources.",
 					"respectSchemaVersion": true,
 				},

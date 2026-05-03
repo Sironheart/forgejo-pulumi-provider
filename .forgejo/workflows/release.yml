@@ -153,9 +153,7 @@ jobs:
           fi
 
   sdk-validation:
-    needs:
-      - version
-      - go-validation
+    needs: version
     if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -224,6 +222,7 @@ jobs:
   forgejo-release:
     needs:
       - version
+      - go-validation
       - sdk-validation
     if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -323,7 +322,7 @@ jobs:
           set -eu
           cd sdk/nodejs
           npm config set @${FORGEJO_REPOSITORY_OWNER}:registry $REGISTRY_URL
-          npm config set -- '${REGISTRY_URL#http*:}:_authToken' $PACKAGE_TOKEN
+          npm config set -- '//forgejo.siron.casa/api/packages/$FORGEJO_REPOSITORY_OWNER/npm/:_authToken' $PACKAGE_TOKEN
           npm install --ignore-scripts
           echo 'Install successful'
           npm run build
