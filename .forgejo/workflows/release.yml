@@ -323,7 +323,7 @@ jobs:
           set -eu
           cd sdk/nodejs
           npm config set @${FORGEJO_REPOSITORY_OWNER}:registry $REGISTRY_URL
-          npm ci --ignore-scripts
+          npm install --ignore-scripts
           npm run build
           npm publish --access public --scope=@${FORGEJO_REPOSITORY_OWNER} --registry=$REGISTRY_URL
 
@@ -356,27 +356,6 @@ jobs:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
 
-      - name: Install Pulumi
-        run: |
-          set -eu
-          export PATH="$HOME/.pulumi/bin:$PATH"
-          if ! command -v pulumi >/dev/null; then
-            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
-          fi
-          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
-
-      - name: Generate Go SDK
-        env:
-          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
-          FORGEJO_SDK_LANGUAGES: go
-        run: |
-          set -eu
-          version=${FORGEJO_PROVIDER_VERSION#v}
-          mkdir -p bin
-          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
-          pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
-          scripts/gen-sdk.sh
-
       - name: Publish Go package
         env:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
@@ -407,18 +386,6 @@ jobs:
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
-      - name: Install system tools
-        run: |
-          set -eu
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
-
-      - uses: https://github.com/actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-          cache-dependency-path: go.sum
-
       - uses: https://github.com/actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -427,27 +394,6 @@ jobs:
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
-
-      - name: Install Pulumi
-        run: |
-          set -eu
-          export PATH="$HOME/.pulumi/bin:$PATH"
-          if ! command -v pulumi >/dev/null; then
-            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
-          fi
-          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
-
-      - name: Generate .NET SDK
-        env:
-          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
-          FORGEJO_SDK_LANGUAGES: dotnet
-        run: |
-          set -eu
-          version=${FORGEJO_PROVIDER_VERSION#v}
-          mkdir -p bin
-          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
-          pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
-          scripts/gen-sdk.sh
 
       - name: Publish .NET package
         env:
@@ -476,18 +422,6 @@ jobs:
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
-      - name: Install system tools
-        run: |
-          set -eu
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
-
-      - uses: https://github.com/actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-          cache-dependency-path: go.sum
-
       - uses: https://github.com/actions/setup-java@v4
         with:
           distribution: temurin
@@ -502,27 +436,6 @@ jobs:
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
-
-      - name: Install Pulumi
-        run: |
-          set -eu
-          export PATH="$HOME/.pulumi/bin:$PATH"
-          if ! command -v pulumi >/dev/null; then
-            curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
-          fi
-          echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
-
-      - name: Generate Java SDK
-        env:
-          FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
-          FORGEJO_SDK_LANGUAGES: java
-        run: |
-          set -eu
-          version=${FORGEJO_PROVIDER_VERSION#v}
-          mkdir -p bin
-          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
-          pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
-          scripts/gen-sdk.sh
 
       - name: Publish Java package
         env:
