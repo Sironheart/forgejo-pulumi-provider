@@ -49,7 +49,7 @@ func Provider() p.Provider {
 			PluginDownloadURL: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}",
 			LanguageMap: map[string]any{
 				"nodejs": map[string]any{
-					"packageName":          "@sironheart/pulumi-forgejo",
+					"packageName":          "pulumi-forgejo",
 					"packageDescription":   "A Pulumi provider for managing Forgejo resources.",
 					"respectSchemaVersion": true,
 				},

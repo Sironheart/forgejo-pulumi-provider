@@ -323,7 +323,7 @@ jobs:
           set -eu
           cd sdk/nodejs
           npm config set @${FORGEJO_REPOSITORY_OWNER}:registry $REGISTRY_URL
-          npm config set -- '//forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}/npm/:_authToken' $PACKAGE_TOKEN
+          npm config set -- '${REGISTRY_URL#http*:}:_authToken' $PACKAGE_TOKEN
           npm install --ignore-scripts
           echo 'Install successful'
           npm run build
