@@ -60,6 +60,12 @@ Inputs: `owner`, `repository`, `namePattern`, `whitelistUsernames`, `whitelistTe
 
 Outputs: `protectionId`.
 
+`forgejo:index:RepositoryPushMirror` manages a repository push mirror and can limit it to matching branches.
+
+Inputs: `owner`, `repository`, `remoteAddress`, `remoteUsername`, `remotePassword`, `interval`, `branchFilter`, `syncOnCommit`, `useSsh`.
+
+Outputs: `remoteName`, `publicKey`, `created`, `lastUpdate`, `lastError`.
+
 `forgejo:index:getCurrentUser` returns information about the authenticated Forgejo user.
 
 Outputs: `userId`, `login`, `fullName`, `email`, `isAdmin`.

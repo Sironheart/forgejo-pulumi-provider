@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.1.14",
+  "version": "0.2.0",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -19,7 +19,7 @@
       "rootNamespace": "Pulumi"
     },
     "go": {
-      "importBasePath": "forgejo-pulumi-provider",
+      "importBasePath": "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
       "modulePath": "sdk/go",
       "rootPackageName": "forgejo-pulumi-provider"
     },
@@ -565,6 +565,117 @@
         "repository",
         "name",
         "value"
+      ]
+    },
+    "forgejo:index:RepositoryPushMirror": {
+      "description": "A Forgejo repository push mirror, optionally limited to matching branches.",
+      "properties": {
+        "branchFilter": {
+          "type": "string",
+          "description": "Optional branch filter for the push mirror. Leave empty to mirror all branches."
+        },
+        "created": {
+          "type": "string"
+        },
+        "interval": {
+          "type": "string",
+          "description": "Mirror sync interval, for example 8h30m0s. Leave empty to use Forgejo's default."
+        },
+        "lastError": {
+          "type": "string"
+        },
+        "lastUpdate": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "publicKey": {
+          "type": "string"
+        },
+        "remoteAddress": {
+          "type": "string",
+          "description": "Target remote URL for the push mirror."
+        },
+        "remoteName": {
+          "type": "string"
+        },
+        "remotePassword": {
+          "type": "string",
+          "description": "Password or token for authenticating to the remote.",
+          "secret": true
+        },
+        "remoteUsername": {
+          "type": "string",
+          "description": "Username for authenticating to the remote."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "syncOnCommit": {
+          "type": "boolean",
+          "description": "Whether pushes to this repository trigger the mirror."
+        },
+        "useSsh": {
+          "type": "boolean",
+          "description": "Whether Forgejo should use an SSH key for the push mirror remote."
+        }
+      },
+      "required": [
+        "owner",
+        "repository",
+        "remoteAddress",
+        "remoteName",
+        "publicKey",
+        "created",
+        "lastUpdate",
+        "lastError"
+      ],
+      "inputProperties": {
+        "branchFilter": {
+          "type": "string",
+          "description": "Optional branch filter for the push mirror. Leave empty to mirror all branches."
+        },
+        "interval": {
+          "type": "string",
+          "description": "Mirror sync interval, for example 8h30m0s. Leave empty to use Forgejo's default."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "remoteAddress": {
+          "type": "string",
+          "description": "Target remote URL for the push mirror."
+        },
+        "remotePassword": {
+          "type": "string",
+          "description": "Password or token for authenticating to the remote.",
+          "secret": true
+        },
+        "remoteUsername": {
+          "type": "string",
+          "description": "Username for authenticating to the remote."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "syncOnCommit": {
+          "type": "boolean",
+          "description": "Whether pushes to this repository trigger the mirror."
+        },
+        "useSsh": {
+          "type": "boolean",
+          "description": "Whether Forgejo should use an SSH key for the push mirror remote."
+        }
+      },
+      "requiredInputs": [
+        "owner",
+        "repository",
+        "remoteAddress"
       ]
     },
     "forgejo:index:RepositoryTagProtection": {

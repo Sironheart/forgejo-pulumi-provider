@@ -90,6 +90,29 @@ func TestRepositoryActionVariableDiffUpdatesValue(t *testing.T) {
 	assertDiffKind(t, resp, "value", p.Update)
 }
 
+func TestRepositoryPushMirrorDiffReplacesBranchFilter(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositoryPushMirror{}).Diff(context.Background(), infer.DiffRequest[RepositoryPushMirrorArgs, RepositoryPushMirrorState]{
+		State: RepositoryPushMirrorState{RepositoryPushMirrorArgs: RepositoryPushMirrorArgs{
+			Owner:         "sironheart",
+			Repository:    "infra",
+			RemoteAddress: "https://example.test/sironheart/infra.git",
+			BranchFilter:  "main",
+		}},
+		Inputs: RepositoryPushMirrorArgs{
+			Owner:         "sironheart",
+			Repository:    "infra",
+			RemoteAddress: "https://example.test/sironheart/infra.git",
+			BranchFilter:  "release/*",
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "branchFilter", p.UpdateReplace)
+}
+
 func assertDiffKind(t *testing.T, resp infer.DiffResponse, property string, kind p.DiffKind) {
 	t.Helper()
 	if !resp.HasChanges {

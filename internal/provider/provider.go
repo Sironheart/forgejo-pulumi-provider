@@ -33,6 +33,7 @@ func Provider() p.Provider {
 			infer.Resource(PublicKey{}),
 			infer.Resource(RepositoryActionVariable{}),
 			infer.Resource(RepositoryTagProtection{}),
+			infer.Resource(RepositoryPushMirror{}),
 		},
 		Functions: []infer.InferredFunction{
 			infer.Function(GetCurrentUser{}),
@@ -54,7 +55,7 @@ func Provider() p.Provider {
 					"respectSchemaVersion": true,
 				},
 				"go": map[string]any{
-					"importBasePath":  "forgejo-pulumi-provider",
+					"importBasePath":  "forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go",
 					"modulePath":      "sdk/go",
 					"rootPackageName": "forgejo-pulumi-provider",
 				},

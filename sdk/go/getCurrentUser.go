@@ -7,7 +7,7 @@ import (
 	"context"
 	"reflect"
 
-	"forgejo-pulumi-provider/internal"
+	"forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go/internal"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 

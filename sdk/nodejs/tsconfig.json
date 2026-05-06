@@ -30,6 +30,7 @@
         "publicKey.ts",
         "repository.ts",
         "repositoryActionVariable.ts",
+        "repositoryPushMirror.ts",
         "repositoryTagProtection.ts",
         "utilities.ts"
     ]

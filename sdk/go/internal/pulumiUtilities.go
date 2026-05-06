@@ -75,7 +75,7 @@ func PkgVersion() (semver.Version, error) {
 	}
 	type sentinal struct{}
 	pkgPath := reflect.TypeOf(sentinal{}).PkgPath()
-	re := regexp.MustCompile("^forgejo-pulumi-provider(/v\\d+)?")
+	re := regexp.MustCompile("^forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go(/v\\d+)?")
 	if match := re.FindStringSubmatch(pkgPath); match != nil {
 		vStr := match[1]
 		if len(vStr) == 0 { // If the version capture group was empty, default to v1.

@@ -6,7 +6,7 @@ package forgejopulumiprovider
 import (
 	"fmt"
 
-	"forgejo-pulumi-provider/internal"
+	"forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go/internal"
 	"github.com/blang/semver"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -33,6 +33,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &Repository{}
 	case "forgejo:index:RepositoryActionVariable":
 		r = &RepositoryActionVariable{}
+	case "forgejo:index:RepositoryPushMirror":
+		r = &RepositoryPushMirror{}
 	case "forgejo:index:RepositoryTagProtection":
 		r = &RepositoryTagProtection{}
 	default:

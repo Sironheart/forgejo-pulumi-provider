@@ -207,6 +207,32 @@ func TestRepositoryTagProtectionUpdateDryRunPreservesProtectionID(t *testing.T) 
 	assertEqual(t, resp.Output.ProtectionID, int64(30))
 }
 
+func TestRepositoryPushMirrorCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := RepositoryPushMirrorArgs{
+		Owner:          "sironheart",
+		Repository:     "infra",
+		RemoteAddress:  "https://example.test/sironheart/infra.git",
+		RemoteUsername: "mirror",
+		RemotePassword: "secret",
+		Interval:       "8h30m0s",
+		BranchFilter:   "main",
+		SyncOnCommit:   true,
+		UseSSH:         true,
+	}
+	resp, err := (RepositoryPushMirror{}).Create(context.Background(), infer.CreateRequest[RepositoryPushMirrorArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "sironheart/infra/https://example.test/sironheart/infra.git")
+	assertEqual(t, resp.Output.RepositoryPushMirrorArgs, args)
+	assertEqual(t, resp.Output.RemoteName, "")
+	assertEqual(t, resp.Output.PublicKey, "")
+	assertEqual(t, resp.Output.LastError, "")
+}
+
 func assertEqual[T any](t *testing.T, got, want T) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {

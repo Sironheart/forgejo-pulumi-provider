@@ -45,6 +45,11 @@ export type RepositoryActionVariable = import("./repositoryActionVariable").Repo
 export const RepositoryActionVariable: typeof import("./repositoryActionVariable").RepositoryActionVariable = null as any;
 utilities.lazyLoad(exports, ["RepositoryActionVariable"], () => require("./repositoryActionVariable"));
 
+export { RepositoryPushMirrorArgs } from "./repositoryPushMirror";
+export type RepositoryPushMirror = import("./repositoryPushMirror").RepositoryPushMirror;
+export const RepositoryPushMirror: typeof import("./repositoryPushMirror").RepositoryPushMirror = null as any;
+utilities.lazyLoad(exports, ["RepositoryPushMirror"], () => require("./repositoryPushMirror"));
+
 export { RepositoryTagProtectionArgs } from "./repositoryTagProtection";
 export type RepositoryTagProtection = import("./repositoryTagProtection").RepositoryTagProtection;
 export const RepositoryTagProtection: typeof import("./repositoryTagProtection").RepositoryTagProtection = null as any;
@@ -74,6 +79,8 @@ const _module = {
                 return new Repository(name, <any>undefined, { urn })
             case "forgejo:index:RepositoryActionVariable":
                 return new RepositoryActionVariable(name, <any>undefined, { urn })
+            case "forgejo:index:RepositoryPushMirror":
+                return new RepositoryPushMirror(name, <any>undefined, { urn })
             case "forgejo:index:RepositoryTagProtection":
                 return new RepositoryTagProtection(name, <any>undefined, { urn })
             default:
