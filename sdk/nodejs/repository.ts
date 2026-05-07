@@ -48,10 +48,6 @@ export class Repository extends pulumi.CustomResource {
     declare public /*out*/ readonly fullName: pulumi.Output<string>;
     declare public /*out*/ readonly htmlUrl: pulumi.Output<string>;
     /**
-     * Whether the repository issue tracker is enabled.
-     */
-    declare public readonly issues: pulumi.Output<boolean | undefined>;
-    /**
      * Repository name.
      */
     declare public readonly name: pulumi.Output<string>;
@@ -63,10 +59,6 @@ export class Repository extends pulumi.CustomResource {
      * Whether the repository is private.
      */
     declare public readonly private: pulumi.Output<boolean | undefined>;
-    /**
-     * Whether repository projects are enabled.
-     */
-    declare public readonly projects: pulumi.Output<boolean | undefined>;
     /**
      * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
      */
@@ -80,10 +72,6 @@ export class Repository extends pulumi.CustomResource {
      * Repository website URL.
      */
     declare public readonly website: pulumi.Output<string | undefined>;
-    /**
-     * Whether the repository wiki is enabled.
-     */
-    declare public readonly wiki: pulumi.Output<boolean | undefined>;
 
     /**
      * Create a Repository resource with the given unique name, arguments, and options.
@@ -101,15 +89,12 @@ export class Repository extends pulumi.CustomResource {
             }
             resourceInputs["defaultBranch"] = args?.defaultBranch;
             resourceInputs["description"] = args?.description;
-            resourceInputs["issues"] = (args?.issues) ?? true;
             resourceInputs["name"] = args?.name;
             resourceInputs["owner"] = args?.owner;
             resourceInputs["private"] = args?.private;
-            resourceInputs["projects"] = (args?.projects) ?? true;
             resourceInputs["settings"] = args?.settings;
             resourceInputs["template"] = args?.template;
             resourceInputs["website"] = args?.website;
-            resourceInputs["wiki"] = (args?.wiki) ?? true;
             resourceInputs["cloneUrl"] = undefined /*out*/;
             resourceInputs["fullName"] = undefined /*out*/;
             resourceInputs["htmlUrl"] = undefined /*out*/;
@@ -120,16 +105,13 @@ export class Repository extends pulumi.CustomResource {
             resourceInputs["description"] = undefined /*out*/;
             resourceInputs["fullName"] = undefined /*out*/;
             resourceInputs["htmlUrl"] = undefined /*out*/;
-            resourceInputs["issues"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
             resourceInputs["owner"] = undefined /*out*/;
             resourceInputs["private"] = undefined /*out*/;
-            resourceInputs["projects"] = undefined /*out*/;
             resourceInputs["settings"] = undefined /*out*/;
             resourceInputs["sshUrl"] = undefined /*out*/;
             resourceInputs["template"] = undefined /*out*/;
             resourceInputs["website"] = undefined /*out*/;
-            resourceInputs["wiki"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(Repository.__pulumiType, name, resourceInputs, opts);
@@ -149,10 +131,6 @@ export interface RepositoryArgs {
      */
     description?: pulumi.Input<string>;
     /**
-     * Whether the repository issue tracker is enabled.
-     */
-    issues?: pulumi.Input<boolean>;
-    /**
      * Repository name.
      */
     name: pulumi.Input<string>;
@@ -165,10 +143,6 @@ export interface RepositoryArgs {
      */
     private?: pulumi.Input<boolean>;
     /**
-     * Whether repository projects are enabled.
-     */
-    projects?: pulumi.Input<boolean>;
-    /**
      * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
      */
     settings?: pulumi.Input<inputs.RepositorySettingsConfigArgs>;
@@ -180,8 +154,4 @@ export interface RepositoryArgs {
      * Repository website URL.
      */
     website?: pulumi.Input<string>;
-    /**
-     * Whether the repository wiki is enabled.
-     */
-    wiki?: pulumi.Input<boolean>;
 }

@@ -51,17 +51,11 @@ func TestRepositoryDiffUpdatesNestedSettings(t *testing.T) {
 		State: RepositoryState{RepositoryArgs: RepositoryArgs{
 			Name:     "infra",
 			Owner:    "sironheart",
-			Issues:   true,
-			Wiki:     true,
-			Projects: true,
 			Settings: &RepositorySettingsConfig{Actions: boolPtr(false)},
 		}},
 		Inputs: RepositoryArgs{
 			Name:     "infra",
 			Owner:    "sironheart",
-			Issues:   true,
-			Wiki:     true,
-			Projects: true,
 			Settings: &RepositorySettingsConfig{Actions: boolPtr(true)},
 		},
 	})

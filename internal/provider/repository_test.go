@@ -15,15 +15,9 @@ func TestRepositoryDiffIgnoresComputedOwnerAndDefaultBranch(t *testing.T) {
 			Name:          "infra",
 			Owner:         "alice",
 			DefaultBranch: "main",
-			Issues:        true,
-			Wiki:          true,
-			Projects:      true,
 		}},
 		Inputs: RepositoryArgs{
-			Name:     "infra",
-			Issues:   true,
-			Wiki:     true,
-			Projects: true,
+			Name: "infra",
 		},
 	})
 	if err != nil {

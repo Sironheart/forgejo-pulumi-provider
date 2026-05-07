@@ -23,16 +23,12 @@ type Repository struct {
 	Description pulumi.StringPtrOutput `pulumi:"description"`
 	FullName    pulumi.StringOutput    `pulumi:"fullName"`
 	HtmlUrl     pulumi.StringOutput    `pulumi:"htmlUrl"`
-	// Whether the repository issue tracker is enabled.
-	Issues pulumi.BoolPtrOutput `pulumi:"issues"`
 	// Repository name.
 	Name pulumi.StringOutput `pulumi:"name"`
 	// Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
 	Owner pulumi.StringPtrOutput `pulumi:"owner"`
 	// Whether the repository is private.
 	Private pulumi.BoolPtrOutput `pulumi:"private"`
-	// Whether repository projects are enabled.
-	Projects pulumi.BoolPtrOutput `pulumi:"projects"`
 	// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
 	Settings RepositorySettingsConfigPtrOutput `pulumi:"settings"`
 	SshUrl   pulumi.StringOutput               `pulumi:"sshUrl"`
@@ -40,8 +36,6 @@ type Repository struct {
 	Template pulumi.BoolPtrOutput `pulumi:"template"`
 	// Repository website URL.
 	Website pulumi.StringPtrOutput `pulumi:"website"`
-	// Whether the repository wiki is enabled.
-	Wiki pulumi.BoolPtrOutput `pulumi:"wiki"`
 }
 
 // NewRepository registers a new resource with the given unique name, arguments, and options.
@@ -53,15 +47,6 @@ func NewRepository(ctx *pulumi.Context,
 
 	if args.Name == nil {
 		return nil, errors.New("invalid value for required argument 'Name'")
-	}
-	if args.Issues == nil {
-		args.Issues = pulumi.BoolPtr(true)
-	}
-	if args.Projects == nil {
-		args.Projects = pulumi.BoolPtr(true)
-	}
-	if args.Wiki == nil {
-		args.Wiki = pulumi.BoolPtr(true)
 	}
 	opts = internal.PkgResourceDefaultOpts(opts)
 	var resource Repository
@@ -100,24 +85,18 @@ type repositoryArgs struct {
 	DefaultBranch *string `pulumi:"defaultBranch"`
 	// Repository description.
 	Description *string `pulumi:"description"`
-	// Whether the repository issue tracker is enabled.
-	Issues *bool `pulumi:"issues"`
 	// Repository name.
 	Name string `pulumi:"name"`
 	// Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
 	Owner *string `pulumi:"owner"`
 	// Whether the repository is private.
 	Private *bool `pulumi:"private"`
-	// Whether repository projects are enabled.
-	Projects *bool `pulumi:"projects"`
 	// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
 	Settings *RepositorySettingsConfig `pulumi:"settings"`
 	// Whether the repository can be used as a template.
 	Template *bool `pulumi:"template"`
 	// Repository website URL.
 	Website *string `pulumi:"website"`
-	// Whether the repository wiki is enabled.
-	Wiki *bool `pulumi:"wiki"`
 }
 
 // The set of arguments for constructing a Repository resource.
@@ -126,24 +105,18 @@ type RepositoryArgs struct {
 	DefaultBranch pulumi.StringPtrInput
 	// Repository description.
 	Description pulumi.StringPtrInput
-	// Whether the repository issue tracker is enabled.
-	Issues pulumi.BoolPtrInput
 	// Repository name.
 	Name pulumi.StringInput
 	// Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
 	Owner pulumi.StringPtrInput
 	// Whether the repository is private.
 	Private pulumi.BoolPtrInput
-	// Whether repository projects are enabled.
-	Projects pulumi.BoolPtrInput
 	// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
 	Settings RepositorySettingsConfigPtrInput
 	// Whether the repository can be used as a template.
 	Template pulumi.BoolPtrInput
 	// Repository website URL.
 	Website pulumi.StringPtrInput
-	// Whether the repository wiki is enabled.
-	Wiki pulumi.BoolPtrInput
 }
 
 func (RepositoryArgs) ElementType() reflect.Type {
@@ -205,11 +178,6 @@ func (o RepositoryOutput) HtmlUrl() pulumi.StringOutput {
 	return o.ApplyT(func(v *Repository) pulumi.StringOutput { return v.HtmlUrl }).(pulumi.StringOutput)
 }
 
-// Whether the repository issue tracker is enabled.
-func (o RepositoryOutput) Issues() pulumi.BoolPtrOutput {
-	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.Issues }).(pulumi.BoolPtrOutput)
-}
-
 // Repository name.
 func (o RepositoryOutput) Name() pulumi.StringOutput {
 	return o.ApplyT(func(v *Repository) pulumi.StringOutput { return v.Name }).(pulumi.StringOutput)
@@ -223,11 +191,6 @@ func (o RepositoryOutput) Owner() pulumi.StringPtrOutput {
 // Whether the repository is private.
 func (o RepositoryOutput) Private() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.Private }).(pulumi.BoolPtrOutput)
-}
-
-// Whether repository projects are enabled.
-func (o RepositoryOutput) Projects() pulumi.BoolPtrOutput {
-	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.Projects }).(pulumi.BoolPtrOutput)
 }
 
 // Optional repository unit, wiki, and issue tracker settings to manage with this repository.
@@ -247,11 +210,6 @@ func (o RepositoryOutput) Template() pulumi.BoolPtrOutput {
 // Repository website URL.
 func (o RepositoryOutput) Website() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Repository) pulumi.StringPtrOutput { return v.Website }).(pulumi.StringPtrOutput)
-}
-
-// Whether the repository wiki is enabled.
-func (o RepositoryOutput) Wiki() pulumi.BoolPtrOutput {
-	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.Wiki }).(pulumi.BoolPtrOutput)
 }
 
 func init() {

@@ -37,12 +37,6 @@ namespace Pulumi.Forgejo
         public Output<string> HtmlUrl { get; private set; } = null!;
 
         /// <summary>
-        /// Whether the repository issue tracker is enabled.
-        /// </summary>
-        [Output("issues")]
-        public Output<bool?> Issues { get; private set; } = null!;
-
-        /// <summary>
         /// Repository name.
         /// </summary>
         [Output("name")]
@@ -59,12 +53,6 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Output("private")]
         public Output<bool?> Private { get; private set; } = null!;
-
-        /// <summary>
-        /// Whether repository projects are enabled.
-        /// </summary>
-        [Output("projects")]
-        public Output<bool?> Projects { get; private set; } = null!;
 
         /// <summary>
         /// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
@@ -86,12 +74,6 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Output("website")]
         public Output<string?> Website { get; private set; } = null!;
-
-        /// <summary>
-        /// Whether the repository wiki is enabled.
-        /// </summary>
-        [Output("wiki")]
-        public Output<bool?> Wiki { get; private set; } = null!;
 
 
         /// <summary>
@@ -152,12 +134,6 @@ namespace Pulumi.Forgejo
         public Input<string>? Description { get; set; }
 
         /// <summary>
-        /// Whether the repository issue tracker is enabled.
-        /// </summary>
-        [Input("issues")]
-        public Input<bool>? Issues { get; set; }
-
-        /// <summary>
         /// Repository name.
         /// </summary>
         [Input("name", required: true)]
@@ -174,12 +150,6 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Input("private")]
         public Input<bool>? Private { get; set; }
-
-        /// <summary>
-        /// Whether repository projects are enabled.
-        /// </summary>
-        [Input("projects")]
-        public Input<bool>? Projects { get; set; }
 
         /// <summary>
         /// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
@@ -199,17 +169,8 @@ namespace Pulumi.Forgejo
         [Input("website")]
         public Input<string>? Website { get; set; }
 
-        /// <summary>
-        /// Whether the repository wiki is enabled.
-        /// </summary>
-        [Input("wiki")]
-        public Input<bool>? Wiki { get; set; }
-
         public RepositoryArgs()
         {
-            Issues = true;
-            Projects = true;
-            Wiki = true;
         }
         public static new RepositoryArgs Empty => new RepositoryArgs();
     }

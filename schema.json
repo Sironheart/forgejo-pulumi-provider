@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -633,11 +633,6 @@
         "htmlUrl": {
           "type": "string"
         },
-        "issues": {
-          "type": "boolean",
-          "description": "Whether the repository issue tracker is enabled.",
-          "default": true
-        },
         "name": {
           "type": "string",
           "description": "Repository name."
@@ -649,11 +644,6 @@
         "private": {
           "type": "boolean",
           "description": "Whether the repository is private."
-        },
-        "projects": {
-          "type": "boolean",
-          "description": "Whether repository projects are enabled.",
-          "default": true
         },
         "settings": {
           "$ref": "#/types/forgejo:index:RepositorySettingsConfig",
@@ -669,11 +659,6 @@
         "website": {
           "type": "string",
           "description": "Repository website URL."
-        },
-        "wiki": {
-          "type": "boolean",
-          "description": "Whether the repository wiki is enabled.",
-          "default": true
         }
       },
       "required": [
@@ -692,11 +677,6 @@
           "type": "string",
           "description": "Repository description."
         },
-        "issues": {
-          "type": "boolean",
-          "description": "Whether the repository issue tracker is enabled.",
-          "default": true
-        },
         "name": {
           "type": "string",
           "description": "Repository name."
@@ -709,11 +689,6 @@
           "type": "boolean",
           "description": "Whether the repository is private."
         },
-        "projects": {
-          "type": "boolean",
-          "description": "Whether repository projects are enabled.",
-          "default": true
-        },
         "settings": {
           "$ref": "#/types/forgejo:index:RepositorySettingsConfig",
           "description": "Optional repository unit, wiki, and issue tracker settings to manage with this repository."
@@ -725,11 +700,6 @@
         "website": {
           "type": "string",
           "description": "Repository website URL."
-        },
-        "wiki": {
-          "type": "boolean",
-          "description": "Whether the repository wiki is enabled.",
-          "default": true
         }
       },
       "requiredInputs": [

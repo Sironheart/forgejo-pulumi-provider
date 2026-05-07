@@ -6,7 +6,6 @@ package casa.siron.forgejo.forgejo;
 import casa.siron.forgejo.forgejo.inputs.RepositorySettingsConfigArgs;
 import com.pulumi.core.Output;
 import com.pulumi.core.annotations.Import;
-import com.pulumi.core.internal.Codegen;
 import com.pulumi.exceptions.MissingRequiredPropertyException;
 import java.lang.Boolean;
 import java.lang.String;
@@ -47,21 +46,6 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
      */
     public Optional<Output<String>> description() {
         return Optional.ofNullable(this.description);
-    }
-
-    /**
-     * Whether the repository issue tracker is enabled.
-     * 
-     */
-    @Import(name="issues")
-    private @Nullable Output<Boolean> issues;
-
-    /**
-     * @return Whether the repository issue tracker is enabled.
-     * 
-     */
-    public Optional<Output<Boolean>> issues() {
-        return Optional.ofNullable(this.issues);
     }
 
     /**
@@ -110,21 +94,6 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
     }
 
     /**
-     * Whether repository projects are enabled.
-     * 
-     */
-    @Import(name="projects")
-    private @Nullable Output<Boolean> projects;
-
-    /**
-     * @return Whether repository projects are enabled.
-     * 
-     */
-    public Optional<Output<Boolean>> projects() {
-        return Optional.ofNullable(this.projects);
-    }
-
-    /**
      * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
      * 
      */
@@ -169,35 +138,17 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
         return Optional.ofNullable(this.website);
     }
 
-    /**
-     * Whether the repository wiki is enabled.
-     * 
-     */
-    @Import(name="wiki")
-    private @Nullable Output<Boolean> wiki;
-
-    /**
-     * @return Whether the repository wiki is enabled.
-     * 
-     */
-    public Optional<Output<Boolean>> wiki() {
-        return Optional.ofNullable(this.wiki);
-    }
-
     private RepositoryArgs() {}
 
     private RepositoryArgs(RepositoryArgs $) {
         this.defaultBranch = $.defaultBranch;
         this.description = $.description;
-        this.issues = $.issues;
         this.name = $.name;
         this.owner = $.owner;
         this.private_ = $.private_;
-        this.projects = $.projects;
         this.settings = $.settings;
         this.template = $.template;
         this.website = $.website;
-        this.wiki = $.wiki;
     }
 
     public static Builder builder() {
@@ -258,27 +209,6 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
          */
         public Builder description(String description) {
             return description(Output.of(description));
-        }
-
-        /**
-         * @param issues Whether the repository issue tracker is enabled.
-         * 
-         * @return builder
-         * 
-         */
-        public Builder issues(@Nullable Output<Boolean> issues) {
-            $.issues = issues;
-            return this;
-        }
-
-        /**
-         * @param issues Whether the repository issue tracker is enabled.
-         * 
-         * @return builder
-         * 
-         */
-        public Builder issues(Boolean issues) {
-            return issues(Output.of(issues));
         }
 
         /**
@@ -345,27 +275,6 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
         }
 
         /**
-         * @param projects Whether repository projects are enabled.
-         * 
-         * @return builder
-         * 
-         */
-        public Builder projects(@Nullable Output<Boolean> projects) {
-            $.projects = projects;
-            return this;
-        }
-
-        /**
-         * @param projects Whether repository projects are enabled.
-         * 
-         * @return builder
-         * 
-         */
-        public Builder projects(Boolean projects) {
-            return projects(Output.of(projects));
-        }
-
-        /**
          * @param settings Optional repository unit, wiki, and issue tracker settings to manage with this repository.
          * 
          * @return builder
@@ -428,34 +337,10 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
             return website(Output.of(website));
         }
 
-        /**
-         * @param wiki Whether the repository wiki is enabled.
-         * 
-         * @return builder
-         * 
-         */
-        public Builder wiki(@Nullable Output<Boolean> wiki) {
-            $.wiki = wiki;
-            return this;
-        }
-
-        /**
-         * @param wiki Whether the repository wiki is enabled.
-         * 
-         * @return builder
-         * 
-         */
-        public Builder wiki(Boolean wiki) {
-            return wiki(Output.of(wiki));
-        }
-
         public RepositoryArgs build() {
-            $.issues = Codegen.booleanProp("issues").output().arg($.issues).def(true).getNullable();
             if ($.name == null) {
                 throw new MissingRequiredPropertyException("RepositoryArgs", "name");
             }
-            $.projects = Codegen.booleanProp("projects").output().arg($.projects).def(true).getNullable();
-            $.wiki = Codegen.booleanProp("wiki").output().arg($.wiki).def(true).getNullable();
             return $;
         }
     }

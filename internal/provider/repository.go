@@ -19,9 +19,6 @@ type RepositoryArgs struct {
 	Private       bool                      `pulumi:"private,optional"`
 	DefaultBranch string                    `pulumi:"defaultBranch,optional"`
 	Website       string                    `pulumi:"website,optional"`
-	Issues        bool                      `pulumi:"issues,optional"`
-	Wiki          bool                      `pulumi:"wiki,optional"`
-	Projects      bool                      `pulumi:"projects,optional"`
 	Template      bool                      `pulumi:"template,optional"`
 	Settings      *RepositorySettingsConfig `pulumi:"settings,optional"`
 }
@@ -46,14 +43,8 @@ func (a *RepositoryArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Private, "Whether the repository is private.")
 	ann.Describe(&a.DefaultBranch, "Default branch name. Leave empty to use Forgejo's default.")
 	ann.Describe(&a.Website, "Repository website URL.")
-	ann.Describe(&a.Issues, "Whether the repository issue tracker is enabled.")
-	ann.Describe(&a.Wiki, "Whether the repository wiki is enabled.")
-	ann.Describe(&a.Projects, "Whether repository projects are enabled.")
 	ann.Describe(&a.Template, "Whether the repository can be used as a template.")
 	ann.Describe(&a.Settings, "Optional repository unit, wiki, and issue tracker settings to manage with this repository.")
-	ann.SetDefault(&a.Issues, true)
-	ann.SetDefault(&a.Wiki, true)
-	ann.SetDefault(&a.Projects, true)
 }
 
 func (Repository) Create(ctx context.Context, req infer.CreateRequest[RepositoryArgs]) (infer.CreateResponse[RepositoryState], error) {
@@ -128,9 +119,6 @@ func (Repository) Diff(_ context.Context, req infer.DiffRequest[RepositoryArgs, 
 	addUpdateDiff(diff, "private", req.State.Private != req.Inputs.Private)
 	addUpdateDiff(diff, "defaultBranch", req.Inputs.DefaultBranch != "" && req.State.DefaultBranch != req.Inputs.DefaultBranch)
 	addUpdateDiff(diff, "website", req.State.Website != req.Inputs.Website)
-	addUpdateDiff(diff, "issues", req.State.Issues != req.Inputs.Issues)
-	addUpdateDiff(diff, "wiki", req.State.Wiki != req.Inputs.Wiki)
-	addUpdateDiff(diff, "projects", req.State.Projects != req.Inputs.Projects)
 	addUpdateDiff(diff, "template", req.State.Template != req.Inputs.Template)
 	addUpdateDiff(diff, "settings", !equalRepositorySettingsConfigPtr(req.State.Settings, req.Inputs.Settings))
 
@@ -200,9 +188,6 @@ func repositoryStateFromAPI(repo *forgejo.Repository, settingsTemplate ...*Repos
 		Private:       repo.Private,
 		DefaultBranch: repo.DefaultBranch,
 		Website:       repo.Website,
-		Issues:        repo.HasIssues,
-		Wiki:          repo.HasWiki,
-		Projects:      repo.HasProjects,
 		Template:      repo.Template,
 	}
 	if len(settingsTemplate) > 0 && settingsTemplate[0] != nil {
@@ -254,9 +239,6 @@ func repositoryEditOption(args RepositoryArgs, includeDefaultBranch bool, repo *
 		Description: &args.Description,
 		Private:     &args.Private,
 		Website:     &args.Website,
-		HasIssues:   &args.Issues,
-		HasWiki:     &args.Wiki,
-		HasProjects: &args.Projects,
 		Template:    &args.Template,
 	}
 	if includeDefaultBranch && args.DefaultBranch != "" {

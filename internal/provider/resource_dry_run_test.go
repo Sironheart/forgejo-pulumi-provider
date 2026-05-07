@@ -18,9 +18,6 @@ func TestRepositoryCreateDryRunBuildsPreviewState(t *testing.T) {
 		Private:       true,
 		DefaultBranch: "main",
 		Website:       "https://example.test",
-		Issues:        true,
-		Wiki:          true,
-		Projects:      true,
 		Template:      true,
 		Settings:      &RepositorySettingsConfig{Actions: boolPtr(true), ExternalWikiURL: stringPtr("https://wiki.example.test/infra")},
 	}
@@ -37,9 +34,9 @@ func TestRepositoryCreateDryRunBuildsPreviewState(t *testing.T) {
 func TestRepositoryUpdateDryRunPreservesComputedURLs(t *testing.T) {
 	t.Parallel()
 
-	inputs := RepositoryArgs{Name: "infra", Owner: "sironheart", Description: "updated", Issues: true, Wiki: true, Projects: true}
+	inputs := RepositoryArgs{Name: "infra", Owner: "sironheart", Description: "updated"}
 	state := RepositoryState{
-		RepositoryArgs: RepositoryArgs{Name: "infra", Owner: "sironheart", Description: "old", Issues: true, Wiki: true, Projects: true},
+		RepositoryArgs: RepositoryArgs{Name: "infra", Owner: "sironheart", Description: "old"},
 		HTMLURL:        "https://forgejo.test/sironheart/infra",
 		SSHURL:         "ssh://git@forgejo.test/sironheart/infra.git",
 		CloneURL:       "https://forgejo.test/sironheart/infra.git",

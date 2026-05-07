@@ -20,7 +20,7 @@ The provider schema generates SDKs for the published Pulumi languages:
 
 `forgejo:index:Repository` manages a Forgejo repository.
 
-Inputs: `name`, `owner`, `description`, `private`, `defaultBranch`, `website`, `issues`, `wiki`, `projects`, `template`, `settings`.
+Inputs: `name`, `owner`, `description`, `private`, `defaultBranch`, `website`, `template`, `settings`.
 
 Outputs: `fullName`, `htmlUrl`, `sshUrl`, `cloneUrl`.
 

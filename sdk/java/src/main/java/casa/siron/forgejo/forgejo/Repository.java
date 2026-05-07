@@ -68,20 +68,6 @@ public class Repository extends com.pulumi.resources.CustomResource {
         return this.htmlUrl;
     }
     /**
-     * Whether the repository issue tracker is enabled.
-     * 
-     */
-    @Export(name="issues", refs={Boolean.class}, tree="[0]")
-    private Output</* @Nullable */ Boolean> issues;
-
-    /**
-     * @return Whether the repository issue tracker is enabled.
-     * 
-     */
-    public Output<Optional<Boolean>> issues() {
-        return Codegen.optional(this.issues);
-    }
-    /**
      * Repository name.
      * 
      */
@@ -122,20 +108,6 @@ public class Repository extends com.pulumi.resources.CustomResource {
      */
     public Output<Optional<Boolean>> private_() {
         return Codegen.optional(this.private_);
-    }
-    /**
-     * Whether repository projects are enabled.
-     * 
-     */
-    @Export(name="projects", refs={Boolean.class}, tree="[0]")
-    private Output</* @Nullable */ Boolean> projects;
-
-    /**
-     * @return Whether repository projects are enabled.
-     * 
-     */
-    public Output<Optional<Boolean>> projects() {
-        return Codegen.optional(this.projects);
     }
     /**
      * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
@@ -184,20 +156,6 @@ public class Repository extends com.pulumi.resources.CustomResource {
      */
     public Output<Optional<String>> website() {
         return Codegen.optional(this.website);
-    }
-    /**
-     * Whether the repository wiki is enabled.
-     * 
-     */
-    @Export(name="wiki", refs={Boolean.class}, tree="[0]")
-    private Output</* @Nullable */ Boolean> wiki;
-
-    /**
-     * @return Whether the repository wiki is enabled.
-     * 
-     */
-    public Output<Optional<Boolean>> wiki() {
-        return Codegen.optional(this.wiki);
     }
 
     /**
