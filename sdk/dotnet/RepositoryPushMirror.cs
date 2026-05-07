@@ -107,7 +107,7 @@ namespace Pulumi.Forgejo
             var defaultOptions = new CustomResourceOptions
             {
                 Version = Utilities.Version,
-                PluginDownloadURL = "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}",
+                PluginDownloadURL = "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}/",
                 AdditionalSecretOutputs =
                 {
                     "remotePassword",

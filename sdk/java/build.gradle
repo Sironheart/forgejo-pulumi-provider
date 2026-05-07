@@ -11,7 +11,7 @@ group = "casa.siron.forgejo"
 
 def resolvedVersion = System.getenv("PACKAGE_VERSION") ?:
     (project.version == "unspecified"
-         ? "0.2.0"
+         ? "0.2.1"
          : project.version)
 
 def signingKey = System.getenv("SIGNING_KEY")
@@ -69,7 +69,7 @@ def genPulumiResources = tasks.register('genPulumiResources') {
         builder {
             resource true
             name "forgejo"
-            server "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v\${VERSION}"
+            server "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v\${VERSION}/"
             version resolvedVersion
         }
         def infoJson = builder.toPrettyString()

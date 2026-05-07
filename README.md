@@ -93,7 +93,7 @@ export FORGEJO_TOKEN=<token>
 Install a released provider plugin from this Forgejo repository:
 
 ```sh
-pulumi plugin install resource forgejo 0.1.0 --server https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v0.1.0
+pulumi plugin install resource forgejo 0.1.0 --server https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v0.1.0/
 ```
 
 Release archives follow Pulumi's plugin naming convention:

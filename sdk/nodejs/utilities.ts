@@ -53,7 +53,7 @@ export function getVersion(): string {
 
 /** @internal */
 export function resourceOptsDefaults(): any {
-    return { version: getVersion(), pluginDownloadURL: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}" };
+    return { version: getVersion(), pluginDownloadURL: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}/" };
 }
 
 /** @internal */

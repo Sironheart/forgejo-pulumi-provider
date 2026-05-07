@@ -217,7 +217,7 @@ public class RepositoryPushMirror extends com.pulumi.resources.CustomResource {
     private static com.pulumi.resources.CustomResourceOptions makeResourceOptions(@Nullable com.pulumi.resources.CustomResourceOptions options, @Nullable Output<java.lang.String> id) {
         var defaultOptions = com.pulumi.resources.CustomResourceOptions.builder()
             .version(Utilities.getVersion())
-            .pluginDownloadURL("https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}")
+            .pluginDownloadURL("https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}/")
             .additionalSecretOutputs(List.of(
                 "remotePassword"
             ))

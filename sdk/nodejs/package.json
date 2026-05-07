@@ -1,6 +1,6 @@
 {
     "name": "@sironheart/pulumi-forgejo-provider",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "A Pulumi provider for managing Forgejo resources.",
     "keywords": [
         "pulumi",
@@ -27,8 +27,8 @@
     "pulumi": {
         "resource": true,
         "name": "forgejo",
-        "version": "0.2.0",
-        "server": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}"
+        "version": "0.2.1",
+        "server": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}/"
     },
     "bugs": {
         "url": "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/issues"

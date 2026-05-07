@@ -18,6 +18,9 @@ import (
 
 const defaultTimeout = 30 * time.Second
 
+// Pulumi appends pulumi-resource-forgejo-v<version>-<os>-<arch>.tar.gz to this Forgejo release asset base.
+const pluginDownloadURL = "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}/"
+
 type Config struct {
 	URL   string `pulumi:"url"`
 	Token string `pulumi:"token" provider:"secret"`
@@ -47,7 +50,7 @@ func Provider() p.Provider {
 			Repository:        "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider",
 			Publisher:         "sironheart",
 			License:           "Apache-2.0",
-			PluginDownloadURL: "https://forgejo.siron.casa/sironheart/forgejo-pulumi-provider/releases/download/v${VERSION}",
+			PluginDownloadURL: pluginDownloadURL,
 			LanguageMap: map[string]any{
 				"nodejs": map[string]any{
 					"packageName":          "@sironheart/pulumi-forgejo-provider",
