@@ -25,13 +25,22 @@
         "getCurrentUser.ts",
         "index.ts",
         "organization.ts",
+        "organizationActionSecret.ts",
+        "organizationActionVariable.ts",
         "organizationTeam.ts",
+        "organizationTeamMember.ts",
         "provider.ts",
         "publicKey.ts",
         "repository.ts",
+        "repositoryActionSecret.ts",
         "repositoryActionVariable.ts",
+        "repositoryBranchProtection.ts",
         "repositoryPushMirror.ts",
+        "repositorySettings.ts",
         "repositoryTagProtection.ts",
+        "types/index.ts",
+        "types/input.ts",
+        "types/output.ts",
         "utilities.ts"
     ]
 }

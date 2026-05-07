@@ -20,10 +20,25 @@ export type Organization = import("./organization").Organization;
 export const Organization: typeof import("./organization").Organization = null as any;
 utilities.lazyLoad(exports, ["Organization"], () => require("./organization"));
 
+export { OrganizationActionSecretArgs } from "./organizationActionSecret";
+export type OrganizationActionSecret = import("./organizationActionSecret").OrganizationActionSecret;
+export const OrganizationActionSecret: typeof import("./organizationActionSecret").OrganizationActionSecret = null as any;
+utilities.lazyLoad(exports, ["OrganizationActionSecret"], () => require("./organizationActionSecret"));
+
+export { OrganizationActionVariableArgs } from "./organizationActionVariable";
+export type OrganizationActionVariable = import("./organizationActionVariable").OrganizationActionVariable;
+export const OrganizationActionVariable: typeof import("./organizationActionVariable").OrganizationActionVariable = null as any;
+utilities.lazyLoad(exports, ["OrganizationActionVariable"], () => require("./organizationActionVariable"));
+
 export { OrganizationTeamArgs } from "./organizationTeam";
 export type OrganizationTeam = import("./organizationTeam").OrganizationTeam;
 export const OrganizationTeam: typeof import("./organizationTeam").OrganizationTeam = null as any;
 utilities.lazyLoad(exports, ["OrganizationTeam"], () => require("./organizationTeam"));
+
+export { OrganizationTeamMemberArgs } from "./organizationTeamMember";
+export type OrganizationTeamMember = import("./organizationTeamMember").OrganizationTeamMember;
+export const OrganizationTeamMember: typeof import("./organizationTeamMember").OrganizationTeamMember = null as any;
+utilities.lazyLoad(exports, ["OrganizationTeamMember"], () => require("./organizationTeamMember"));
 
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
@@ -40,15 +55,30 @@ export type Repository = import("./repository").Repository;
 export const Repository: typeof import("./repository").Repository = null as any;
 utilities.lazyLoad(exports, ["Repository"], () => require("./repository"));
 
+export { RepositoryActionSecretArgs } from "./repositoryActionSecret";
+export type RepositoryActionSecret = import("./repositoryActionSecret").RepositoryActionSecret;
+export const RepositoryActionSecret: typeof import("./repositoryActionSecret").RepositoryActionSecret = null as any;
+utilities.lazyLoad(exports, ["RepositoryActionSecret"], () => require("./repositoryActionSecret"));
+
 export { RepositoryActionVariableArgs } from "./repositoryActionVariable";
 export type RepositoryActionVariable = import("./repositoryActionVariable").RepositoryActionVariable;
 export const RepositoryActionVariable: typeof import("./repositoryActionVariable").RepositoryActionVariable = null as any;
 utilities.lazyLoad(exports, ["RepositoryActionVariable"], () => require("./repositoryActionVariable"));
 
+export { RepositoryBranchProtectionArgs } from "./repositoryBranchProtection";
+export type RepositoryBranchProtection = import("./repositoryBranchProtection").RepositoryBranchProtection;
+export const RepositoryBranchProtection: typeof import("./repositoryBranchProtection").RepositoryBranchProtection = null as any;
+utilities.lazyLoad(exports, ["RepositoryBranchProtection"], () => require("./repositoryBranchProtection"));
+
 export { RepositoryPushMirrorArgs } from "./repositoryPushMirror";
 export type RepositoryPushMirror = import("./repositoryPushMirror").RepositoryPushMirror;
 export const RepositoryPushMirror: typeof import("./repositoryPushMirror").RepositoryPushMirror = null as any;
 utilities.lazyLoad(exports, ["RepositoryPushMirror"], () => require("./repositoryPushMirror"));
+
+export { RepositorySettingsArgs } from "./repositorySettings";
+export type RepositorySettings = import("./repositorySettings").RepositorySettings;
+export const RepositorySettings: typeof import("./repositorySettings").RepositorySettings = null as any;
+utilities.lazyLoad(exports, ["RepositorySettings"], () => require("./repositorySettings"));
 
 export { RepositoryTagProtectionArgs } from "./repositoryTagProtection";
 export type RepositoryTagProtection = import("./repositoryTagProtection").RepositoryTagProtection;
@@ -58,9 +88,11 @@ utilities.lazyLoad(exports, ["RepositoryTagProtection"], () => require("./reposi
 
 // Export sub-modules:
 import * as config from "./config";
+import * as types from "./types";
 
 export {
     config,
+    types,
 };
 
 const _module = {
@@ -71,16 +103,28 @@ const _module = {
                 return new DeployKey(name, <any>undefined, { urn })
             case "forgejo:index:Organization":
                 return new Organization(name, <any>undefined, { urn })
+            case "forgejo:index:OrganizationActionSecret":
+                return new OrganizationActionSecret(name, <any>undefined, { urn })
+            case "forgejo:index:OrganizationActionVariable":
+                return new OrganizationActionVariable(name, <any>undefined, { urn })
             case "forgejo:index:OrganizationTeam":
                 return new OrganizationTeam(name, <any>undefined, { urn })
+            case "forgejo:index:OrganizationTeamMember":
+                return new OrganizationTeamMember(name, <any>undefined, { urn })
             case "forgejo:index:PublicKey":
                 return new PublicKey(name, <any>undefined, { urn })
             case "forgejo:index:Repository":
                 return new Repository(name, <any>undefined, { urn })
+            case "forgejo:index:RepositoryActionSecret":
+                return new RepositoryActionSecret(name, <any>undefined, { urn })
             case "forgejo:index:RepositoryActionVariable":
                 return new RepositoryActionVariable(name, <any>undefined, { urn })
+            case "forgejo:index:RepositoryBranchProtection":
+                return new RepositoryBranchProtection(name, <any>undefined, { urn })
             case "forgejo:index:RepositoryPushMirror":
                 return new RepositoryPushMirror(name, <any>undefined, { urn })
+            case "forgejo:index:RepositorySettings":
+                return new RepositorySettings(name, <any>undefined, { urn })
             case "forgejo:index:RepositoryTagProtection":
                 return new RepositoryTagProtection(name, <any>undefined, { urn })
             default:

@@ -33,7 +33,9 @@ type Repository struct {
 	Private pulumi.BoolPtrOutput `pulumi:"private"`
 	// Whether repository projects are enabled.
 	Projects pulumi.BoolPtrOutput `pulumi:"projects"`
-	SshUrl   pulumi.StringOutput  `pulumi:"sshUrl"`
+	// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+	Settings RepositorySettingsConfigPtrOutput `pulumi:"settings"`
+	SshUrl   pulumi.StringOutput               `pulumi:"sshUrl"`
 	// Whether the repository can be used as a template.
 	Template pulumi.BoolPtrOutput `pulumi:"template"`
 	// Repository website URL.
@@ -108,6 +110,8 @@ type repositoryArgs struct {
 	Private *bool `pulumi:"private"`
 	// Whether repository projects are enabled.
 	Projects *bool `pulumi:"projects"`
+	// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+	Settings *RepositorySettingsConfig `pulumi:"settings"`
 	// Whether the repository can be used as a template.
 	Template *bool `pulumi:"template"`
 	// Repository website URL.
@@ -132,6 +136,8 @@ type RepositoryArgs struct {
 	Private pulumi.BoolPtrInput
 	// Whether repository projects are enabled.
 	Projects pulumi.BoolPtrInput
+	// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+	Settings RepositorySettingsConfigPtrInput
 	// Whether the repository can be used as a template.
 	Template pulumi.BoolPtrInput
 	// Repository website URL.
@@ -222,6 +228,11 @@ func (o RepositoryOutput) Private() pulumi.BoolPtrOutput {
 // Whether repository projects are enabled.
 func (o RepositoryOutput) Projects() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.Projects }).(pulumi.BoolPtrOutput)
+}
+
+// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+func (o RepositoryOutput) Settings() RepositorySettingsConfigPtrOutput {
+	return o.ApplyT(func(v *Repository) RepositorySettingsConfigPtrOutput { return v.Settings }).(RepositorySettingsConfigPtrOutput)
 }
 
 func (o RepositoryOutput) SshUrl() pulumi.StringOutput {

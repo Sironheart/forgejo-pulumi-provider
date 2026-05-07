@@ -22,6 +22,7 @@ func TestRepositoryCreateDryRunBuildsPreviewState(t *testing.T) {
 		Wiki:          true,
 		Projects:      true,
 		Template:      true,
+		Settings:      &RepositorySettingsConfig{Actions: boolPtr(true), ExternalWikiURL: stringPtr("https://wiki.example.test/infra")},
 	}
 	resp, err := (Repository{}).Create(context.Background(), infer.CreateRequest[RepositoryArgs]{Inputs: args, DryRun: true})
 	if err != nil {
@@ -118,6 +119,34 @@ func TestOrganizationTeamUpdateDryRunPreservesTeamID(t *testing.T) {
 	assertEqual(t, resp.Output.TeamID, int64(42))
 }
 
+func TestOrganizationTeamMemberCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := OrganizationTeamMemberArgs{Organization: "platform", Team: "maintainers", Username: "alice"}
+	resp, err := (OrganizationTeamMember{}).Create(context.Background(), infer.CreateRequest[OrganizationTeamMemberArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "platform/maintainers/alice")
+	assertEqual(t, resp.Output.OrganizationTeamMemberArgs, args)
+	assertEqual(t, resp.Output.UserID, int64(0))
+}
+
+func TestOrganizationTeamMemberCreateDryRunUsesTeamIDPreview(t *testing.T) {
+	t.Parallel()
+
+	args := OrganizationTeamMemberArgs{TeamID: 42, Username: "alice"}
+	resp, err := (OrganizationTeamMember{}).Create(context.Background(), infer.CreateRequest[OrganizationTeamMemberArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "42/alice")
+	assertEqual(t, resp.Output.OrganizationTeamMemberArgs, args)
+	assertEqual(t, resp.Output.UserID, int64(0))
+}
+
 func TestDeployKeyCreateDryRunBuildsPreviewState(t *testing.T) {
 	t.Parallel()
 
@@ -152,7 +181,7 @@ func TestPublicKeyCreateDryRunBuildsPreviewState(t *testing.T) {
 func TestRepositoryActionVariableCreateDryRunBuildsPreviewState(t *testing.T) {
 	t.Parallel()
 
-	args := RepositoryActionVariableArgs{Owner: "sironheart", Repository: "infra", Name: "ENVIRONMENT", Value: "prod"}
+	args := RepositoryActionVariableArgs{ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "prod"}, Owner: "sironheart", Repository: "infra"}
 	resp, err := (RepositoryActionVariable{}).Create(context.Background(), infer.CreateRequest[RepositoryActionVariableArgs]{Inputs: args, DryRun: true})
 	if err != nil {
 		t.Fatalf("create dry-run: %v", err)
@@ -167,8 +196,8 @@ func TestRepositoryActionVariableCreateDryRunBuildsPreviewState(t *testing.T) {
 func TestRepositoryActionVariableUpdateDryRunPreservesIDs(t *testing.T) {
 	t.Parallel()
 
-	inputs := RepositoryActionVariableArgs{Owner: "sironheart", Repository: "infra", Name: "ENVIRONMENT", Value: "prod"}
-	state := RepositoryActionVariableState{RepositoryActionVariableArgs: RepositoryActionVariableArgs{Owner: "sironheart", Repository: "infra", Name: "ENVIRONMENT", Value: "dev"}, OwnerID: 10, RepoID: 20}
+	inputs := RepositoryActionVariableArgs{ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "prod"}, Owner: "sironheart", Repository: "infra"}
+	state := RepositoryActionVariableState{RepositoryActionVariableArgs: RepositoryActionVariableArgs{ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "dev"}, Owner: "sironheart", Repository: "infra"}, OwnerID: 10, RepoID: 20}
 	resp, err := (RepositoryActionVariable{}).Update(context.Background(), infer.UpdateRequest[RepositoryActionVariableArgs, RepositoryActionVariableState]{Inputs: inputs, State: state, DryRun: true})
 	if err != nil {
 		t.Fatalf("update dry-run: %v", err)
@@ -231,6 +260,100 @@ func TestRepositoryPushMirrorCreateDryRunBuildsPreviewState(t *testing.T) {
 	assertEqual(t, resp.Output.RemoteName, "")
 	assertEqual(t, resp.Output.PublicKey, "")
 	assertEqual(t, resp.Output.LastError, "")
+}
+
+func TestRepositoryActionSecretCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := RepositoryActionSecretArgs{ActionSecretArgs: ActionSecretArgs{Name: "DEPLOY_TOKEN", Value: "secret"}, Owner: "sironheart", Repository: "infra"}
+	resp, err := (RepositoryActionSecret{}).Create(context.Background(), infer.CreateRequest[RepositoryActionSecretArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "sironheart/infra/DEPLOY_TOKEN")
+	assertEqual(t, resp.Output.RepositoryActionSecretArgs, args)
+	assertEqual(t, resp.Output.Created, "")
+}
+
+func TestOrganizationActionSecretCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := OrganizationActionSecretArgs{ActionSecretArgs: ActionSecretArgs{Name: "DEPLOY_TOKEN", Value: "secret"}, Organization: "platform"}
+	resp, err := (OrganizationActionSecret{}).Create(context.Background(), infer.CreateRequest[OrganizationActionSecretArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "platform/DEPLOY_TOKEN")
+	assertEqual(t, resp.Output.OrganizationActionSecretArgs, args)
+	assertEqual(t, resp.Output.Created, "")
+}
+
+func TestOrganizationActionVariableCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := OrganizationActionVariableArgs{ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "prod"}, Organization: "platform"}
+	resp, err := (OrganizationActionVariable{}).Create(context.Background(), infer.CreateRequest[OrganizationActionVariableArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "platform/ENVIRONMENT")
+	assertEqual(t, resp.Output.OrganizationActionVariableArgs, args)
+	assertEqual(t, resp.Output.OwnerID, int64(0))
+}
+
+func TestRepositoryBranchProtectionCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := RepositoryBranchProtectionArgs{
+		Owner:                   "sironheart",
+		Repository:              "infra",
+		Name:                    "main",
+		EnableStatusCheck:       true,
+		StatusCheckContexts:     []string{"test"},
+		RequiredApprovals:       2,
+		BlockOnRejectedReviews:  true,
+		RequireSignedCommits:    true,
+		ProtectedFilePatterns:   "*.go",
+		UnprotectedFilePatterns: "docs/**",
+	}
+	resp, err := (RepositoryBranchProtection{}).Create(context.Background(), infer.CreateRequest[RepositoryBranchProtectionArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "sironheart/infra/main")
+	assertEqual(t, resp.Output.RepositoryBranchProtectionArgs, args)
+	assertEqual(t, resp.Output.Created, "")
+	assertEqual(t, resp.Output.Updated, "")
+}
+
+func TestRepositorySettingsCreateDryRunBuildsPreviewState(t *testing.T) {
+	t.Parallel()
+
+	args := RepositorySettingsArgs{
+		Owner:      "sironheart",
+		Repository: "infra",
+		RepositorySettingsConfig: RepositorySettingsConfig{
+			Issues:                                 boolPtr(true),
+			PullRequests:                           boolPtr(true),
+			Wiki:                                   boolPtr(true),
+			Actions:                                boolPtr(true),
+			ExternalWikiURL:                        stringPtr("https://wiki.example.test/infra"),
+			ExternalTrackerURL:                     stringPtr("https://issues.example.test"),
+			ExternalTrackerFormat:                  stringPtr("https://issues.example.test/{index}"),
+			InternalTrackerEnableIssueDependencies: boolPtr(true),
+		},
+	}
+	resp, err := (RepositorySettings{}).Create(context.Background(), infer.CreateRequest[RepositorySettingsArgs]{Inputs: args, DryRun: true})
+	if err != nil {
+		t.Fatalf("create dry-run: %v", err)
+	}
+
+	assertEqual(t, resp.ID, "sironheart/infra")
+	assertEqual(t, resp.Output.RepositorySettingsArgs, args)
 }
 
 func assertEqual[T any](t *testing.T, got, want T) {

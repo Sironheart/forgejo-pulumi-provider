@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -59,6 +59,81 @@
       "url",
       "token"
     ]
+  },
+  "types": {
+    "forgejo:index:RepositorySettingsConfig": {
+      "properties": {
+        "actions": {
+          "type": "boolean",
+          "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
+        },
+        "externalTrackerFormat": {
+          "type": "string",
+          "description": "External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}."
+        },
+        "externalTrackerRegexPattern": {
+          "type": "string",
+          "description": "External issue tracker regular expression pattern."
+        },
+        "externalTrackerStyle": {
+          "type": "string",
+          "description": "External issue tracker number style, for example numeric or alphanumeric."
+        },
+        "externalTrackerUrl": {
+          "type": "string",
+          "description": "External issue tracker URL. Setting this also enables issues unless issues is explicitly set."
+        },
+        "externalWikiUrl": {
+          "type": "string",
+          "description": "External wiki URL. Setting this also enables the wiki unless wiki is explicitly set."
+        },
+        "globallyEditableWiki": {
+          "type": "boolean",
+          "description": "Whether the wiki is globally editable."
+        },
+        "internalTrackerAllowOnlyContributorsToTrackTime": {
+          "type": "boolean",
+          "description": "Whether only contributors may track time in the internal issue tracker."
+        },
+        "internalTrackerEnableIssueDependencies": {
+          "type": "boolean",
+          "description": "Whether issue dependencies are enabled in the internal issue tracker."
+        },
+        "internalTrackerEnableTimeTracker": {
+          "type": "boolean",
+          "description": "Whether the internal issue tracker has time tracking enabled."
+        },
+        "issues": {
+          "type": "boolean",
+          "description": "Whether the issue tracker unit is enabled. Leave unset to avoid managing it."
+        },
+        "packages": {
+          "type": "boolean",
+          "description": "Whether the packages unit is enabled. Leave unset to avoid managing it."
+        },
+        "projects": {
+          "type": "boolean",
+          "description": "Whether the projects unit is enabled. Leave unset to avoid managing it."
+        },
+        "pullRequests": {
+          "type": "boolean",
+          "description": "Whether the pull request unit is enabled. Leave unset to avoid managing it."
+        },
+        "releases": {
+          "type": "boolean",
+          "description": "Whether the releases unit is enabled. Leave unset to avoid managing it."
+        },
+        "wiki": {
+          "type": "boolean",
+          "description": "Whether the wiki unit is enabled. Leave unset to avoid managing it."
+        },
+        "wikiBranch": {
+          "type": "string",
+          "description": "Branch used for the repository wiki."
+        }
+      },
+      "type": "object"
+    }
   },
   "provider": {
     "properties": {
@@ -251,6 +326,98 @@
         "name"
       ]
     },
+    "forgejo:index:OrganizationActionSecret": {
+      "description": "A Forgejo Actions secret for an organization.",
+      "properties": {
+        "created": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "description": "Actions secret name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions secret value.",
+          "secret": true
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "organization",
+        "created"
+      ],
+      "inputProperties": {
+        "name": {
+          "type": "string",
+          "description": "Actions secret name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions secret value.",
+          "secret": true
+        }
+      },
+      "requiredInputs": [
+        "name",
+        "value",
+        "organization"
+      ]
+    },
+    "forgejo:index:OrganizationActionVariable": {
+      "description": "A Forgejo Actions variable for an organization.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Actions variable name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization name."
+        },
+        "ownerId": {
+          "type": "integer"
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions variable value."
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "organization",
+        "ownerId"
+      ],
+      "inputProperties": {
+        "name": {
+          "type": "string",
+          "description": "Actions variable name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions variable value."
+        }
+      },
+      "requiredInputs": [
+        "name",
+        "value",
+        "organization"
+      ]
+    },
     "forgejo:index:OrganizationTeam": {
       "description": "A Forgejo organization team.",
       "properties": {
@@ -332,6 +499,55 @@
       "requiredInputs": [
         "organization",
         "name"
+      ]
+    },
+    "forgejo:index:OrganizationTeamMember": {
+      "description": "A Forgejo organization team membership.",
+      "properties": {
+        "organization": {
+          "type": "string",
+          "description": "Organization username/slug. Required when teamId is not set."
+        },
+        "team": {
+          "type": "string",
+          "description": "Team name. Required when teamId is not set."
+        },
+        "teamId": {
+          "type": "integer",
+          "description": "Numeric Forgejo team ID. If omitted, organization and team are used to look up the team."
+        },
+        "userId": {
+          "type": "integer"
+        },
+        "username": {
+          "type": "string",
+          "description": "Username to add to the team."
+        }
+      },
+      "required": [
+        "username",
+        "userId"
+      ],
+      "inputProperties": {
+        "organization": {
+          "type": "string",
+          "description": "Organization username/slug. Required when teamId is not set."
+        },
+        "team": {
+          "type": "string",
+          "description": "Team name. Required when teamId is not set."
+        },
+        "teamId": {
+          "type": "integer",
+          "description": "Numeric Forgejo team ID. If omitted, organization and team are used to look up the team."
+        },
+        "username": {
+          "type": "string",
+          "description": "Username to add to the team."
+        }
+      },
+      "requiredInputs": [
+        "username"
       ]
     },
     "forgejo:index:PublicKey": {
@@ -435,6 +651,10 @@
           "description": "Whether repository projects are enabled.",
           "default": true
         },
+        "settings": {
+          "$ref": "#/types/forgejo:index:RepositorySettingsConfig",
+          "description": "Optional repository unit, wiki, and issue tracker settings to manage with this repository."
+        },
         "sshUrl": {
           "type": "string"
         },
@@ -490,6 +710,10 @@
           "description": "Whether repository projects are enabled.",
           "default": true
         },
+        "settings": {
+          "$ref": "#/types/forgejo:index:RepositorySettingsConfig",
+          "description": "Optional repository unit, wiki, and issue tracker settings to manage with this repository."
+        },
         "template": {
           "type": "boolean",
           "description": "Whether the repository can be used as a template."
@@ -506,6 +730,63 @@
       },
       "requiredInputs": [
         "name"
+      ]
+    },
+    "forgejo:index:RepositoryActionSecret": {
+      "description": "A Forgejo Actions secret for a repository.",
+      "properties": {
+        "created": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "description": "Actions secret name."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions secret value.",
+          "secret": true
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "owner",
+        "repository",
+        "created"
+      ],
+      "inputProperties": {
+        "name": {
+          "type": "string",
+          "description": "Actions secret name."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Actions secret value.",
+          "secret": true
+        }
+      },
+      "requiredInputs": [
+        "name",
+        "value",
+        "owner",
+        "repository"
       ]
     },
     "forgejo:index:RepositoryActionVariable": {
@@ -535,10 +816,10 @@
         }
       },
       "required": [
-        "owner",
-        "repository",
         "name",
         "value",
+        "owner",
+        "repository",
         "ownerId",
         "repoId"
       ],
@@ -561,10 +842,269 @@
         }
       },
       "requiredInputs": [
+        "name",
+        "value",
+        "owner",
+        "repository"
+      ]
+    },
+    "forgejo:index:RepositoryBranchProtection": {
+      "description": "A Forgejo branch protection rule for a repository.",
+      "properties": {
+        "approvalsWhitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams whose approvals count."
+        },
+        "approvalsWhitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users whose approvals count."
+        },
+        "blockOnOfficialReviewRequests": {
+          "type": "boolean",
+          "description": "Whether official review requests block merging."
+        },
+        "blockOnOutdatedBranch": {
+          "type": "boolean",
+          "description": "Whether outdated branches block merging."
+        },
+        "blockOnRejectedReviews": {
+          "type": "boolean",
+          "description": "Whether rejected reviews block merging."
+        },
+        "created": {
+          "type": "string"
+        },
+        "dismissStaleApprovals": {
+          "type": "boolean",
+          "description": "Whether stale approvals are dismissed after new commits."
+        },
+        "enableApprovalsWhitelist": {
+          "type": "boolean",
+          "description": "Whether review approvals are limited to the approval whitelist."
+        },
+        "enableMergeWhitelist": {
+          "type": "boolean",
+          "description": "Whether merging is limited to the merge whitelist."
+        },
+        "enablePush": {
+          "type": "boolean",
+          "description": "Whether protected branches can be pushed to directly."
+        },
+        "enablePushWhitelist": {
+          "type": "boolean",
+          "description": "Whether direct pushes are limited to the push whitelist."
+        },
+        "enableStatusCheck": {
+          "type": "boolean",
+          "description": "Whether status checks are required before merge."
+        },
+        "mergeWhitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams allowed to merge."
+        },
+        "mergeWhitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users allowed to merge."
+        },
+        "name": {
+          "type": "string",
+          "description": "Protected branch name or rule pattern."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "protectedFilePatterns": {
+          "type": "string",
+          "description": "Protected file patterns."
+        },
+        "pushWhitelistDeployKeys": {
+          "type": "boolean",
+          "description": "Whether deploy keys may push directly."
+        },
+        "pushWhitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams allowed to push directly."
+        },
+        "pushWhitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users allowed to push directly."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "requireSignedCommits": {
+          "type": "boolean",
+          "description": "Whether commits must be signed."
+        },
+        "requiredApprovals": {
+          "type": "integer",
+          "description": "Number of required approving reviews."
+        },
+        "statusCheckContexts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required status check contexts."
+        },
+        "unprotectedFilePatterns": {
+          "type": "string",
+          "description": "Unprotected file patterns."
+        },
+        "updated": {
+          "type": "string"
+        }
+      },
+      "required": [
         "owner",
         "repository",
         "name",
-        "value"
+        "created",
+        "updated"
+      ],
+      "inputProperties": {
+        "approvalsWhitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams whose approvals count."
+        },
+        "approvalsWhitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users whose approvals count."
+        },
+        "blockOnOfficialReviewRequests": {
+          "type": "boolean",
+          "description": "Whether official review requests block merging."
+        },
+        "blockOnOutdatedBranch": {
+          "type": "boolean",
+          "description": "Whether outdated branches block merging."
+        },
+        "blockOnRejectedReviews": {
+          "type": "boolean",
+          "description": "Whether rejected reviews block merging."
+        },
+        "dismissStaleApprovals": {
+          "type": "boolean",
+          "description": "Whether stale approvals are dismissed after new commits."
+        },
+        "enableApprovalsWhitelist": {
+          "type": "boolean",
+          "description": "Whether review approvals are limited to the approval whitelist."
+        },
+        "enableMergeWhitelist": {
+          "type": "boolean",
+          "description": "Whether merging is limited to the merge whitelist."
+        },
+        "enablePush": {
+          "type": "boolean",
+          "description": "Whether protected branches can be pushed to directly."
+        },
+        "enablePushWhitelist": {
+          "type": "boolean",
+          "description": "Whether direct pushes are limited to the push whitelist."
+        },
+        "enableStatusCheck": {
+          "type": "boolean",
+          "description": "Whether status checks are required before merge."
+        },
+        "mergeWhitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams allowed to merge."
+        },
+        "mergeWhitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users allowed to merge."
+        },
+        "name": {
+          "type": "string",
+          "description": "Protected branch name or rule pattern."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "protectedFilePatterns": {
+          "type": "string",
+          "description": "Protected file patterns."
+        },
+        "pushWhitelistDeployKeys": {
+          "type": "boolean",
+          "description": "Whether deploy keys may push directly."
+        },
+        "pushWhitelistTeams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Teams allowed to push directly."
+        },
+        "pushWhitelistUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Users allowed to push directly."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "requireSignedCommits": {
+          "type": "boolean",
+          "description": "Whether commits must be signed."
+        },
+        "requiredApprovals": {
+          "type": "integer",
+          "description": "Number of required approving reviews."
+        },
+        "statusCheckContexts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required status check contexts."
+        },
+        "unprotectedFilePatterns": {
+          "type": "string",
+          "description": "Unprotected file patterns."
+        }
+      },
+      "requiredInputs": [
+        "owner",
+        "repository",
+        "name"
       ]
     },
     "forgejo:index:RepositoryPushMirror": {
@@ -676,6 +1216,173 @@
         "owner",
         "repository",
         "remoteAddress"
+      ]
+    },
+    "forgejo:index:RepositorySettings": {
+      "description": "Settings for enabled Forgejo repository units and their wiki or issue tracker configuration.",
+      "properties": {
+        "actions": {
+          "type": "boolean",
+          "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
+        },
+        "externalTrackerFormat": {
+          "type": "string",
+          "description": "External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}."
+        },
+        "externalTrackerRegexPattern": {
+          "type": "string",
+          "description": "External issue tracker regular expression pattern."
+        },
+        "externalTrackerStyle": {
+          "type": "string",
+          "description": "External issue tracker number style, for example numeric or alphanumeric."
+        },
+        "externalTrackerUrl": {
+          "type": "string",
+          "description": "External issue tracker URL. Setting this also enables issues unless issues is explicitly set."
+        },
+        "externalWikiUrl": {
+          "type": "string",
+          "description": "External wiki URL. Setting this also enables the wiki unless wiki is explicitly set."
+        },
+        "globallyEditableWiki": {
+          "type": "boolean",
+          "description": "Whether the wiki is globally editable."
+        },
+        "internalTrackerAllowOnlyContributorsToTrackTime": {
+          "type": "boolean",
+          "description": "Whether only contributors may track time in the internal issue tracker."
+        },
+        "internalTrackerEnableIssueDependencies": {
+          "type": "boolean",
+          "description": "Whether issue dependencies are enabled in the internal issue tracker."
+        },
+        "internalTrackerEnableTimeTracker": {
+          "type": "boolean",
+          "description": "Whether the internal issue tracker has time tracking enabled."
+        },
+        "issues": {
+          "type": "boolean",
+          "description": "Whether the issue tracker unit is enabled. Leave unset to avoid managing it."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "packages": {
+          "type": "boolean",
+          "description": "Whether the packages unit is enabled. Leave unset to avoid managing it."
+        },
+        "projects": {
+          "type": "boolean",
+          "description": "Whether the projects unit is enabled. Leave unset to avoid managing it."
+        },
+        "pullRequests": {
+          "type": "boolean",
+          "description": "Whether the pull request unit is enabled. Leave unset to avoid managing it."
+        },
+        "releases": {
+          "type": "boolean",
+          "description": "Whether the releases unit is enabled. Leave unset to avoid managing it."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "wiki": {
+          "type": "boolean",
+          "description": "Whether the wiki unit is enabled. Leave unset to avoid managing it."
+        },
+        "wikiBranch": {
+          "type": "string",
+          "description": "Branch used for the repository wiki."
+        }
+      },
+      "required": [
+        "owner",
+        "repository"
+      ],
+      "inputProperties": {
+        "actions": {
+          "type": "boolean",
+          "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
+        },
+        "externalTrackerFormat": {
+          "type": "string",
+          "description": "External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}."
+        },
+        "externalTrackerRegexPattern": {
+          "type": "string",
+          "description": "External issue tracker regular expression pattern."
+        },
+        "externalTrackerStyle": {
+          "type": "string",
+          "description": "External issue tracker number style, for example numeric or alphanumeric."
+        },
+        "externalTrackerUrl": {
+          "type": "string",
+          "description": "External issue tracker URL. Setting this also enables issues unless issues is explicitly set."
+        },
+        "externalWikiUrl": {
+          "type": "string",
+          "description": "External wiki URL. Setting this also enables the wiki unless wiki is explicitly set."
+        },
+        "globallyEditableWiki": {
+          "type": "boolean",
+          "description": "Whether the wiki is globally editable."
+        },
+        "internalTrackerAllowOnlyContributorsToTrackTime": {
+          "type": "boolean",
+          "description": "Whether only contributors may track time in the internal issue tracker."
+        },
+        "internalTrackerEnableIssueDependencies": {
+          "type": "boolean",
+          "description": "Whether issue dependencies are enabled in the internal issue tracker."
+        },
+        "internalTrackerEnableTimeTracker": {
+          "type": "boolean",
+          "description": "Whether the internal issue tracker has time tracking enabled."
+        },
+        "issues": {
+          "type": "boolean",
+          "description": "Whether the issue tracker unit is enabled. Leave unset to avoid managing it."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Repository owner."
+        },
+        "packages": {
+          "type": "boolean",
+          "description": "Whether the packages unit is enabled. Leave unset to avoid managing it."
+        },
+        "projects": {
+          "type": "boolean",
+          "description": "Whether the projects unit is enabled. Leave unset to avoid managing it."
+        },
+        "pullRequests": {
+          "type": "boolean",
+          "description": "Whether the pull request unit is enabled. Leave unset to avoid managing it."
+        },
+        "releases": {
+          "type": "boolean",
+          "description": "Whether the releases unit is enabled. Leave unset to avoid managing it."
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository name."
+        },
+        "wiki": {
+          "type": "boolean",
+          "description": "Whether the wiki unit is enabled. Leave unset to avoid managing it."
+        },
+        "wikiBranch": {
+          "type": "string",
+          "description": "Branch used for the repository wiki."
+        }
+      },
+      "requiredInputs": [
+        "owner",
+        "repository"
       ]
     },
     "forgejo:index:RepositoryTagProtection": {

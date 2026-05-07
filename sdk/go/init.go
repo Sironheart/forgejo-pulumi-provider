@@ -25,16 +25,28 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &DeployKey{}
 	case "forgejo:index:Organization":
 		r = &Organization{}
+	case "forgejo:index:OrganizationActionSecret":
+		r = &OrganizationActionSecret{}
+	case "forgejo:index:OrganizationActionVariable":
+		r = &OrganizationActionVariable{}
 	case "forgejo:index:OrganizationTeam":
 		r = &OrganizationTeam{}
+	case "forgejo:index:OrganizationTeamMember":
+		r = &OrganizationTeamMember{}
 	case "forgejo:index:PublicKey":
 		r = &PublicKey{}
 	case "forgejo:index:Repository":
 		r = &Repository{}
+	case "forgejo:index:RepositoryActionSecret":
+		r = &RepositoryActionSecret{}
 	case "forgejo:index:RepositoryActionVariable":
 		r = &RepositoryActionVariable{}
+	case "forgejo:index:RepositoryBranchProtection":
+		r = &RepositoryBranchProtection{}
 	case "forgejo:index:RepositoryPushMirror":
 		r = &RepositoryPushMirror{}
+	case "forgejo:index:RepositorySettings":
+		r = &RepositorySettings{}
 	case "forgejo:index:RepositoryTagProtection":
 		r = &RepositoryTagProtection{}
 	default:

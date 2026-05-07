@@ -66,6 +66,12 @@ namespace Pulumi.Forgejo
         [Output("projects")]
         public Output<bool?> Projects { get; private set; } = null!;
 
+        /// <summary>
+        /// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+        /// </summary>
+        [Output("settings")]
+        public Output<Outputs.RepositorySettingsConfig?> Settings { get; private set; } = null!;
+
         [Output("sshUrl")]
         public Output<string> SshUrl { get; private set; } = null!;
 
@@ -174,6 +180,12 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Input("projects")]
         public Input<bool>? Projects { get; set; }
+
+        /// <summary>
+        /// Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+        /// </summary>
+        [Input("settings")]
+        public Input<Inputs.RepositorySettingsConfigArgs>? Settings { get; set; }
 
         /// <summary>
         /// Whether the repository can be used as a template.

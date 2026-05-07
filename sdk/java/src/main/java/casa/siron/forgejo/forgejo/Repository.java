@@ -5,6 +5,7 @@ package casa.siron.forgejo.forgejo;
 
 import casa.siron.forgejo.forgejo.RepositoryArgs;
 import casa.siron.forgejo.forgejo.Utilities;
+import casa.siron.forgejo.forgejo.outputs.RepositorySettingsConfig;
 import com.pulumi.core.Output;
 import com.pulumi.core.annotations.Export;
 import com.pulumi.core.annotations.ResourceType;
@@ -135,6 +136,20 @@ public class Repository extends com.pulumi.resources.CustomResource {
      */
     public Output<Optional<Boolean>> projects() {
         return Codegen.optional(this.projects);
+    }
+    /**
+     * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+     * 
+     */
+    @Export(name="settings", refs={RepositorySettingsConfig.class}, tree="[0]")
+    private Output</* @Nullable */ RepositorySettingsConfig> settings;
+
+    /**
+     * @return Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+     * 
+     */
+    public Output<Optional<RepositorySettingsConfig>> settings() {
+        return Codegen.optional(this.settings);
     }
     @Export(name="sshUrl", refs={String.class}, tree="[0]")
     private Output<String> sshUrl;

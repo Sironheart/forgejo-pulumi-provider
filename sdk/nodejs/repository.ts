@@ -2,6 +2,8 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
+import * as inputs from "./types/input";
+import * as outputs from "./types/output";
 import * as utilities from "./utilities";
 
 /**
@@ -65,6 +67,10 @@ export class Repository extends pulumi.CustomResource {
      * Whether repository projects are enabled.
      */
     declare public readonly projects: pulumi.Output<boolean | undefined>;
+    /**
+     * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+     */
+    declare public readonly settings: pulumi.Output<outputs.RepositorySettingsConfig | undefined>;
     declare public /*out*/ readonly sshUrl: pulumi.Output<string>;
     /**
      * Whether the repository can be used as a template.
@@ -100,6 +106,7 @@ export class Repository extends pulumi.CustomResource {
             resourceInputs["owner"] = args?.owner;
             resourceInputs["private"] = args?.private;
             resourceInputs["projects"] = (args?.projects) ?? true;
+            resourceInputs["settings"] = args?.settings;
             resourceInputs["template"] = args?.template;
             resourceInputs["website"] = args?.website;
             resourceInputs["wiki"] = (args?.wiki) ?? true;
@@ -118,6 +125,7 @@ export class Repository extends pulumi.CustomResource {
             resourceInputs["owner"] = undefined /*out*/;
             resourceInputs["private"] = undefined /*out*/;
             resourceInputs["projects"] = undefined /*out*/;
+            resourceInputs["settings"] = undefined /*out*/;
             resourceInputs["sshUrl"] = undefined /*out*/;
             resourceInputs["template"] = undefined /*out*/;
             resourceInputs["website"] = undefined /*out*/;
@@ -160,6 +168,10 @@ export interface RepositoryArgs {
      * Whether repository projects are enabled.
      */
     projects?: pulumi.Input<boolean>;
+    /**
+     * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+     */
+    settings?: pulumi.Input<inputs.RepositorySettingsConfigArgs>;
     /**
      * Whether the repository can be used as a template.
      */

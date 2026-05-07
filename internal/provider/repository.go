@@ -13,16 +13,17 @@ import (
 type Repository struct{}
 
 type RepositoryArgs struct {
-	Name          string `pulumi:"name"`
-	Owner         string `pulumi:"owner,optional"`
-	Description   string `pulumi:"description,optional"`
-	Private       bool   `pulumi:"private,optional"`
-	DefaultBranch string `pulumi:"defaultBranch,optional"`
-	Website       string `pulumi:"website,optional"`
-	Issues        bool   `pulumi:"issues,optional"`
-	Wiki          bool   `pulumi:"wiki,optional"`
-	Projects      bool   `pulumi:"projects,optional"`
-	Template      bool   `pulumi:"template,optional"`
+	Name          string                    `pulumi:"name"`
+	Owner         string                    `pulumi:"owner,optional"`
+	Description   string                    `pulumi:"description,optional"`
+	Private       bool                      `pulumi:"private,optional"`
+	DefaultBranch string                    `pulumi:"defaultBranch,optional"`
+	Website       string                    `pulumi:"website,optional"`
+	Issues        bool                      `pulumi:"issues,optional"`
+	Wiki          bool                      `pulumi:"wiki,optional"`
+	Projects      bool                      `pulumi:"projects,optional"`
+	Template      bool                      `pulumi:"template,optional"`
+	Settings      *RepositorySettingsConfig `pulumi:"settings,optional"`
 }
 
 type RepositoryState struct {
@@ -49,6 +50,7 @@ func (a *RepositoryArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Wiki, "Whether the repository wiki is enabled.")
 	ann.Describe(&a.Projects, "Whether repository projects are enabled.")
 	ann.Describe(&a.Template, "Whether the repository can be used as a template.")
+	ann.Describe(&a.Settings, "Optional repository unit, wiki, and issue tracker settings to manage with this repository.")
 	ann.SetDefault(&a.Issues, true)
 	ann.SetDefault(&a.Wiki, true)
 	ann.SetDefault(&a.Projects, true)
@@ -78,12 +80,12 @@ func (Repository) Create(ctx context.Context, req infer.CreateRequest[Repository
 	if err != nil {
 		return infer.CreateResponse[RepositoryState]{}, err
 	}
-	repo, err = editRepository(client, repo, repositoryEditOption(req.Inputs, false))
+	repo, err = editRepository(client, repo, repositoryEditOption(req.Inputs, false, repo))
 	if err != nil {
 		return infer.CreateResponse[RepositoryState]{}, err
 	}
 
-	state := repositoryStateFromAPI(repo)
+	state := repositoryStateFromAPI(repo, req.Inputs.Settings)
 	return infer.CreateResponse[RepositoryState]{ID: repositoryID(state.Owner, state.Name), Output: state}, nil
 }
 
@@ -106,7 +108,7 @@ func (Repository) Read(ctx context.Context, req infer.ReadRequest[RepositoryArgs
 		return infer.ReadResponse[RepositoryArgs, RepositoryState]{}, err
 	}
 
-	state := repositoryStateFromAPI(repo)
+	state := repositoryStateFromAPI(repo, repositorySettingsTemplate(req.Inputs.Settings, req.State.Settings))
 	return infer.ReadResponse[RepositoryArgs, RepositoryState]{
 		ID:     repositoryID(state.Owner, state.Name),
 		Inputs: state.RepositoryArgs,
@@ -130,6 +132,7 @@ func (Repository) Diff(_ context.Context, req infer.DiffRequest[RepositoryArgs, 
 	addUpdateDiff(diff, "wiki", req.State.Wiki != req.Inputs.Wiki)
 	addUpdateDiff(diff, "projects", req.State.Projects != req.Inputs.Projects)
 	addUpdateDiff(diff, "template", req.State.Template != req.Inputs.Template)
+	addUpdateDiff(diff, "settings", !equalRepositorySettingsConfigPtr(req.State.Settings, req.Inputs.Settings))
 
 	return p.DiffResponse{HasChanges: len(diff) > 0, DeleteBeforeReplace: true, DetailedDiff: diff}, nil
 }
@@ -148,12 +151,19 @@ func (Repository) Update(ctx context.Context, req infer.UpdateRequest[Repository
 		return infer.UpdateResponse[RepositoryState]{}, err
 	}
 
-	repo, _, err := client.EditRepo(owner, name, repositoryEditOption(req.Inputs, true))
+	var current *forgejo.Repository
+	if req.Inputs.Settings != nil {
+		current, _, err = client.GetRepo(owner, name)
+		if err != nil {
+			return infer.UpdateResponse[RepositoryState]{}, err
+		}
+	}
+	repo, _, err := client.EditRepo(owner, name, repositoryEditOption(req.Inputs, true, current))
 	if err != nil {
 		return infer.UpdateResponse[RepositoryState]{}, err
 	}
 
-	return infer.UpdateResponse[RepositoryState]{Output: repositoryStateFromAPI(repo)}, nil
+	return infer.UpdateResponse[RepositoryState]{Output: repositoryStateFromAPI(repo, req.Inputs.Settings)}, nil
 }
 
 func (Repository) Delete(ctx context.Context, req infer.DeleteRequest[RepositoryState]) (infer.DeleteResponse, error) {
@@ -174,7 +184,7 @@ func (Repository) Delete(ctx context.Context, req infer.DeleteRequest[Repository
 	return infer.DeleteResponse{}, err
 }
 
-func repositoryStateFromAPI(repo *forgejo.Repository) RepositoryState {
+func repositoryStateFromAPI(repo *forgejo.Repository, settingsTemplate ...*RepositorySettingsConfig) RepositoryState {
 	owner := ""
 	if repo.Owner != nil {
 		owner = repo.Owner.UserName
@@ -183,23 +193,29 @@ func repositoryStateFromAPI(repo *forgejo.Repository) RepositoryState {
 		owner, _, _ = strings.Cut(repo.FullName, "/")
 	}
 
+	args := RepositoryArgs{
+		Name:          repo.Name,
+		Owner:         owner,
+		Description:   repo.Description,
+		Private:       repo.Private,
+		DefaultBranch: repo.DefaultBranch,
+		Website:       repo.Website,
+		Issues:        repo.HasIssues,
+		Wiki:          repo.HasWiki,
+		Projects:      repo.HasProjects,
+		Template:      repo.Template,
+	}
+	if len(settingsTemplate) > 0 && settingsTemplate[0] != nil {
+		settings := repositorySettingsConfigFromAPI(*settingsTemplate[0], repo)
+		args.Settings = &settings
+	}
+
 	return RepositoryState{
-		RepositoryArgs: RepositoryArgs{
-			Name:          repo.Name,
-			Owner:         owner,
-			Description:   repo.Description,
-			Private:       repo.Private,
-			DefaultBranch: repo.DefaultBranch,
-			Website:       repo.Website,
-			Issues:        repo.HasIssues,
-			Wiki:          repo.HasWiki,
-			Projects:      repo.HasProjects,
-			Template:      repo.Template,
-		},
-		FullName: repo.FullName,
-		HTMLURL:  repo.HTMLURL,
-		SSHURL:   repo.SSHURL,
-		CloneURL: repo.CloneURL,
+		RepositoryArgs: args,
+		FullName:       repo.FullName,
+		HTMLURL:        repo.HTMLURL,
+		SSHURL:         repo.SSHURL,
+		CloneURL:       repo.CloneURL,
 	}
 }
 
@@ -233,7 +249,7 @@ func editRepository(client *forgejo.Client, repo *forgejo.Repository, opt forgej
 	return updated, err
 }
 
-func repositoryEditOption(args RepositoryArgs, includeDefaultBranch bool) forgejo.EditRepoOption {
+func repositoryEditOption(args RepositoryArgs, includeDefaultBranch bool, repo *forgejo.Repository) forgejo.EditRepoOption {
 	opt := forgejo.EditRepoOption{
 		Description: &args.Description,
 		Private:     &args.Private,
@@ -245,6 +261,10 @@ func repositoryEditOption(args RepositoryArgs, includeDefaultBranch bool) forgej
 	}
 	if includeDefaultBranch && args.DefaultBranch != "" {
 		opt.DefaultBranch = &args.DefaultBranch
+	}
+	if args.Settings != nil {
+		settings := repositorySettingsConfigEditOption(*args.Settings, repo)
+		mergeRepositoryEditOption(&opt, settings)
 	}
 	return opt
 }

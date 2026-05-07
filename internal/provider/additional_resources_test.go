@@ -44,6 +44,61 @@ func TestOrganizationTeamDiffUpdatesUnitsMap(t *testing.T) {
 	assertDiffKind(t, resp, "unitsMap", p.Update)
 }
 
+func TestRepositoryDiffUpdatesNestedSettings(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (Repository{}).Diff(context.Background(), infer.DiffRequest[RepositoryArgs, RepositoryState]{
+		State: RepositoryState{RepositoryArgs: RepositoryArgs{
+			Name:     "infra",
+			Owner:    "sironheart",
+			Issues:   true,
+			Wiki:     true,
+			Projects: true,
+			Settings: &RepositorySettingsConfig{Actions: boolPtr(false)},
+		}},
+		Inputs: RepositoryArgs{
+			Name:     "infra",
+			Owner:    "sironheart",
+			Issues:   true,
+			Wiki:     true,
+			Projects: true,
+			Settings: &RepositorySettingsConfig{Actions: boolPtr(true)},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "settings", p.Update)
+}
+
+func TestOrganizationTeamMemberDiffReplacesUsername(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (OrganizationTeamMember{}).Diff(context.Background(), infer.DiffRequest[OrganizationTeamMemberArgs, OrganizationTeamMemberState]{
+		State:  OrganizationTeamMemberState{OrganizationTeamMemberArgs: OrganizationTeamMemberArgs{Organization: "platform", Team: "maintainers", TeamID: 42, Username: "alice"}},
+		Inputs: OrganizationTeamMemberArgs{Organization: "platform", Team: "maintainers", Username: "bob"},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "username", p.UpdateReplace)
+}
+
+func TestOrganizationTeamMemberDiffIgnoresResolvedTeamID(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (OrganizationTeamMember{}).Diff(context.Background(), infer.DiffRequest[OrganizationTeamMemberArgs, OrganizationTeamMemberState]{
+		State:  OrganizationTeamMemberState{OrganizationTeamMemberArgs: OrganizationTeamMemberArgs{Organization: "platform", Team: "maintainers", TeamID: 42, Username: "alice"}},
+		Inputs: OrganizationTeamMemberArgs{Organization: "platform", Team: "maintainers", Username: "alice"},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	if resp.HasChanges {
+		t.Fatalf("expected no changes, got %#v", resp.DetailedDiff)
+	}
+}
+
 func TestRepositoryTagProtectionDiffUpdatesWhitelist(t *testing.T) {
 	t.Parallel()
 
@@ -72,16 +127,14 @@ func TestRepositoryActionVariableDiffUpdatesValue(t *testing.T) {
 
 	resp, err := (RepositoryActionVariable{}).Diff(context.Background(), infer.DiffRequest[RepositoryActionVariableArgs, RepositoryActionVariableState]{
 		State: RepositoryActionVariableState{RepositoryActionVariableArgs: RepositoryActionVariableArgs{
-			Owner:      "sironheart",
-			Repository: "infra",
-			Name:       "ENVIRONMENT",
-			Value:      "dev",
+			ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "dev"},
+			Owner:              "sironheart",
+			Repository:         "infra",
 		}},
 		Inputs: RepositoryActionVariableArgs{
-			Owner:      "sironheart",
-			Repository: "infra",
-			Name:       "ENVIRONMENT",
-			Value:      "prod",
+			ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "prod"},
+			Owner:              "sironheart",
+			Repository:         "infra",
 		},
 	})
 	if err != nil {
@@ -111,6 +164,96 @@ func TestRepositoryPushMirrorDiffReplacesBranchFilter(t *testing.T) {
 		t.Fatalf("diff: %v", err)
 	}
 	assertDiffKind(t, resp, "branchFilter", p.UpdateReplace)
+}
+
+func TestRepositoryActionSecretDiffUpdatesValue(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositoryActionSecret{}).Diff(context.Background(), infer.DiffRequest[RepositoryActionSecretArgs, RepositoryActionSecretState]{
+		State: RepositoryActionSecretState{RepositoryActionSecretArgs: RepositoryActionSecretArgs{
+			ActionSecretArgs: ActionSecretArgs{Name: "DEPLOY_TOKEN", Value: "old"},
+			Owner:            "sironheart",
+			Repository:       "infra",
+		}},
+		Inputs: RepositoryActionSecretArgs{
+			ActionSecretArgs: ActionSecretArgs{Name: "DEPLOY_TOKEN", Value: "new"},
+			Owner:            "sironheart",
+			Repository:       "infra",
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "value", p.Update)
+}
+
+func TestOrganizationActionVariableDiffUpdatesValue(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (OrganizationActionVariable{}).Diff(context.Background(), infer.DiffRequest[OrganizationActionVariableArgs, OrganizationActionVariableState]{
+		State: OrganizationActionVariableState{OrganizationActionVariableArgs: OrganizationActionVariableArgs{
+			ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "dev"},
+			Organization:       "platform",
+		}},
+		Inputs: OrganizationActionVariableArgs{
+			ActionVariableArgs: ActionVariableArgs{Name: "ENVIRONMENT", Value: "prod"},
+			Organization:       "platform",
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "value", p.Update)
+}
+
+func TestRepositoryBranchProtectionDiffUpdatesStatusChecks(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositoryBranchProtection{}).Diff(context.Background(), infer.DiffRequest[RepositoryBranchProtectionArgs, RepositoryBranchProtectionState]{
+		State: RepositoryBranchProtectionState{RepositoryBranchProtectionArgs: RepositoryBranchProtectionArgs{
+			Owner:               "sironheart",
+			Repository:          "infra",
+			Name:                "main",
+			EnableStatusCheck:   true,
+			StatusCheckContexts: []string{"test"},
+		}},
+		Inputs: RepositoryBranchProtectionArgs{
+			Owner:               "sironheart",
+			Repository:          "infra",
+			Name:                "main",
+			EnableStatusCheck:   true,
+			StatusCheckContexts: []string{"test", "lint"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "statusCheckContexts", p.Update)
+}
+
+func TestRepositorySettingsDiffUpdatesExternalTrackerURL(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositorySettings{}).Diff(context.Background(), infer.DiffRequest[RepositorySettingsArgs, RepositorySettingsState]{
+		State: RepositorySettingsState{RepositorySettingsArgs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				ExternalTrackerURL: stringPtr("https://old.example.test"),
+			},
+		}},
+		Inputs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				ExternalTrackerURL: stringPtr("https://new.example.test"),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "externalTrackerUrl", p.Update)
 }
 
 func assertDiffKind(t *testing.T, resp infer.DiffResponse, property string, kind p.DiffKind) {

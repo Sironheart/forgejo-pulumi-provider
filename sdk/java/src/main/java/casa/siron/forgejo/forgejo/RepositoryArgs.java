@@ -3,6 +3,7 @@
 
 package casa.siron.forgejo.forgejo;
 
+import casa.siron.forgejo.forgejo.inputs.RepositorySettingsConfigArgs;
 import com.pulumi.core.Output;
 import com.pulumi.core.annotations.Import;
 import com.pulumi.core.internal.Codegen;
@@ -124,6 +125,21 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
     }
 
     /**
+     * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+     * 
+     */
+    @Import(name="settings")
+    private @Nullable Output<RepositorySettingsConfigArgs> settings;
+
+    /**
+     * @return Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+     * 
+     */
+    public Optional<Output<RepositorySettingsConfigArgs>> settings() {
+        return Optional.ofNullable(this.settings);
+    }
+
+    /**
      * Whether the repository can be used as a template.
      * 
      */
@@ -178,6 +194,7 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
         this.owner = $.owner;
         this.private_ = $.private_;
         this.projects = $.projects;
+        this.settings = $.settings;
         this.template = $.template;
         this.website = $.website;
         this.wiki = $.wiki;
@@ -346,6 +363,27 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
          */
         public Builder projects(Boolean projects) {
             return projects(Output.of(projects));
+        }
+
+        /**
+         * @param settings Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder settings(@Nullable Output<RepositorySettingsConfigArgs> settings) {
+            $.settings = settings;
+            return this;
+        }
+
+        /**
+         * @param settings Optional repository unit, wiki, and issue tracker settings to manage with this repository.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder settings(RepositorySettingsConfigArgs settings) {
+            return settings(Output.of(settings));
         }
 
         /**

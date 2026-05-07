@@ -11,11 +11,16 @@ import (
 
 type RepositoryActionVariable struct{}
 
+type ActionVariableArgs struct {
+	Name  string `pulumi:"name"`
+	Value string `pulumi:"value"`
+}
+
 type RepositoryActionVariableArgs struct {
+	ActionVariableArgs
+
 	Owner      string `pulumi:"owner"`
 	Repository string `pulumi:"repository"`
-	Name       string `pulumi:"name"`
-	Value      string `pulumi:"value"`
 }
 
 type RepositoryActionVariableState struct {
@@ -30,10 +35,9 @@ func (v *RepositoryActionVariable) Annotate(a infer.Annotator) {
 }
 
 func (a *RepositoryActionVariableArgs) Annotate(ann infer.Annotator) {
+	annotateActionVariableArgs(&a.ActionVariableArgs, ann)
 	ann.Describe(&a.Owner, "Repository owner.")
 	ann.Describe(&a.Repository, "Repository name.")
-	ann.Describe(&a.Name, "Actions variable name.")
-	ann.Describe(&a.Value, "Actions variable value.")
 }
 
 func (RepositoryActionVariable) Create(ctx context.Context, req infer.CreateRequest[RepositoryActionVariableArgs]) (infer.CreateResponse[RepositoryActionVariableState], error) {
@@ -121,7 +125,7 @@ func (RepositoryActionVariable) Delete(ctx context.Context, req infer.DeleteRequ
 }
 
 func repositoryActionVariableStateFromAPI(owner, repo string, variable *forgejo.ActionVariable) RepositoryActionVariableState {
-	return repositoryActionVariableStateFromArgs(RepositoryActionVariableArgs{Owner: owner, Repository: repo, Name: variable.Name, Value: variable.Data}, variable.OwnerID, variable.RepoID)
+	return repositoryActionVariableStateFromArgs(RepositoryActionVariableArgs{ActionVariableArgs: ActionVariableArgs{Name: variable.Name, Value: variable.Data}, Owner: owner, Repository: repo}, variable.OwnerID, variable.RepoID)
 }
 
 func repositoryActionVariableStateFromArgs(args RepositoryActionVariableArgs, ownerID, repoID int64) RepositoryActionVariableState {
@@ -130,4 +134,9 @@ func repositoryActionVariableStateFromArgs(args RepositoryActionVariableArgs, ow
 
 func repositoryActionVariableID(owner, repo, name string) string {
 	return fmt.Sprintf("%s/%s/%s", owner, repo, name)
+}
+
+func annotateActionVariableArgs(a *ActionVariableArgs, ann infer.Annotator) {
+	ann.Describe(&a.Name, "Actions variable name.")
+	ann.Describe(&a.Value, "Actions variable value.")
 }

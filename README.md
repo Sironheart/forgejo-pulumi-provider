@@ -20,7 +20,7 @@ The provider schema generates SDKs for the published Pulumi languages:
 
 `forgejo:index:Repository` manages a Forgejo repository.
 
-Inputs: `name`, `owner`, `description`, `private`, `defaultBranch`, `website`, `issues`, `wiki`, `projects`, `template`.
+Inputs: `name`, `owner`, `description`, `private`, `defaultBranch`, `website`, `issues`, `wiki`, `projects`, `template`, `settings`.
 
 Outputs: `fullName`, `htmlUrl`, `sshUrl`, `cloneUrl`.
 
@@ -35,6 +35,12 @@ Outputs: `avatarUrl`.
 Inputs: `organization`, `name`, `description`, `permission`, `canCreateOrgRepo`, `includesAllRepositories`, `unitsMap`.
 
 Outputs: `teamId`.
+
+`forgejo:index:OrganizationTeamMember` manages a Forgejo organization team membership.
+
+Inputs: `organization`, `team`, `teamId`, `username`.
+
+Outputs: `teamId`, `userId`.
 
 `forgejo:index:DeployKey` manages a repository deploy key.
 
@@ -54,11 +60,39 @@ Inputs: `owner`, `repository`, `name`, `value`.
 
 Outputs: `ownerId`, `repoId`.
 
+`forgejo:index:RepositoryActionSecret` manages a Forgejo Actions secret for a repository.
+
+Inputs: `owner`, `repository`, `name`, `value`.
+
+Outputs: `created`.
+
+`forgejo:index:OrganizationActionVariable` manages a Forgejo Actions variable for an organization.
+
+Inputs: `organization`, `name`, `value`.
+
+Outputs: `ownerId`.
+
+`forgejo:index:OrganizationActionSecret` manages a Forgejo Actions secret for an organization.
+
+Inputs: `organization`, `name`, `value`.
+
+Outputs: `created`.
+
 `forgejo:index:RepositoryTagProtection` manages a repository tag protection rule.
 
 Inputs: `owner`, `repository`, `namePattern`, `whitelistUsernames`, `whitelistTeams`.
 
 Outputs: `protectionId`.
+
+`forgejo:index:RepositoryBranchProtection` manages a repository branch protection rule.
+
+Inputs include `owner`, `repository`, `name`, push and merge whitelists, status-check settings, review approval settings, signed-commit requirements, and protected/unprotected file patterns.
+
+Outputs: `created`, `updated`.
+
+`forgejo:index:RepositorySettings` manages repository unit flags and wiki or issue tracker settings.
+
+Inputs include `owner`, `repository`, `issues`, `pullRequests`, `wiki`, `projects`, `releases`, `packages`, `actions`, `externalWikiUrl`, internal tracker settings, and external tracker settings.
 
 `forgejo:index:RepositoryPushMirror` manages a repository push mirror and can limit it to matching branches.
 
