@@ -18,6 +18,11 @@ public final class RepositorySettingsConfig {
      */
     private @Nullable Boolean actions;
     /**
+     * @return Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable Boolean defaultDeleteBranchAfterMerge;
+    /**
      * @return External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      * 
      */
@@ -105,6 +110,13 @@ public final class RepositorySettingsConfig {
      */
     public Optional<Boolean> actions() {
         return Optional.ofNullable(this.actions);
+    }
+    /**
+     * @return Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Boolean> defaultDeleteBranchAfterMerge() {
+        return Optional.ofNullable(this.defaultDeleteBranchAfterMerge);
     }
     /**
      * @return External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -229,6 +241,7 @@ public final class RepositorySettingsConfig {
     @CustomType.Builder
     public static final class Builder {
         private @Nullable Boolean actions;
+        private @Nullable Boolean defaultDeleteBranchAfterMerge;
         private @Nullable String externalTrackerFormat;
         private @Nullable String externalTrackerRegexPattern;
         private @Nullable String externalTrackerStyle;
@@ -249,6 +262,7 @@ public final class RepositorySettingsConfig {
         public Builder(RepositorySettingsConfig defaults) {
     	      Objects.requireNonNull(defaults);
     	      this.actions = defaults.actions;
+    	      this.defaultDeleteBranchAfterMerge = defaults.defaultDeleteBranchAfterMerge;
     	      this.externalTrackerFormat = defaults.externalTrackerFormat;
     	      this.externalTrackerRegexPattern = defaults.externalTrackerRegexPattern;
     	      this.externalTrackerStyle = defaults.externalTrackerStyle;
@@ -271,6 +285,12 @@ public final class RepositorySettingsConfig {
         public Builder actions(@Nullable Boolean actions) {
 
             this.actions = actions;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder defaultDeleteBranchAfterMerge(@Nullable Boolean defaultDeleteBranchAfterMerge) {
+
+            this.defaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
             return this;
         }
         @CustomType.Setter
@@ -372,6 +392,7 @@ public final class RepositorySettingsConfig {
         public RepositorySettingsConfig build() {
             final var _resultValue = new RepositorySettingsConfig();
             _resultValue.actions = actions;
+            _resultValue.defaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
             _resultValue.externalTrackerFormat = externalTrackerFormat;
             _resultValue.externalTrackerRegexPattern = externalTrackerRegexPattern;
             _resultValue.externalTrackerStyle = externalTrackerStyle;

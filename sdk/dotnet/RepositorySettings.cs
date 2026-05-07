@@ -22,6 +22,12 @@ namespace Pulumi.Forgejo
         public Output<bool?> Actions { get; private set; } = null!;
 
         /// <summary>
+        /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("defaultDeleteBranchAfterMerge")]
+        public Output<bool?> DefaultDeleteBranchAfterMerge { get; private set; } = null!;
+
+        /// <summary>
         /// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
         /// </summary>
         [Output("externalTrackerFormat")]
@@ -180,6 +186,12 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Input("actions")]
         public Input<bool>? Actions { get; set; }
+
+        /// <summary>
+        /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("defaultDeleteBranchAfterMerge")]
+        public Input<bool>? DefaultDeleteBranchAfterMerge { get; set; }
 
         /// <summary>
         /// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.

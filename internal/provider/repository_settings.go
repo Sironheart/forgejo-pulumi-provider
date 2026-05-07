@@ -15,6 +15,7 @@ type RepositorySettings struct{}
 type RepositorySettingsConfig struct {
 	Issues                                          *bool   `pulumi:"issues,optional"`
 	PullRequests                                    *bool   `pulumi:"pullRequests,optional"`
+	DefaultDeleteBranchAfterMerge                   *bool   `pulumi:"defaultDeleteBranchAfterMerge,optional"`
 	Wiki                                            *bool   `pulumi:"wiki,optional"`
 	Projects                                        *bool   `pulumi:"projects,optional"`
 	Releases                                        *bool   `pulumi:"releases,optional"`
@@ -61,6 +62,7 @@ func (a *RepositorySettingsConfig) Annotate(ann infer.Annotator) {
 func annotateRepositorySettingsConfig(a *RepositorySettingsConfig, ann infer.Annotator) {
 	ann.Describe(&a.Issues, "Whether the issue tracker unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.PullRequests, "Whether the pull request unit is enabled. Leave unset to avoid managing it.")
+	ann.Describe(&a.DefaultDeleteBranchAfterMerge, "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.")
 	ann.Describe(&a.Wiki, "Whether the wiki unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.Projects, "Whether the projects unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.Releases, "Whether the releases unit is enabled. Leave unset to avoid managing it.")
@@ -128,6 +130,7 @@ func (RepositorySettings) Diff(_ context.Context, req infer.DiffRequest[Reposito
 	addReplaceDiff(diff, "repository", req.State.Repository != req.Inputs.Repository)
 	addUpdateDiff(diff, "issues", !equalBoolPtr(req.State.Issues, req.Inputs.Issues))
 	addUpdateDiff(diff, "pullRequests", !equalBoolPtr(req.State.PullRequests, req.Inputs.PullRequests))
+	addUpdateDiff(diff, "defaultDeleteBranchAfterMerge", !equalBoolPtr(req.State.DefaultDeleteBranchAfterMerge, req.Inputs.DefaultDeleteBranchAfterMerge))
 	addUpdateDiff(diff, "wiki", !equalBoolPtr(req.State.Wiki, req.Inputs.Wiki))
 	addUpdateDiff(diff, "projects", !equalBoolPtr(req.State.Projects, req.Inputs.Projects))
 	addUpdateDiff(diff, "releases", !equalBoolPtr(req.State.Releases, req.Inputs.Releases))
@@ -177,15 +180,19 @@ func repositorySettingsEditOption(args RepositorySettingsArgs, repo *forgejo.Rep
 
 func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo *forgejo.Repository) forgejo.EditRepoOption {
 	opt := forgejo.EditRepoOption{
-		HasIssues:            settings.Issues,
-		HasPullRequests:      settings.PullRequests,
-		HasWiki:              settings.Wiki,
-		HasProjects:          settings.Projects,
-		HasReleases:          settings.Releases,
-		HasPackages:          settings.Packages,
-		HasActions:           settings.Actions,
-		GloballyEditableWiki: settings.GloballyEditableWiki,
-		WikiBranch:           settings.WikiBranch,
+		HasIssues:                     settings.Issues,
+		HasPullRequests:               settings.PullRequests,
+		DefaultDeleteBranchAfterMerge: settings.DefaultDeleteBranchAfterMerge,
+		HasWiki:                       settings.Wiki,
+		HasProjects:                   settings.Projects,
+		HasReleases:                   settings.Releases,
+		HasPackages:                   settings.Packages,
+		HasActions:                    settings.Actions,
+		GloballyEditableWiki:          settings.GloballyEditableWiki,
+		WikiBranch:                    settings.WikiBranch,
+	}
+	if settings.DefaultDeleteBranchAfterMerge != nil && opt.HasPullRequests == nil {
+		opt.HasPullRequests = boolPtr(true)
 	}
 	if settings.ExternalWikiURL != nil {
 		opt.ExternalWiki = &forgejo.ExternalWiki{ExternalWikiURL: *settings.ExternalWikiURL}
@@ -260,6 +267,11 @@ func repositorySettingsConfigFromAPI(template RepositorySettingsConfig, repo *fo
 	if template.PullRequests != nil {
 		settings.PullRequests = boolPtr(repo.HasPullRequests)
 	}
+	// The pinned SDK can set this field but does not expose it on repository reads,
+	// so preserve the desired value in state rather than inventing a default.
+	if template.DefaultDeleteBranchAfterMerge != nil {
+		settings.DefaultDeleteBranchAfterMerge = template.DefaultDeleteBranchAfterMerge
+	}
 	if template.Wiki != nil {
 		settings.Wiki = boolPtr(repo.HasWiki)
 	}
@@ -319,6 +331,9 @@ func repositorySettingsReadArgs(owner, repo string, req infer.ReadRequest[Reposi
 	}
 	if args.PullRequests == nil {
 		args.PullRequests = req.State.PullRequests
+	}
+	if args.DefaultDeleteBranchAfterMerge == nil {
+		args.DefaultDeleteBranchAfterMerge = req.State.DefaultDeleteBranchAfterMerge
 	}
 	if args.Wiki == nil {
 		args.Wiki = req.State.Wiki
@@ -443,6 +458,7 @@ func equalRepositorySettingsConfigPtr(a, b *RepositorySettingsConfig) bool {
 	}
 	return equalBoolPtr(a.Issues, b.Issues) &&
 		equalBoolPtr(a.PullRequests, b.PullRequests) &&
+		equalBoolPtr(a.DefaultDeleteBranchAfterMerge, b.DefaultDeleteBranchAfterMerge) &&
 		equalBoolPtr(a.Wiki, b.Wiki) &&
 		equalBoolPtr(a.Projects, b.Projects) &&
 		equalBoolPtr(a.Releases, b.Releases) &&
@@ -466,6 +482,9 @@ func mergeRepositoryEditOption(base *forgejo.EditRepoOption, settings forgejo.Ed
 	}
 	if settings.HasPullRequests != nil {
 		base.HasPullRequests = settings.HasPullRequests
+	}
+	if settings.DefaultDeleteBranchAfterMerge != nil {
+		base.DefaultDeleteBranchAfterMerge = settings.DefaultDeleteBranchAfterMerge
 	}
 	if settings.HasWiki != nil {
 		base.HasWiki = settings.HasWiki

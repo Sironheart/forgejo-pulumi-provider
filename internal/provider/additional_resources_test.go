@@ -256,6 +256,54 @@ func TestRepositorySettingsDiffUpdatesExternalTrackerURL(t *testing.T) {
 	assertDiffKind(t, resp, "externalTrackerUrl", p.Update)
 }
 
+func TestRepositorySettingsDiffUpdatesDefaultDeleteBranchAfterMerge(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositorySettings{}).Diff(context.Background(), infer.DiffRequest[RepositorySettingsArgs, RepositorySettingsState]{
+		State: RepositorySettingsState{RepositorySettingsArgs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				DefaultDeleteBranchAfterMerge: boolPtr(false),
+			},
+		}},
+		Inputs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				DefaultDeleteBranchAfterMerge: boolPtr(true),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "defaultDeleteBranchAfterMerge", p.Update)
+}
+
+func TestRepositorySettingsEditOptionEnablesPullRequestsForDefaultBranchDeletion(t *testing.T) {
+	t.Parallel()
+
+	opt := repositorySettingsEditOption(RepositorySettingsArgs{RepositorySettingsConfig: RepositorySettingsConfig{
+		DefaultDeleteBranchAfterMerge: boolPtr(true),
+	}}, nil)
+
+	assertBoolPtr(t, opt.DefaultDeleteBranchAfterMerge, true)
+	assertBoolPtr(t, opt.HasPullRequests, true)
+}
+
+func TestRepositorySettingsEditOptionKeepsExplicitPullRequests(t *testing.T) {
+	t.Parallel()
+
+	opt := repositorySettingsEditOption(RepositorySettingsArgs{RepositorySettingsConfig: RepositorySettingsConfig{
+		PullRequests:                  boolPtr(false),
+		DefaultDeleteBranchAfterMerge: boolPtr(true),
+	}}, nil)
+
+	assertBoolPtr(t, opt.DefaultDeleteBranchAfterMerge, true)
+	assertBoolPtr(t, opt.HasPullRequests, false)
+}
+
 func assertDiffKind(t *testing.T, resp infer.DiffResponse, property string, kind p.DiffKind) {
 	t.Helper()
 	if !resp.HasChanges {
@@ -267,5 +315,15 @@ func assertDiffKind(t *testing.T, resp infer.DiffResponse, property string, kind
 	}
 	if diff.Kind != kind {
 		t.Fatalf("expected %s diff kind %v, got %v", property, kind, diff.Kind)
+	}
+}
+
+func assertBoolPtr(t *testing.T, got *bool, want bool) {
+	t.Helper()
+	if got == nil {
+		t.Fatalf("expected bool pointer %v, got nil", want)
+	}
+	if *got != want {
+		t.Fatalf("expected bool pointer %v, got %v", want, *got)
 	}
 }

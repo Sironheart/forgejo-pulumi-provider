@@ -39,6 +39,10 @@ export class RepositorySettings extends pulumi.CustomResource {
      */
     declare public readonly actions: pulumi.Output<boolean | undefined>;
     /**
+     * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     */
+    declare public readonly defaultDeleteBranchAfterMerge: pulumi.Output<boolean | undefined>;
+    /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      */
     declare public readonly externalTrackerFormat: pulumi.Output<string | undefined>;
@@ -129,6 +133,7 @@ export class RepositorySettings extends pulumi.CustomResource {
                 throw new Error("Missing required property 'repository'");
             }
             resourceInputs["actions"] = args?.actions;
+            resourceInputs["defaultDeleteBranchAfterMerge"] = args?.defaultDeleteBranchAfterMerge;
             resourceInputs["externalTrackerFormat"] = args?.externalTrackerFormat;
             resourceInputs["externalTrackerRegexPattern"] = args?.externalTrackerRegexPattern;
             resourceInputs["externalTrackerStyle"] = args?.externalTrackerStyle;
@@ -149,6 +154,7 @@ export class RepositorySettings extends pulumi.CustomResource {
             resourceInputs["wikiBranch"] = args?.wikiBranch;
         } else {
             resourceInputs["actions"] = undefined /*out*/;
+            resourceInputs["defaultDeleteBranchAfterMerge"] = undefined /*out*/;
             resourceInputs["externalTrackerFormat"] = undefined /*out*/;
             resourceInputs["externalTrackerRegexPattern"] = undefined /*out*/;
             resourceInputs["externalTrackerStyle"] = undefined /*out*/;
@@ -181,6 +187,10 @@ export interface RepositorySettingsArgs {
      * Whether the actions unit is enabled. Leave unset to avoid managing it.
      */
     actions?: pulumi.Input<boolean>;
+    /**
+     * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     */
+    defaultDeleteBranchAfterMerge?: pulumi.Input<boolean>;
     /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      */

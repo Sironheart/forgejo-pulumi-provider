@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -66,6 +66,10 @@
         "actions": {
           "type": "boolean",
           "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
+        },
+        "defaultDeleteBranchAfterMerge": {
+          "type": "boolean",
+          "description": "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set."
         },
         "externalTrackerFormat": {
           "type": "string",
@@ -1225,6 +1229,10 @@
           "type": "boolean",
           "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
         },
+        "defaultDeleteBranchAfterMerge": {
+          "type": "boolean",
+          "description": "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set."
+        },
         "externalTrackerFormat": {
           "type": "string",
           "description": "External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}."
@@ -1306,6 +1314,10 @@
         "actions": {
           "type": "boolean",
           "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
+        },
+        "defaultDeleteBranchAfterMerge": {
+          "type": "boolean",
+          "description": "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set."
         },
         "externalTrackerFormat": {
           "type": "string",

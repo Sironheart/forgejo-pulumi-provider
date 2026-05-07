@@ -18,6 +18,8 @@ type RepositorySettings struct {
 
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrOutput `pulumi:"actions"`
+	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+	DefaultDeleteBranchAfterMerge pulumi.BoolPtrOutput `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat pulumi.StringPtrOutput `pulumi:"externalTrackerFormat"`
 	// External issue tracker regular expression pattern.
@@ -104,6 +106,8 @@ func (RepositorySettingsState) ElementType() reflect.Type {
 type repositorySettingsArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions *bool `pulumi:"actions"`
+	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+	DefaultDeleteBranchAfterMerge *bool `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat *string `pulumi:"externalTrackerFormat"`
 	// External issue tracker regular expression pattern.
@@ -146,6 +150,8 @@ type repositorySettingsArgs struct {
 type RepositorySettingsArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrInput
+	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+	DefaultDeleteBranchAfterMerge pulumi.BoolPtrInput
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat pulumi.StringPtrInput
 	// External issue tracker regular expression pattern.
@@ -224,6 +230,11 @@ func (o RepositorySettingsOutput) ToRepositorySettingsOutputWithContext(ctx cont
 // Whether the actions unit is enabled. Leave unset to avoid managing it.
 func (o RepositorySettingsOutput) Actions() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.Actions }).(pulumi.BoolPtrOutput)
+}
+
+// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) DefaultDeleteBranchAfterMerge() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.DefaultDeleteBranchAfterMerge }).(pulumi.BoolPtrOutput)
 }
 
 // External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.

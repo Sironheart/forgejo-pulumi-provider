@@ -11,6 +11,10 @@ export interface RepositorySettingsConfig {
      */
     actions?: boolean;
     /**
+     * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     */
+    defaultDeleteBranchAfterMerge?: boolean;
+    /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      */
     externalTrackerFormat?: string;

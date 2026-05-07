@@ -18,6 +18,10 @@ namespace Pulumi.Forgejo.Outputs
         /// </summary>
         public readonly bool? Actions;
         /// <summary>
+        /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        public readonly bool? DefaultDeleteBranchAfterMerge;
+        /// <summary>
         /// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
         /// </summary>
         public readonly string? ExternalTrackerFormat;
@@ -86,6 +90,8 @@ namespace Pulumi.Forgejo.Outputs
         private RepositorySettingsConfig(
             bool? actions,
 
+            bool? defaultDeleteBranchAfterMerge,
+
             string? externalTrackerFormat,
 
             string? externalTrackerRegexPattern,
@@ -119,6 +125,7 @@ namespace Pulumi.Forgejo.Outputs
             string? wikiBranch)
         {
             Actions = actions;
+            DefaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
             ExternalTrackerFormat = externalTrackerFormat;
             ExternalTrackerRegexPattern = externalTrackerRegexPattern;
             ExternalTrackerStyle = externalTrackerStyle;

@@ -33,6 +33,21 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
     }
 
     /**
+     * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="defaultDeleteBranchAfterMerge")
+    private @Nullable Output<Boolean> defaultDeleteBranchAfterMerge;
+
+    /**
+     * @return Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<Boolean>> defaultDeleteBranchAfterMerge() {
+        return Optional.ofNullable(this.defaultDeleteBranchAfterMerge);
+    }
+
+    /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      * 
      */
@@ -306,6 +321,7 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
 
     private RepositorySettingsArgs(RepositorySettingsArgs $) {
         this.actions = $.actions;
+        this.defaultDeleteBranchAfterMerge = $.defaultDeleteBranchAfterMerge;
         this.externalTrackerFormat = $.externalTrackerFormat;
         this.externalTrackerRegexPattern = $.externalTrackerRegexPattern;
         this.externalTrackerStyle = $.externalTrackerStyle;
@@ -363,6 +379,27 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
          */
         public Builder actions(Boolean actions) {
             return actions(Output.of(actions));
+        }
+
+        /**
+         * @param defaultDeleteBranchAfterMerge Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder defaultDeleteBranchAfterMerge(@Nullable Output<Boolean> defaultDeleteBranchAfterMerge) {
+            $.defaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
+            return this;
+        }
+
+        /**
+         * @param defaultDeleteBranchAfterMerge Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder defaultDeleteBranchAfterMerge(Boolean defaultDeleteBranchAfterMerge) {
+            return defaultDeleteBranchAfterMerge(Output.of(defaultDeleteBranchAfterMerge));
         }
 
         /**

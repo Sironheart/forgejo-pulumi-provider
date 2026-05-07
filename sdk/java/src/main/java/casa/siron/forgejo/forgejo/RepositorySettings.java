@@ -35,6 +35,20 @@ public class RepositorySettings extends com.pulumi.resources.CustomResource {
         return Codegen.optional(this.actions);
     }
     /**
+     * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="defaultDeleteBranchAfterMerge", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> defaultDeleteBranchAfterMerge;
+
+    /**
+     * @return Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<Boolean>> defaultDeleteBranchAfterMerge() {
+        return Codegen.optional(this.defaultDeleteBranchAfterMerge);
+    }
+    /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      * 
      */

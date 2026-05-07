@@ -339,6 +339,7 @@ func TestRepositorySettingsCreateDryRunBuildsPreviewState(t *testing.T) {
 		RepositorySettingsConfig: RepositorySettingsConfig{
 			Issues:                                 boolPtr(true),
 			PullRequests:                           boolPtr(true),
+			DefaultDeleteBranchAfterMerge:          boolPtr(true),
 			Wiki:                                   boolPtr(true),
 			Actions:                                boolPtr(true),
 			ExternalWikiURL:                        stringPtr("https://wiki.example.test/infra"),

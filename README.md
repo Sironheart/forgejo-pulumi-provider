@@ -92,7 +92,7 @@ Outputs: `created`, `updated`.
 
 `forgejo:index:RepositorySettings` manages repository unit flags and wiki or issue tracker settings.
 
-Inputs include `owner`, `repository`, `issues`, `pullRequests`, `wiki`, `projects`, `releases`, `packages`, `actions`, `externalWikiUrl`, internal tracker settings, and external tracker settings.
+Inputs include `owner`, `repository`, `issues`, `pullRequests`, `defaultDeleteBranchAfterMerge`, `wiki`, `projects`, `releases`, `packages`, `actions`, `externalWikiUrl`, internal tracker settings, and external tracker settings.
 
 `forgejo:index:RepositoryPushMirror` manages a repository push mirror and can limit it to matching branches.
 

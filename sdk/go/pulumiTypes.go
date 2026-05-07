@@ -16,6 +16,8 @@ var _ = internal.GetEnvOrDefault
 type RepositorySettingsConfig struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions *bool `pulumi:"actions"`
+	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+	DefaultDeleteBranchAfterMerge *bool `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat *string `pulumi:"externalTrackerFormat"`
 	// External issue tracker regular expression pattern.
@@ -64,6 +66,8 @@ type RepositorySettingsConfigInput interface {
 type RepositorySettingsConfigArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrInput `pulumi:"actions"`
+	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+	DefaultDeleteBranchAfterMerge pulumi.BoolPtrInput `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat pulumi.StringPtrInput `pulumi:"externalTrackerFormat"`
 	// External issue tracker regular expression pattern.
@@ -180,6 +184,11 @@ func (o RepositorySettingsConfigOutput) Actions() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v RepositorySettingsConfig) *bool { return v.Actions }).(pulumi.BoolPtrOutput)
 }
 
+// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsConfigOutput) DefaultDeleteBranchAfterMerge() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v RepositorySettingsConfig) *bool { return v.DefaultDeleteBranchAfterMerge }).(pulumi.BoolPtrOutput)
+}
+
 // External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 func (o RepositorySettingsConfigOutput) ExternalTrackerFormat() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v RepositorySettingsConfig) *string { return v.ExternalTrackerFormat }).(pulumi.StringPtrOutput)
@@ -291,6 +300,16 @@ func (o RepositorySettingsConfigPtrOutput) Actions() pulumi.BoolPtrOutput {
 			return nil
 		}
 		return v.Actions
+	}).(pulumi.BoolPtrOutput)
+}
+
+// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsConfigPtrOutput) DefaultDeleteBranchAfterMerge() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettingsConfig) *bool {
+		if v == nil {
+			return nil
+		}
+		return v.DefaultDeleteBranchAfterMerge
 	}).(pulumi.BoolPtrOutput)
 }
 
