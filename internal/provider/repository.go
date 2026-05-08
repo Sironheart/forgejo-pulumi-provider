@@ -31,6 +31,17 @@ type RepositoryState struct {
 	CloneURL string `pulumi:"cloneUrl"`
 }
 
+type legacyRepositoryState struct {
+	RepositoryArgs
+	Issues   *bool  `pulumi:"issues,optional"`
+	Wiki     *bool  `pulumi:"wiki,optional"`
+	Projects *bool  `pulumi:"projects,optional"`
+	FullName string `pulumi:"fullName"`
+	HTMLURL  string `pulumi:"htmlUrl"`
+	SSHURL   string `pulumi:"sshUrl"`
+	CloneURL string `pulumi:"cloneUrl"`
+}
+
 func (r *Repository) Annotate(a infer.Annotator) {
 	a.Describe(r, "A Forgejo repository.")
 	a.SetToken("index", "Repository")
@@ -45,6 +56,40 @@ func (a *RepositoryArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Website, "Repository website URL.")
 	ann.Describe(&a.Template, "Whether the repository can be used as a template.")
 	ann.Describe(&a.Settings, "Optional repository unit, wiki, and issue tracker settings to manage with this repository.")
+}
+
+func (Repository) StateMigrations(context.Context) []infer.StateMigrationFunc[RepositoryState] {
+	return []infer.StateMigrationFunc[RepositoryState]{
+		infer.StateMigration(migrateLegacyRepositoryState),
+	}
+}
+
+func migrateLegacyRepositoryState(_ context.Context, legacy legacyRepositoryState) (infer.MigrationResult[RepositoryState], error) {
+	if legacy.Issues == nil && legacy.Wiki == nil && legacy.Projects == nil {
+		return infer.MigrationResult[RepositoryState]{}, nil
+	}
+
+	state := RepositoryState{
+		RepositoryArgs: legacy.RepositoryArgs,
+		FullName:       legacy.FullName,
+		HTMLURL:        legacy.HTMLURL,
+		SSHURL:         legacy.SSHURL,
+		CloneURL:       legacy.CloneURL,
+	}
+	if state.Settings == nil {
+		state.Settings = &RepositorySettingsConfig{}
+	}
+	if legacy.Issues != nil && state.Settings.Issues == nil {
+		state.Settings.Issues = legacy.Issues
+	}
+	if legacy.Wiki != nil && state.Settings.Wiki == nil {
+		state.Settings.Wiki = legacy.Wiki
+	}
+	if legacy.Projects != nil && state.Settings.Projects == nil {
+		state.Settings.Projects = legacy.Projects
+	}
+
+	return infer.MigrationResult[RepositoryState]{Result: &state}, nil
 }
 
 func (Repository) Create(ctx context.Context, req infer.CreateRequest[RepositoryArgs]) (infer.CreateResponse[RepositoryState], error) {
