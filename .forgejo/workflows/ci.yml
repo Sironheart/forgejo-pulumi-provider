@@ -166,7 +166,7 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}

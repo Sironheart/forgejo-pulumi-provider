@@ -171,7 +171,7 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
@@ -243,7 +243,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: go.sum
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
@@ -310,7 +310,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
@@ -353,7 +353,7 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
@@ -392,7 +392,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
@@ -434,7 +434,7 @@ jobs:
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
 
-      - uses: https://github.com/actions/cache@v4
+      - uses: https://github.com/actions/cache@v5
         with:
           path: ~/.pulumi/bin
           key: pulumi-${{ env.PULUMI_VERSION }}
