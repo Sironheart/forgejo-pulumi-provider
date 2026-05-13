@@ -2,7 +2,7 @@
 go = "1.26.2"
 pulumi = "3.232.0"
 jq = "1.8.1"
-"github:caarlos0/svu" = "3.4.0"
+"github:caarlos0/svu" = "3.4.1"
 goreleaser = "2.15.4"
 golangci-lint = "2.11.4"
 
