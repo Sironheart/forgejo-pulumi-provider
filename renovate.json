@@ -4,6 +4,50 @@
     "config:recommended"
   ],
   "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
     "**/sdk/**"
-  ]
+  ],
+  "npm": {
+    "ignorePaths": [
+      "**/node_modules/**",
+      "**/bower_components/**",
+      "**/vendor/**",
+      "**/examples/**",
+      "**/__tests__/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/__fixtures__/**",
+      "**/sdk/**"
+    ]
+  },
+  "gradle": {
+    "ignorePaths": [
+      "**/node_modules/**",
+      "**/bower_components/**",
+      "**/vendor/**",
+      "**/examples/**",
+      "**/__tests__/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/__fixtures__/**",
+      "**/sdk/**"
+    ]
+  },
+  "nuget": {
+    "ignorePaths": [
+      "**/node_modules/**",
+      "**/bower_components/**",
+      "**/vendor/**",
+      "**/examples/**",
+      "**/__fixtures__/**",
+      "**/sdk/**"
+    ]
+  }
 }
