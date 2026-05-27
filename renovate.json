@@ -4,6 +4,6 @@
     "config:recommended"
   ],
   "ignorePaths": [
-    "sdk/**"
-  ],
+    "**/sdk/**"
+  ]
 }
