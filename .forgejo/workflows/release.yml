@@ -430,7 +430,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: gradle
 
-      - uses: https://github.com/gradle/actions/setup-gradle@v4
+      - uses: https://github.com/gradle/actions/setup-gradle@v6
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
 
