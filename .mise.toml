@@ -3,7 +3,7 @@ go = "1.26.3"
 pulumi = "3.244.0"
 jq = "1.8.1"
 "github:caarlos0/svu" = "3.4.1"
-goreleaser = "2.15.4"
+goreleaser = "2.16.0"
 golangci-lint = "2.12.2"
 
 [tasks.fmt]
