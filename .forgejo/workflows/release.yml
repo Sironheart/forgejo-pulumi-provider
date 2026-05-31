@@ -31,7 +31,7 @@ env:
   # renovate: datasource=docker depName=azul/zulu-openjdk
   JAVA_VERSION: "11.0.31"
   # renovate: datasource=github-releases depName=gradle/gradle
-  GRADLE_VERSION: "8.10"
+  GRADLE_VERSION: "v8.14.5"
   # renovate: datasource=github-releases depName=goreleaser/goreleaser
   GORELEASER_VERSION: "2.16.0"
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
