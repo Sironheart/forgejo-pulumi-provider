@@ -8,7 +8,7 @@ env:
   # renovate: datasource=github-releases depName=golangci/golangci-lint
   GOLANGCI_LINT_VERSION: v2.11.4
   # renovate: datasource=github-releases depName=caarlos0/svu
-  SVU_VERSION: v3.4.0
+  SVU_VERSION: v3.4.1
 
 on:
   pull_request:
