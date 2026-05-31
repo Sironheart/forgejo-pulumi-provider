@@ -48,6 +48,10 @@ export class Repository extends pulumi.CustomResource {
     declare public /*out*/ readonly fullName: pulumi.Output<string>;
     declare public /*out*/ readonly htmlUrl: pulumi.Output<string>;
     /**
+     * Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+     */
+    declare public readonly initializeWithReadme: pulumi.Output<boolean | undefined>;
+    /**
      * Repository name.
      */
     declare public readonly name: pulumi.Output<string>;
@@ -69,6 +73,10 @@ export class Repository extends pulumi.CustomResource {
      */
     declare public readonly template: pulumi.Output<boolean | undefined>;
     /**
+     * Repository topics.
+     */
+    declare public readonly topics: pulumi.Output<string[] | undefined>;
+    /**
      * Repository website URL.
      */
     declare public readonly website: pulumi.Output<string | undefined>;
@@ -89,11 +97,13 @@ export class Repository extends pulumi.CustomResource {
             }
             resourceInputs["defaultBranch"] = args?.defaultBranch;
             resourceInputs["description"] = args?.description;
+            resourceInputs["initializeWithReadme"] = args?.initializeWithReadme;
             resourceInputs["name"] = args?.name;
             resourceInputs["owner"] = args?.owner;
             resourceInputs["private"] = args?.private;
             resourceInputs["settings"] = args?.settings;
             resourceInputs["template"] = args?.template;
+            resourceInputs["topics"] = args?.topics;
             resourceInputs["website"] = args?.website;
             resourceInputs["cloneUrl"] = undefined /*out*/;
             resourceInputs["fullName"] = undefined /*out*/;
@@ -105,12 +115,14 @@ export class Repository extends pulumi.CustomResource {
             resourceInputs["description"] = undefined /*out*/;
             resourceInputs["fullName"] = undefined /*out*/;
             resourceInputs["htmlUrl"] = undefined /*out*/;
+            resourceInputs["initializeWithReadme"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
             resourceInputs["owner"] = undefined /*out*/;
             resourceInputs["private"] = undefined /*out*/;
             resourceInputs["settings"] = undefined /*out*/;
             resourceInputs["sshUrl"] = undefined /*out*/;
             resourceInputs["template"] = undefined /*out*/;
+            resourceInputs["topics"] = undefined /*out*/;
             resourceInputs["website"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
@@ -131,6 +143,10 @@ export interface RepositoryArgs {
      */
     description?: pulumi.Input<string>;
     /**
+     * Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+     */
+    initializeWithReadme?: pulumi.Input<boolean>;
+    /**
      * Repository name.
      */
     name: pulumi.Input<string>;
@@ -150,6 +166,10 @@ export interface RepositoryArgs {
      * Whether the repository can be used as a template.
      */
     template?: pulumi.Input<boolean>;
+    /**
+     * Repository topics.
+     */
+    topics?: pulumi.Input<pulumi.Input<string>[]>;
     /**
      * Repository website URL.
      */

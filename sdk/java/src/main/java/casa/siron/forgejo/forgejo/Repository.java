@@ -12,6 +12,7 @@ import com.pulumi.core.annotations.ResourceType;
 import com.pulumi.core.internal.Codegen;
 import java.lang.Boolean;
 import java.lang.String;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -66,6 +67,20 @@ public class Repository extends com.pulumi.resources.CustomResource {
 
     public Output<String> htmlUrl() {
         return this.htmlUrl;
+    }
+    /**
+     * Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+     * 
+     */
+    @Export(name="initializeWithReadme", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> initializeWithReadme;
+
+    /**
+     * @return Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+     * 
+     */
+    public Output<Optional<Boolean>> initializeWithReadme() {
+        return Codegen.optional(this.initializeWithReadme);
     }
     /**
      * Repository name.
@@ -142,6 +157,20 @@ public class Repository extends com.pulumi.resources.CustomResource {
      */
     public Output<Optional<Boolean>> template() {
         return Codegen.optional(this.template);
+    }
+    /**
+     * Repository topics.
+     * 
+     */
+    @Export(name="topics", refs={List.class,String.class}, tree="[0,1]")
+    private Output</* @Nullable */ List<String>> topics;
+
+    /**
+     * @return Repository topics.
+     * 
+     */
+    public Output<Optional<List<String>>> topics() {
+        return Codegen.optional(this.topics);
     }
     /**
      * Repository website URL.

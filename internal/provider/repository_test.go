@@ -65,3 +65,72 @@ func TestRepositoryDiffMigratesLegacyUnitState(t *testing.T) {
 		t.Fatalf("expected no diff, got %#v", resp.DetailedDiff)
 	}
 }
+
+func TestRepositoryDiffIgnoresInitializeWithReadmeChange(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (Repository{}).Diff(context.Background(), infer.DiffRequest[RepositoryArgs, RepositoryState]{
+		State: RepositoryState{RepositoryArgs: RepositoryArgs{
+			Name:                 "infra",
+			Owner:                "alice",
+			InitializeWithReadme: false,
+		}},
+		Inputs: RepositoryArgs{
+			Name:                 "infra",
+			InitializeWithReadme: true,
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	if resp.HasChanges {
+		t.Fatalf("expected no diff for initializeWithReadme change, got %#v", resp.DetailedDiff)
+	}
+}
+
+func TestRepositoryDiffTopics(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (Repository{}).Diff(context.Background(), infer.DiffRequest[RepositoryArgs, RepositoryState]{
+		State: RepositoryState{RepositoryArgs: RepositoryArgs{
+			Name:   "infra",
+			Owner:  "alice",
+			Topics: []string{"pulumi", "git"},
+		}},
+		Inputs: RepositoryArgs{
+			Name:   "infra",
+			Topics: []string{"pulumi", "forgejo"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	if !resp.HasChanges {
+		t.Fatalf("expected diff for topics change")
+	}
+	if d, ok := resp.DetailedDiff["topics"]; !ok || d.Kind != p.Update {
+		t.Fatalf("expected topics update diff, got %#v", resp.DetailedDiff)
+	}
+}
+
+func TestRepositoryDiffIgnoresTopicsOrder(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (Repository{}).Diff(context.Background(), infer.DiffRequest[RepositoryArgs, RepositoryState]{
+		State: RepositoryState{RepositoryArgs: RepositoryArgs{
+			Name:   "infra",
+			Owner:  "alice",
+			Topics: []string{"forgejo", "pulumi"},
+		}},
+		Inputs: RepositoryArgs{
+			Name:   "infra",
+			Topics: []string{"pulumi", "forgejo"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	if resp.HasChanges {
+		t.Fatalf("expected no diff when topics differ only in order, got %#v", resp.DetailedDiff)
+	}
+}

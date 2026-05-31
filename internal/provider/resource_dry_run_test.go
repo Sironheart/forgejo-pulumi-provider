@@ -12,14 +12,16 @@ func TestRepositoryCreateDryRunBuildsPreviewState(t *testing.T) {
 	t.Parallel()
 
 	args := RepositoryArgs{
-		Name:          "infra",
-		Owner:         "sironheart",
-		Description:   "Infrastructure repository",
-		Private:       true,
-		DefaultBranch: "main",
-		Website:       "https://example.test",
-		Template:      true,
-		Settings:      &RepositorySettingsConfig{Actions: boolPtr(true), ExternalWikiURL: stringPtr("https://wiki.example.test/infra")},
+		Name:                 "infra",
+		Owner:                "sironheart",
+		Description:          "Infrastructure repository",
+		Private:              true,
+		DefaultBranch:        "main",
+		Website:              "https://example.test",
+		Template:             true,
+		InitializeWithReadme: true,
+		Topics:               []string{"infra", "pulumi"},
+		Settings:             &RepositorySettingsConfig{Actions: boolPtr(true), ExternalWikiURL: stringPtr("https://wiki.example.test/infra")},
 	}
 	resp, err := (Repository{}).Create(context.Background(), infer.CreateRequest[RepositoryArgs]{Inputs: args, DryRun: true})
 	if err != nil {

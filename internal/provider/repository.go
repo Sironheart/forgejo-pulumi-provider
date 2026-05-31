@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
@@ -13,14 +14,16 @@ import (
 type Repository struct{}
 
 type RepositoryArgs struct {
-	Name          string                    `pulumi:"name"`
-	Owner         string                    `pulumi:"owner,optional"`
-	Description   string                    `pulumi:"description,optional"`
-	Private       bool                      `pulumi:"private,optional"`
-	DefaultBranch string                    `pulumi:"defaultBranch,optional"`
-	Website       string                    `pulumi:"website,optional"`
-	Template      bool                      `pulumi:"template,optional"`
-	Settings      *RepositorySettingsConfig `pulumi:"settings,optional"`
+	Name                 string                    `pulumi:"name"`
+	Owner                string                    `pulumi:"owner,optional"`
+	Description          string                    `pulumi:"description,optional"`
+	Private              bool                      `pulumi:"private,optional"`
+	DefaultBranch        string                    `pulumi:"defaultBranch,optional"`
+	Website              string                    `pulumi:"website,optional"`
+	Template             bool                      `pulumi:"template,optional"`
+	InitializeWithReadme bool                      `pulumi:"initializeWithReadme,optional"`
+	Topics               []string                  `pulumi:"topics,optional"`
+	Settings             *RepositorySettingsConfig `pulumi:"settings,optional"`
 }
 
 type RepositoryState struct {
@@ -55,6 +58,8 @@ func (a *RepositoryArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.DefaultBranch, "Default branch name. Leave empty to use Forgejo's default.")
 	ann.Describe(&a.Website, "Repository website URL.")
 	ann.Describe(&a.Template, "Whether the repository can be used as a template.")
+	ann.Describe(&a.InitializeWithReadme, "Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.")
+	ann.Describe(&a.Topics, "Repository topics.")
 	ann.Describe(&a.Settings, "Optional repository unit, wiki, and issue tracker settings to manage with this repository.")
 }
 
@@ -111,6 +116,7 @@ func (Repository) Create(ctx context.Context, req infer.CreateRequest[Repository
 		Private:       req.Inputs.Private,
 		DefaultBranch: req.Inputs.DefaultBranch,
 		Template:      req.Inputs.Template,
+		AutoInit:      req.Inputs.InitializeWithReadme,
 	}
 	repo, err := createRepository(client, req.Inputs.Owner, create)
 	if err != nil {
@@ -122,6 +128,14 @@ func (Repository) Create(ctx context.Context, req infer.CreateRequest[Repository
 	}
 
 	state := repositoryStateFromAPI(repo, req.Inputs.Settings)
+	state.InitializeWithReadme = req.Inputs.InitializeWithReadme
+	if req.Inputs.Topics != nil {
+		_, err = client.SetRepoTopics(state.Owner, state.Name, req.Inputs.Topics)
+		if err != nil {
+			return infer.CreateResponse[RepositoryState]{}, err
+		}
+		state.Topics = req.Inputs.Topics
+	}
 	return infer.CreateResponse[RepositoryState]{ID: repositoryID(state.Owner, state.Name), Output: state}, nil
 }
 
@@ -145,6 +159,14 @@ func (Repository) Read(ctx context.Context, req infer.ReadRequest[RepositoryArgs
 	}
 
 	state := repositoryStateFromAPI(repo, repositorySettingsTemplate(req.Inputs.Settings, req.State.Settings))
+	state.InitializeWithReadme = req.State.InitializeWithReadme
+	if req.Inputs.Topics != nil {
+		topics, _, err := client.ListRepoTopics(owner, name, forgejo.ListRepoTopicsOptions{})
+		if err != nil {
+			return infer.ReadResponse[RepositoryArgs, RepositoryState]{}, err
+		}
+		state.Topics = topics
+	}
 	return infer.ReadResponse[RepositoryArgs, RepositoryState]{
 		ID:     repositoryID(state.Owner, state.Name),
 		Inputs: state.RepositoryArgs,
@@ -165,6 +187,7 @@ func (Repository) Diff(_ context.Context, req infer.DiffRequest[RepositoryArgs, 
 	addUpdateDiff(diff, "defaultBranch", req.Inputs.DefaultBranch != "" && req.State.DefaultBranch != req.Inputs.DefaultBranch)
 	addUpdateDiff(diff, "website", req.State.Website != req.Inputs.Website)
 	addUpdateDiff(diff, "template", req.State.Template != req.Inputs.Template)
+	addUpdateDiff(diff, "topics", !equalStringSlice(req.State.Topics, req.Inputs.Topics))
 	addUpdateDiff(diff, "settings", !equalRepositorySettingsConfigPtr(req.State.Settings, req.Inputs.Settings))
 
 	return p.DiffResponse{HasChanges: len(diff) > 0, DeleteBeforeReplace: true, DetailedDiff: diff}, nil
@@ -196,7 +219,17 @@ func (Repository) Update(ctx context.Context, req infer.UpdateRequest[Repository
 		return infer.UpdateResponse[RepositoryState]{}, err
 	}
 
-	return infer.UpdateResponse[RepositoryState]{Output: repositoryStateFromAPI(repo, req.Inputs.Settings)}, nil
+	if req.Inputs.Topics != nil {
+		_, err = client.SetRepoTopics(owner, name, req.Inputs.Topics)
+		if err != nil {
+			return infer.UpdateResponse[RepositoryState]{}, err
+		}
+	}
+
+	state := repositoryStateFromAPI(repo, req.Inputs.Settings)
+	state.InitializeWithReadme = req.State.InitializeWithReadme
+	state.Topics = req.Inputs.Topics
+	return infer.UpdateResponse[RepositoryState]{Output: state}, nil
 }
 
 func (Repository) Delete(ctx context.Context, req infer.DeleteRequest[RepositoryState]) (infer.DeleteResponse, error) {
@@ -329,4 +362,18 @@ func addUpdateDiff(diff map[string]p.PropertyDiff, field string, changed bool) {
 	if changed {
 		diff[field] = p.PropertyDiff{Kind: p.Update, InputDiff: true}
 	}
+}
+
+func equalStringSlice(a, b []string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	a = slices.Clone(a)
+	b = slices.Clone(b)
+	slices.Sort(a)
+	slices.Sort(b)
+	return slices.Equal(a, b)
 }

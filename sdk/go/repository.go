@@ -23,6 +23,8 @@ type Repository struct {
 	Description pulumi.StringPtrOutput `pulumi:"description"`
 	FullName    pulumi.StringOutput    `pulumi:"fullName"`
 	HtmlUrl     pulumi.StringOutput    `pulumi:"htmlUrl"`
+	// Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+	InitializeWithReadme pulumi.BoolPtrOutput `pulumi:"initializeWithReadme"`
 	// Repository name.
 	Name pulumi.StringOutput `pulumi:"name"`
 	// Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
@@ -34,6 +36,8 @@ type Repository struct {
 	SshUrl   pulumi.StringOutput               `pulumi:"sshUrl"`
 	// Whether the repository can be used as a template.
 	Template pulumi.BoolPtrOutput `pulumi:"template"`
+	// Repository topics.
+	Topics pulumi.StringArrayOutput `pulumi:"topics"`
 	// Repository website URL.
 	Website pulumi.StringPtrOutput `pulumi:"website"`
 }
@@ -85,6 +89,8 @@ type repositoryArgs struct {
 	DefaultBranch *string `pulumi:"defaultBranch"`
 	// Repository description.
 	Description *string `pulumi:"description"`
+	// Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+	InitializeWithReadme *bool `pulumi:"initializeWithReadme"`
 	// Repository name.
 	Name string `pulumi:"name"`
 	// Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
@@ -95,6 +101,8 @@ type repositoryArgs struct {
 	Settings *RepositorySettingsConfig `pulumi:"settings"`
 	// Whether the repository can be used as a template.
 	Template *bool `pulumi:"template"`
+	// Repository topics.
+	Topics []string `pulumi:"topics"`
 	// Repository website URL.
 	Website *string `pulumi:"website"`
 }
@@ -105,6 +113,8 @@ type RepositoryArgs struct {
 	DefaultBranch pulumi.StringPtrInput
 	// Repository description.
 	Description pulumi.StringPtrInput
+	// Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+	InitializeWithReadme pulumi.BoolPtrInput
 	// Repository name.
 	Name pulumi.StringInput
 	// Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
@@ -115,6 +125,8 @@ type RepositoryArgs struct {
 	Settings RepositorySettingsConfigPtrInput
 	// Whether the repository can be used as a template.
 	Template pulumi.BoolPtrInput
+	// Repository topics.
+	Topics pulumi.StringArrayInput
 	// Repository website URL.
 	Website pulumi.StringPtrInput
 }
@@ -178,6 +190,11 @@ func (o RepositoryOutput) HtmlUrl() pulumi.StringOutput {
 	return o.ApplyT(func(v *Repository) pulumi.StringOutput { return v.HtmlUrl }).(pulumi.StringOutput)
 }
 
+// Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+func (o RepositoryOutput) InitializeWithReadme() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.InitializeWithReadme }).(pulumi.BoolPtrOutput)
+}
+
 // Repository name.
 func (o RepositoryOutput) Name() pulumi.StringOutput {
 	return o.ApplyT(func(v *Repository) pulumi.StringOutput { return v.Name }).(pulumi.StringOutput)
@@ -205,6 +222,11 @@ func (o RepositoryOutput) SshUrl() pulumi.StringOutput {
 // Whether the repository can be used as a template.
 func (o RepositoryOutput) Template() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Repository) pulumi.BoolPtrOutput { return v.Template }).(pulumi.BoolPtrOutput)
+}
+
+// Repository topics.
+func (o RepositoryOutput) Topics() pulumi.StringArrayOutput {
+	return o.ApplyT(func(v *Repository) pulumi.StringArrayOutput { return v.Topics }).(pulumi.StringArrayOutput)
 }
 
 // Repository website URL.

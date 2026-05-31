@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -633,6 +633,10 @@
         "htmlUrl": {
           "type": "string"
         },
+        "initializeWithReadme": {
+          "type": "boolean",
+          "description": "Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect."
+        },
         "name": {
           "type": "string",
           "description": "Repository name."
@@ -656,6 +660,13 @@
           "type": "boolean",
           "description": "Whether the repository can be used as a template."
         },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Repository topics."
+        },
         "website": {
           "type": "string",
           "description": "Repository website URL."
@@ -677,6 +688,10 @@
           "type": "string",
           "description": "Repository description."
         },
+        "initializeWithReadme": {
+          "type": "boolean",
+          "description": "Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect."
+        },
         "name": {
           "type": "string",
           "description": "Repository name."
@@ -696,6 +711,13 @@
         "template": {
           "type": "boolean",
           "description": "Whether the repository can be used as a template."
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Repository topics."
         },
         "website": {
           "type": "string",

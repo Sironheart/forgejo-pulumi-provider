@@ -9,6 +9,7 @@ import com.pulumi.core.annotations.Import;
 import com.pulumi.exceptions.MissingRequiredPropertyException;
 import java.lang.Boolean;
 import java.lang.String;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -46,6 +47,21 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
      */
     public Optional<Output<String>> description() {
         return Optional.ofNullable(this.description);
+    }
+
+    /**
+     * Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+     * 
+     */
+    @Import(name="initializeWithReadme")
+    private @Nullable Output<Boolean> initializeWithReadme;
+
+    /**
+     * @return Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+     * 
+     */
+    public Optional<Output<Boolean>> initializeWithReadme() {
+        return Optional.ofNullable(this.initializeWithReadme);
     }
 
     /**
@@ -124,6 +140,21 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
     }
 
     /**
+     * Repository topics.
+     * 
+     */
+    @Import(name="topics")
+    private @Nullable Output<List<String>> topics;
+
+    /**
+     * @return Repository topics.
+     * 
+     */
+    public Optional<Output<List<String>>> topics() {
+        return Optional.ofNullable(this.topics);
+    }
+
+    /**
      * Repository website URL.
      * 
      */
@@ -143,11 +174,13 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
     private RepositoryArgs(RepositoryArgs $) {
         this.defaultBranch = $.defaultBranch;
         this.description = $.description;
+        this.initializeWithReadme = $.initializeWithReadme;
         this.name = $.name;
         this.owner = $.owner;
         this.private_ = $.private_;
         this.settings = $.settings;
         this.template = $.template;
+        this.topics = $.topics;
         this.website = $.website;
     }
 
@@ -209,6 +242,27 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
          */
         public Builder description(String description) {
             return description(Output.of(description));
+        }
+
+        /**
+         * @param initializeWithReadme Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder initializeWithReadme(@Nullable Output<Boolean> initializeWithReadme) {
+            $.initializeWithReadme = initializeWithReadme;
+            return this;
+        }
+
+        /**
+         * @param initializeWithReadme Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder initializeWithReadme(Boolean initializeWithReadme) {
+            return initializeWithReadme(Output.of(initializeWithReadme));
         }
 
         /**
@@ -314,6 +368,37 @@ public final class RepositoryArgs extends com.pulumi.resources.ResourceArgs {
          */
         public Builder template(Boolean template) {
             return template(Output.of(template));
+        }
+
+        /**
+         * @param topics Repository topics.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder topics(@Nullable Output<List<String>> topics) {
+            $.topics = topics;
+            return this;
+        }
+
+        /**
+         * @param topics Repository topics.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder topics(List<String> topics) {
+            return topics(Output.of(topics));
+        }
+
+        /**
+         * @param topics Repository topics.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder topics(String... topics) {
+            return topics(List.of(topics));
         }
 
         /**

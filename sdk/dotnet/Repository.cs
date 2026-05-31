@@ -37,6 +37,12 @@ namespace Pulumi.Forgejo
         public Output<string> HtmlUrl { get; private set; } = null!;
 
         /// <summary>
+        /// Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+        /// </summary>
+        [Output("initializeWithReadme")]
+        public Output<bool?> InitializeWithReadme { get; private set; } = null!;
+
+        /// <summary>
         /// Repository name.
         /// </summary>
         [Output("name")]
@@ -68,6 +74,12 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Output("template")]
         public Output<bool?> Template { get; private set; } = null!;
+
+        /// <summary>
+        /// Repository topics.
+        /// </summary>
+        [Output("topics")]
+        public Output<ImmutableArray<string>> Topics { get; private set; } = null!;
 
         /// <summary>
         /// Repository website URL.
@@ -134,6 +146,12 @@ namespace Pulumi.Forgejo
         public Input<string>? Description { get; set; }
 
         /// <summary>
+        /// Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
+        /// </summary>
+        [Input("initializeWithReadme")]
+        public Input<bool>? InitializeWithReadme { get; set; }
+
+        /// <summary>
         /// Repository name.
         /// </summary>
         [Input("name", required: true)]
@@ -162,6 +180,18 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Input("template")]
         public Input<bool>? Template { get; set; }
+
+        [Input("topics")]
+        private InputList<string>? _topics;
+
+        /// <summary>
+        /// Repository topics.
+        /// </summary>
+        public InputList<string> Topics
+        {
+            get => _topics ?? (_topics = new InputList<string>());
+            set => _topics = value;
+        }
 
         /// <summary>
         /// Repository website URL.
