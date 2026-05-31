@@ -290,12 +290,13 @@ jobs:
           set -eu
           printf '%s' "$FORGEJO_TOKEN" > .goreleaser-forgejo-token
           trap 'rm -f .goreleaser-forgejo-token' EXIT
-          goreleaser release --clean
+          goreleaser release --clean --parallelism 1
         env:
           GORELEASER_FORCE_TOKEN: gitea
           GORELEASER_CURRENT_TAG: ${{ needs.version.outputs.tag }}
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
           FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+          GOMEMLIMIT: 2GiB
 
   package-nodejs:
     needs:

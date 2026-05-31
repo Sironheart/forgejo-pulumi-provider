@@ -20,7 +20,7 @@ builds:
     main: ./cmd/pulumi-resource-forgejo
     binary: pulumi-resource-forgejo
     env:
-      - GOMAXPROCS=2
+      - GOMAXPROCS=1
       - CGO_ENABLED=0
     goos:
       - linux
