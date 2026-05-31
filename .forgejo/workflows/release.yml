@@ -33,7 +33,7 @@ env:
   # renovate: datasource=github-releases depName=gradle/gradle
   GRADLE_VERSION: "8.10"
   # renovate: datasource=github-releases depName=goreleaser/goreleaser
-  GORELEASER_VERSION: "2.15.4"
+  GORELEASER_VERSION: "2.16.0"
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
   PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
 
