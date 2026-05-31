@@ -16,15 +16,24 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  GO_VERSION: "1.26.2"
-  NODE_VERSION: "20"
-  DOTNET_VERSION: "8.0.x"
-  JAVA_VERSION: "11"
-  GRADLE_VERSION: "8.10"
+  # renovate: datasource=github-releases depName=golang/go
+  GO_VERSION: "1.26.3"
+  # renovate: datasource=github-releases depName=pulumi/pulumi
   PULUMI_VERSION: "3.232.0"
+  # renovate: datasource=github-releases depName=golangci/golangci-lint
+  GOLANGCI_LINT_VERSION: v2.12.2
+  # renovate: datasource=github-releases depName=caarlos0/svu
+  SVU_VERSION: v3.4.1
+  # renovate: depName=nodejs/node
+  NODE_VERSION: "20"
+  # renovate: depName=microsoft/dotnet
+  DOTNET_VERSION: "8.0.x"
+  # renovate: datasource=docker depName=azul/zulu-openjdk
+  JAVA_VERSION: "11"
+  # renovate: depName=gradle/gradle
+  GRADLE_VERSION: "8.10"
+  # renovate: depName=goreleaser/goreleaser
   GORELEASER_VERSION: "2.15.4"
-  GOLANGCI_LINT_VERSION: v2.11.4
-  SVU_VERSION: v3.4.0
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
   PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
 
