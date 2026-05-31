@@ -24,15 +24,15 @@ env:
   GOLANGCI_LINT_VERSION: v2.12.2
   # renovate: datasource=github-releases depName=caarlos0/svu
   SVU_VERSION: v3.4.1
-  # renovate: depName=nodejs/node
+  # renovate: datasource=github-releases depName=nodejs/node
   NODE_VERSION: "20"
-  # renovate: depName=microsoft/dotnet
+  # renovate: datasource=github-releases depName=microsoft/dotnet
   DOTNET_VERSION: "8.0.x"
   # renovate: datasource=docker depName=azul/zulu-openjdk
   JAVA_VERSION: "11"
-  # renovate: depName=gradle/gradle
+  # renovate: datasource=github-releases depName=gradle/gradle
   GRADLE_VERSION: "8.10"
-  # renovate: depName=goreleaser/goreleaser
+  # renovate: datasource=github-releases depName=goreleaser/goreleaser
   GORELEASER_VERSION: "2.15.4"
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
   PACKAGE_USERNAME: ${{ forgejo.repository_owner }}
