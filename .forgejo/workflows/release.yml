@@ -186,7 +186,7 @@ jobs:
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
       - name: Install GoReleaser
-        uses: https://github.com/goreleaser/goreleaser-action@v6
+        uses: https://github.com/goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: ${{ env.GORELEASER_VERSION }}
@@ -258,7 +258,7 @@ jobs:
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
       - name: Install GoReleaser
-        uses: https://github.com/goreleaser/goreleaser-action@v6
+        uses: https://github.com/goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: ${{ env.GORELEASER_VERSION }}
