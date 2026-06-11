@@ -119,7 +119,7 @@ export interface DeployKeyArgs {
     /**
      * Whether the deploy key is read-only.
      */
-    readOnly?: pulumi.Input<boolean>;
+    readOnly?: pulumi.Input<boolean | undefined>;
     /**
      * Repository name.
      */

@@ -32,6 +32,21 @@ public final class RepositorySettingsConfigArgs extends com.pulumi.resources.Res
     }
 
     /**
+     * Whether the repository is archived. Leave unset to avoid managing it.
+     * 
+     */
+    @Import(name="archived")
+    private @Nullable Output<Boolean> archived;
+
+    /**
+     * @return Whether the repository is archived. Leave unset to avoid managing it.
+     * 
+     */
+    public Optional<Output<Boolean>> archived() {
+        return Optional.ofNullable(this.archived);
+    }
+
+    /**
      * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      * 
      */
@@ -290,6 +305,7 @@ public final class RepositorySettingsConfigArgs extends com.pulumi.resources.Res
 
     private RepositorySettingsConfigArgs(RepositorySettingsConfigArgs $) {
         this.actions = $.actions;
+        this.archived = $.archived;
         this.defaultDeleteBranchAfterMerge = $.defaultDeleteBranchAfterMerge;
         this.externalTrackerFormat = $.externalTrackerFormat;
         this.externalTrackerRegexPattern = $.externalTrackerRegexPattern;
@@ -346,6 +362,27 @@ public final class RepositorySettingsConfigArgs extends com.pulumi.resources.Res
          */
         public Builder actions(Boolean actions) {
             return actions(Output.of(actions));
+        }
+
+        /**
+         * @param archived Whether the repository is archived. Leave unset to avoid managing it.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder archived(@Nullable Output<Boolean> archived) {
+            $.archived = archived;
+            return this;
+        }
+
+        /**
+         * @param archived Whether the repository is archived. Leave unset to avoid managing it.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder archived(Boolean archived) {
+            return archived(Output.of(archived));
         }
 
         /**

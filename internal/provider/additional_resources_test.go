@@ -298,6 +298,41 @@ func TestRepositorySettingsEditOptionKeepsExplicitPullRequests(t *testing.T) {
 	assertBoolPtr(t, opt.HasPullRequests, false)
 }
 
+func TestRepositorySettingsDiffUpdatesArchived(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositorySettings{}).Diff(context.Background(), infer.DiffRequest[RepositorySettingsArgs, RepositorySettingsState]{
+		State: RepositorySettingsState{RepositorySettingsArgs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				Archived: boolPtr(false),
+			},
+		}},
+		Inputs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				Archived: boolPtr(true),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "archived", p.Update)
+}
+
+func TestRepositorySettingsEditOptionPropagatesArchived(t *testing.T) {
+	t.Parallel()
+
+	opt := repositorySettingsEditOption(RepositorySettingsArgs{RepositorySettingsConfig: RepositorySettingsConfig{
+		Archived: boolPtr(true),
+	}}, nil)
+
+	assertBoolPtr(t, opt.Archived, true)
+}
+
 func assertDiffKind(t *testing.T, resp infer.DiffResponse, property string, kind p.DiffKind) {
 	t.Helper()
 	if !resp.HasChanges {

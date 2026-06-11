@@ -114,9 +114,9 @@ export interface RepositoryTagProtectionArgs {
     /**
      * Teams allowed to create matching tags.
      */
-    whitelistTeams?: pulumi.Input<pulumi.Input<string>[]>;
+    whitelistTeams?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Users allowed to create matching tags.
      */
-    whitelistUsernames?: pulumi.Input<pulumi.Input<string>[]>;
+    whitelistUsernames?: pulumi.Input<pulumi.Input<string>[] | undefined>;
 }

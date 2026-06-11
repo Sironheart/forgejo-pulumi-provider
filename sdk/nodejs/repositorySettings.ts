@@ -39,6 +39,10 @@ export class RepositorySettings extends pulumi.CustomResource {
      */
     declare public readonly actions: pulumi.Output<boolean | undefined>;
     /**
+     * Whether the repository is archived. Leave unset to avoid managing it.
+     */
+    declare public readonly archived: pulumi.Output<boolean | undefined>;
+    /**
      * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      */
     declare public readonly defaultDeleteBranchAfterMerge: pulumi.Output<boolean | undefined>;
@@ -133,6 +137,7 @@ export class RepositorySettings extends pulumi.CustomResource {
                 throw new Error("Missing required property 'repository'");
             }
             resourceInputs["actions"] = args?.actions;
+            resourceInputs["archived"] = args?.archived;
             resourceInputs["defaultDeleteBranchAfterMerge"] = args?.defaultDeleteBranchAfterMerge;
             resourceInputs["externalTrackerFormat"] = args?.externalTrackerFormat;
             resourceInputs["externalTrackerRegexPattern"] = args?.externalTrackerRegexPattern;
@@ -154,6 +159,7 @@ export class RepositorySettings extends pulumi.CustomResource {
             resourceInputs["wikiBranch"] = args?.wikiBranch;
         } else {
             resourceInputs["actions"] = undefined /*out*/;
+            resourceInputs["archived"] = undefined /*out*/;
             resourceInputs["defaultDeleteBranchAfterMerge"] = undefined /*out*/;
             resourceInputs["externalTrackerFormat"] = undefined /*out*/;
             resourceInputs["externalTrackerRegexPattern"] = undefined /*out*/;
@@ -186,51 +192,55 @@ export interface RepositorySettingsArgs {
     /**
      * Whether the actions unit is enabled. Leave unset to avoid managing it.
      */
-    actions?: pulumi.Input<boolean>;
+    actions?: pulumi.Input<boolean | undefined>;
+    /**
+     * Whether the repository is archived. Leave unset to avoid managing it.
+     */
+    archived?: pulumi.Input<boolean | undefined>;
     /**
      * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      */
-    defaultDeleteBranchAfterMerge?: pulumi.Input<boolean>;
+    defaultDeleteBranchAfterMerge?: pulumi.Input<boolean | undefined>;
     /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      */
-    externalTrackerFormat?: pulumi.Input<string>;
+    externalTrackerFormat?: pulumi.Input<string | undefined>;
     /**
      * External issue tracker regular expression pattern.
      */
-    externalTrackerRegexPattern?: pulumi.Input<string>;
+    externalTrackerRegexPattern?: pulumi.Input<string | undefined>;
     /**
      * External issue tracker number style, for example numeric or alphanumeric.
      */
-    externalTrackerStyle?: pulumi.Input<string>;
+    externalTrackerStyle?: pulumi.Input<string | undefined>;
     /**
      * External issue tracker URL. Setting this also enables issues unless issues is explicitly set.
      */
-    externalTrackerUrl?: pulumi.Input<string>;
+    externalTrackerUrl?: pulumi.Input<string | undefined>;
     /**
      * External wiki URL. Setting this also enables the wiki unless wiki is explicitly set.
      */
-    externalWikiUrl?: pulumi.Input<string>;
+    externalWikiUrl?: pulumi.Input<string | undefined>;
     /**
      * Whether the wiki is globally editable.
      */
-    globallyEditableWiki?: pulumi.Input<boolean>;
+    globallyEditableWiki?: pulumi.Input<boolean | undefined>;
     /**
      * Whether only contributors may track time in the internal issue tracker.
      */
-    internalTrackerAllowOnlyContributorsToTrackTime?: pulumi.Input<boolean>;
+    internalTrackerAllowOnlyContributorsToTrackTime?: pulumi.Input<boolean | undefined>;
     /**
      * Whether issue dependencies are enabled in the internal issue tracker.
      */
-    internalTrackerEnableIssueDependencies?: pulumi.Input<boolean>;
+    internalTrackerEnableIssueDependencies?: pulumi.Input<boolean | undefined>;
     /**
      * Whether the internal issue tracker has time tracking enabled.
      */
-    internalTrackerEnableTimeTracker?: pulumi.Input<boolean>;
+    internalTrackerEnableTimeTracker?: pulumi.Input<boolean | undefined>;
     /**
      * Whether the issue tracker unit is enabled. Leave unset to avoid managing it.
      */
-    issues?: pulumi.Input<boolean>;
+    issues?: pulumi.Input<boolean | undefined>;
     /**
      * Repository owner.
      */
@@ -238,19 +248,19 @@ export interface RepositorySettingsArgs {
     /**
      * Whether the packages unit is enabled. Leave unset to avoid managing it.
      */
-    packages?: pulumi.Input<boolean>;
+    packages?: pulumi.Input<boolean | undefined>;
     /**
      * Whether the projects unit is enabled. Leave unset to avoid managing it.
      */
-    projects?: pulumi.Input<boolean>;
+    projects?: pulumi.Input<boolean | undefined>;
     /**
      * Whether the pull request unit is enabled. Leave unset to avoid managing it.
      */
-    pullRequests?: pulumi.Input<boolean>;
+    pullRequests?: pulumi.Input<boolean | undefined>;
     /**
      * Whether the releases unit is enabled. Leave unset to avoid managing it.
      */
-    releases?: pulumi.Input<boolean>;
+    releases?: pulumi.Input<boolean | undefined>;
     /**
      * Repository name.
      */
@@ -258,9 +268,9 @@ export interface RepositorySettingsArgs {
     /**
      * Whether the wiki unit is enabled. Leave unset to avoid managing it.
      */
-    wiki?: pulumi.Input<boolean>;
+    wiki?: pulumi.Input<boolean | undefined>;
     /**
      * Branch used for the repository wiki.
      */
-    wikiBranch?: pulumi.Input<string>;
+    wikiBranch?: pulumi.Input<string | undefined>;
 }

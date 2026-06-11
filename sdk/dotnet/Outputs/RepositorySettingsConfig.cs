@@ -18,6 +18,10 @@ namespace Pulumi.Forgejo.Outputs
         /// </summary>
         public readonly bool? Actions;
         /// <summary>
+        /// Whether the repository is archived. Leave unset to avoid managing it.
+        /// </summary>
+        public readonly bool? Archived;
+        /// <summary>
         /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
         /// </summary>
         public readonly bool? DefaultDeleteBranchAfterMerge;
@@ -90,6 +94,8 @@ namespace Pulumi.Forgejo.Outputs
         private RepositorySettingsConfig(
             bool? actions,
 
+            bool? archived,
+
             bool? defaultDeleteBranchAfterMerge,
 
             string? externalTrackerFormat,
@@ -125,6 +131,7 @@ namespace Pulumi.Forgejo.Outputs
             string? wikiBranch)
         {
             Actions = actions;
+            Archived = archived;
             DefaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
             ExternalTrackerFormat = externalTrackerFormat;
             ExternalTrackerRegexPattern = externalTrackerRegexPattern;

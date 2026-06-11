@@ -90,15 +90,15 @@ export interface OrganizationTeamMemberArgs {
     /**
      * Organization username/slug. Required when teamId is not set.
      */
-    organization?: pulumi.Input<string>;
+    organization?: pulumi.Input<string | undefined>;
     /**
      * Team name. Required when teamId is not set.
      */
-    team?: pulumi.Input<string>;
+    team?: pulumi.Input<string | undefined>;
     /**
      * Numeric Forgejo team ID. If omitted, organization and team are used to look up the team.
      */
-    teamId?: pulumi.Input<number>;
+    teamId?: pulumi.Input<number | undefined>;
     /**
      * Username to add to the team.
      */

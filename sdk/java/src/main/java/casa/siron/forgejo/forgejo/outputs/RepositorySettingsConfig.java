@@ -18,6 +18,11 @@ public final class RepositorySettingsConfig {
      */
     private @Nullable Boolean actions;
     /**
+     * @return Whether the repository is archived. Leave unset to avoid managing it.
+     * 
+     */
+    private @Nullable Boolean archived;
+    /**
      * @return Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      * 
      */
@@ -110,6 +115,13 @@ public final class RepositorySettingsConfig {
      */
     public Optional<Boolean> actions() {
         return Optional.ofNullable(this.actions);
+    }
+    /**
+     * @return Whether the repository is archived. Leave unset to avoid managing it.
+     * 
+     */
+    public Optional<Boolean> archived() {
+        return Optional.ofNullable(this.archived);
     }
     /**
      * @return Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
@@ -241,6 +253,7 @@ public final class RepositorySettingsConfig {
     @CustomType.Builder
     public static final class Builder {
         private @Nullable Boolean actions;
+        private @Nullable Boolean archived;
         private @Nullable Boolean defaultDeleteBranchAfterMerge;
         private @Nullable String externalTrackerFormat;
         private @Nullable String externalTrackerRegexPattern;
@@ -262,6 +275,7 @@ public final class RepositorySettingsConfig {
         public Builder(RepositorySettingsConfig defaults) {
     	      Objects.requireNonNull(defaults);
     	      this.actions = defaults.actions;
+    	      this.archived = defaults.archived;
     	      this.defaultDeleteBranchAfterMerge = defaults.defaultDeleteBranchAfterMerge;
     	      this.externalTrackerFormat = defaults.externalTrackerFormat;
     	      this.externalTrackerRegexPattern = defaults.externalTrackerRegexPattern;
@@ -285,6 +299,12 @@ public final class RepositorySettingsConfig {
         public Builder actions(@Nullable Boolean actions) {
 
             this.actions = actions;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder archived(@Nullable Boolean archived) {
+
+            this.archived = archived;
             return this;
         }
         @CustomType.Setter
@@ -392,6 +412,7 @@ public final class RepositorySettingsConfig {
         public RepositorySettingsConfig build() {
             final var _resultValue = new RepositorySettingsConfig();
             _resultValue.actions = actions;
+            _resultValue.archived = archived;
             _resultValue.defaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
             _resultValue.externalTrackerFormat = externalTrackerFormat;
             _resultValue.externalTrackerRegexPattern = externalTrackerRegexPattern;

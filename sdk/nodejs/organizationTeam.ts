@@ -111,15 +111,15 @@ export interface OrganizationTeamArgs {
     /**
      * Whether team members can create organization repositories.
      */
-    canCreateOrgRepo?: pulumi.Input<boolean>;
+    canCreateOrgRepo?: pulumi.Input<boolean | undefined>;
     /**
      * Team description.
      */
-    description?: pulumi.Input<string>;
+    description?: pulumi.Input<string | undefined>;
     /**
      * Whether the team includes all organization repositories.
      */
-    includesAllRepositories?: pulumi.Input<boolean>;
+    includesAllRepositories?: pulumi.Input<boolean | undefined>;
     /**
      * Team name.
      */
@@ -131,9 +131,9 @@ export interface OrganizationTeamArgs {
     /**
      * Team repository permission: read, write, or admin.
      */
-    permission?: pulumi.Input<string>;
+    permission?: pulumi.Input<string | undefined>;
     /**
      * Per-repository-unit permissions, for example repo.code=read or repo.issues=write.
      */
-    unitsMap?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
+    unitsMap?: pulumi.Input<{[key: string]: pulumi.Input<string>} | undefined>;
 }

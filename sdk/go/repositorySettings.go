@@ -18,6 +18,8 @@ type RepositorySettings struct {
 
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrOutput `pulumi:"actions"`
+	// Whether the repository is archived. Leave unset to avoid managing it.
+	Archived pulumi.BoolPtrOutput `pulumi:"archived"`
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge pulumi.BoolPtrOutput `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -106,6 +108,8 @@ func (RepositorySettingsState) ElementType() reflect.Type {
 type repositorySettingsArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions *bool `pulumi:"actions"`
+	// Whether the repository is archived. Leave unset to avoid managing it.
+	Archived *bool `pulumi:"archived"`
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge *bool `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -150,6 +154,8 @@ type repositorySettingsArgs struct {
 type RepositorySettingsArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrInput
+	// Whether the repository is archived. Leave unset to avoid managing it.
+	Archived pulumi.BoolPtrInput
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge pulumi.BoolPtrInput
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -230,6 +236,11 @@ func (o RepositorySettingsOutput) ToRepositorySettingsOutputWithContext(ctx cont
 // Whether the actions unit is enabled. Leave unset to avoid managing it.
 func (o RepositorySettingsOutput) Actions() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.Actions }).(pulumi.BoolPtrOutput)
+}
+
+// Whether the repository is archived. Leave unset to avoid managing it.
+func (o RepositorySettingsOutput) Archived() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.Archived }).(pulumi.BoolPtrOutput)
 }
 
 // Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.

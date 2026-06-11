@@ -1,6 +1,6 @@
 module forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go
 
-go 1.26.3
+go 1.26.4
 
 require (
 	github.com/blang/semver v3.5.1+incompatible

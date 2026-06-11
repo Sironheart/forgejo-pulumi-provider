@@ -103,7 +103,7 @@ export interface PublicKeyArgs {
     /**
      * Whether the key has read-only access.
      */
-    readOnly?: pulumi.Input<boolean>;
+    readOnly?: pulumi.Input<boolean | undefined>;
     /**
      * Public key title.
      */

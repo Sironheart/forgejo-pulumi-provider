@@ -16,6 +16,8 @@ var _ = internal.GetEnvOrDefault
 type RepositorySettingsConfig struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions *bool `pulumi:"actions"`
+	// Whether the repository is archived. Leave unset to avoid managing it.
+	Archived *bool `pulumi:"archived"`
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge *bool `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -66,6 +68,8 @@ type RepositorySettingsConfigInput interface {
 type RepositorySettingsConfigArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrInput `pulumi:"actions"`
+	// Whether the repository is archived. Leave unset to avoid managing it.
+	Archived pulumi.BoolPtrInput `pulumi:"archived"`
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge pulumi.BoolPtrInput `pulumi:"defaultDeleteBranchAfterMerge"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -184,6 +188,11 @@ func (o RepositorySettingsConfigOutput) Actions() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v RepositorySettingsConfig) *bool { return v.Actions }).(pulumi.BoolPtrOutput)
 }
 
+// Whether the repository is archived. Leave unset to avoid managing it.
+func (o RepositorySettingsConfigOutput) Archived() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v RepositorySettingsConfig) *bool { return v.Archived }).(pulumi.BoolPtrOutput)
+}
+
 // Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 func (o RepositorySettingsConfigOutput) DefaultDeleteBranchAfterMerge() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v RepositorySettingsConfig) *bool { return v.DefaultDeleteBranchAfterMerge }).(pulumi.BoolPtrOutput)
@@ -300,6 +309,16 @@ func (o RepositorySettingsConfigPtrOutput) Actions() pulumi.BoolPtrOutput {
 			return nil
 		}
 		return v.Actions
+	}).(pulumi.BoolPtrOutput)
+}
+
+// Whether the repository is archived. Leave unset to avoid managing it.
+func (o RepositorySettingsConfigPtrOutput) Archived() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettingsConfig) *bool {
+		if v == nil {
+			return nil
+		}
+		return v.Archived
 	}).(pulumi.BoolPtrOutput)
 }
 

@@ -19,6 +19,12 @@ namespace Pulumi.Forgejo.Inputs
         public Input<bool>? Actions { get; set; }
 
         /// <summary>
+        /// Whether the repository is archived. Leave unset to avoid managing it.
+        /// </summary>
+        [Input("archived")]
+        public Input<bool>? Archived { get; set; }
+
+        /// <summary>
         /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
         /// </summary>
         [Input("defaultDeleteBranchAfterMerge")]

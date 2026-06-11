@@ -137,15 +137,15 @@ export interface RepositoryArgs {
     /**
      * Default branch name. Leave empty to use Forgejo's default.
      */
-    defaultBranch?: pulumi.Input<string>;
+    defaultBranch?: pulumi.Input<string | undefined>;
     /**
      * Repository description.
      */
-    description?: pulumi.Input<string>;
+    description?: pulumi.Input<string | undefined>;
     /**
      * Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.
      */
-    initializeWithReadme?: pulumi.Input<boolean>;
+    initializeWithReadme?: pulumi.Input<boolean | undefined>;
     /**
      * Repository name.
      */
@@ -153,25 +153,25 @@ export interface RepositoryArgs {
     /**
      * Repository owner. Leave empty to create a repository for the authenticated user; set an organization name to create an organization repository.
      */
-    owner?: pulumi.Input<string>;
+    owner?: pulumi.Input<string | undefined>;
     /**
      * Whether the repository is private.
      */
-    private?: pulumi.Input<boolean>;
+    private?: pulumi.Input<boolean | undefined>;
     /**
      * Optional repository unit, wiki, and issue tracker settings to manage with this repository.
      */
-    settings?: pulumi.Input<inputs.RepositorySettingsConfigArgs>;
+    settings?: pulumi.Input<inputs.RepositorySettingsConfigArgs | undefined>;
     /**
      * Whether the repository can be used as a template.
      */
-    template?: pulumi.Input<boolean>;
+    template?: pulumi.Input<boolean | undefined>;
     /**
      * Repository topics.
      */
-    topics?: pulumi.Input<pulumi.Input<string>[]>;
+    topics?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Repository website URL.
      */
-    website?: pulumi.Input<string>;
+    website?: pulumi.Input<string | undefined>;
 }

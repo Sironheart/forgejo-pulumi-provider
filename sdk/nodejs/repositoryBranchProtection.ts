@@ -219,55 +219,55 @@ export interface RepositoryBranchProtectionArgs {
     /**
      * Teams whose approvals count.
      */
-    approvalsWhitelistTeams?: pulumi.Input<pulumi.Input<string>[]>;
+    approvalsWhitelistTeams?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Users whose approvals count.
      */
-    approvalsWhitelistUsernames?: pulumi.Input<pulumi.Input<string>[]>;
+    approvalsWhitelistUsernames?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Whether official review requests block merging.
      */
-    blockOnOfficialReviewRequests?: pulumi.Input<boolean>;
+    blockOnOfficialReviewRequests?: pulumi.Input<boolean | undefined>;
     /**
      * Whether outdated branches block merging.
      */
-    blockOnOutdatedBranch?: pulumi.Input<boolean>;
+    blockOnOutdatedBranch?: pulumi.Input<boolean | undefined>;
     /**
      * Whether rejected reviews block merging.
      */
-    blockOnRejectedReviews?: pulumi.Input<boolean>;
+    blockOnRejectedReviews?: pulumi.Input<boolean | undefined>;
     /**
      * Whether stale approvals are dismissed after new commits.
      */
-    dismissStaleApprovals?: pulumi.Input<boolean>;
+    dismissStaleApprovals?: pulumi.Input<boolean | undefined>;
     /**
      * Whether review approvals are limited to the approval whitelist.
      */
-    enableApprovalsWhitelist?: pulumi.Input<boolean>;
+    enableApprovalsWhitelist?: pulumi.Input<boolean | undefined>;
     /**
      * Whether merging is limited to the merge whitelist.
      */
-    enableMergeWhitelist?: pulumi.Input<boolean>;
+    enableMergeWhitelist?: pulumi.Input<boolean | undefined>;
     /**
      * Whether protected branches can be pushed to directly.
      */
-    enablePush?: pulumi.Input<boolean>;
+    enablePush?: pulumi.Input<boolean | undefined>;
     /**
      * Whether direct pushes are limited to the push whitelist.
      */
-    enablePushWhitelist?: pulumi.Input<boolean>;
+    enablePushWhitelist?: pulumi.Input<boolean | undefined>;
     /**
      * Whether status checks are required before merge.
      */
-    enableStatusCheck?: pulumi.Input<boolean>;
+    enableStatusCheck?: pulumi.Input<boolean | undefined>;
     /**
      * Teams allowed to merge.
      */
-    mergeWhitelistTeams?: pulumi.Input<pulumi.Input<string>[]>;
+    mergeWhitelistTeams?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Users allowed to merge.
      */
-    mergeWhitelistUsernames?: pulumi.Input<pulumi.Input<string>[]>;
+    mergeWhitelistUsernames?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Protected branch name or rule pattern.
      */
@@ -279,19 +279,19 @@ export interface RepositoryBranchProtectionArgs {
     /**
      * Protected file patterns.
      */
-    protectedFilePatterns?: pulumi.Input<string>;
+    protectedFilePatterns?: pulumi.Input<string | undefined>;
     /**
      * Whether deploy keys may push directly.
      */
-    pushWhitelistDeployKeys?: pulumi.Input<boolean>;
+    pushWhitelistDeployKeys?: pulumi.Input<boolean | undefined>;
     /**
      * Teams allowed to push directly.
      */
-    pushWhitelistTeams?: pulumi.Input<pulumi.Input<string>[]>;
+    pushWhitelistTeams?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Users allowed to push directly.
      */
-    pushWhitelistUsernames?: pulumi.Input<pulumi.Input<string>[]>;
+    pushWhitelistUsernames?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Repository name.
      */
@@ -299,17 +299,17 @@ export interface RepositoryBranchProtectionArgs {
     /**
      * Whether commits must be signed.
      */
-    requireSignedCommits?: pulumi.Input<boolean>;
+    requireSignedCommits?: pulumi.Input<boolean | undefined>;
     /**
      * Number of required approving reviews.
      */
-    requiredApprovals?: pulumi.Input<number>;
+    requiredApprovals?: pulumi.Input<number | undefined>;
     /**
      * Required status check contexts.
      */
-    statusCheckContexts?: pulumi.Input<pulumi.Input<string>[]>;
+    statusCheckContexts?: pulumi.Input<pulumi.Input<string>[] | undefined>;
     /**
      * Unprotected file patterns.
      */
-    unprotectedFilePatterns?: pulumi.Input<string>;
+    unprotectedFilePatterns?: pulumi.Input<string | undefined>;
 }

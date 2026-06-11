@@ -11,6 +11,10 @@ export interface RepositorySettingsConfig {
      */
     actions?: boolean;
     /**
+     * Whether the repository is archived. Leave unset to avoid managing it.
+     */
+    archived?: boolean;
+    /**
      * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      */
     defaultDeleteBranchAfterMerge?: boolean;

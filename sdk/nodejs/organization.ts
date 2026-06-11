@@ -102,15 +102,15 @@ export interface OrganizationArgs {
     /**
      * Organization description.
      */
-    description?: pulumi.Input<string>;
+    description?: pulumi.Input<string | undefined>;
     /**
      * Organization display name.
      */
-    fullName?: pulumi.Input<string>;
+    fullName?: pulumi.Input<string | undefined>;
     /**
      * Organization location.
      */
-    location?: pulumi.Input<string>;
+    location?: pulumi.Input<string | undefined>;
     /**
      * Organization username/slug.
      */
@@ -118,9 +118,9 @@ export interface OrganizationArgs {
     /**
      * Organization visibility, for example public, limited, or private. Leave empty to use Forgejo's default.
      */
-    visibility?: pulumi.Input<string>;
+    visibility?: pulumi.Input<string | undefined>;
     /**
      * Organization website URL.
      */
-    website?: pulumi.Input<string>;
+    website?: pulumi.Input<string | undefined>;
 }

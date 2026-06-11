@@ -22,6 +22,12 @@ namespace Pulumi.Forgejo
         public Output<bool?> Actions { get; private set; } = null!;
 
         /// <summary>
+        /// Whether the repository is archived. Leave unset to avoid managing it.
+        /// </summary>
+        [Output("archived")]
+        public Output<bool?> Archived { get; private set; } = null!;
+
+        /// <summary>
         /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
         /// </summary>
         [Output("defaultDeleteBranchAfterMerge")]
@@ -186,6 +192,12 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Input("actions")]
         public Input<bool>? Actions { get; set; }
+
+        /// <summary>
+        /// Whether the repository is archived. Leave unset to avoid managing it.
+        /// </summary>
+        [Input("archived")]
+        public Input<bool>? Archived { get; set; }
 
         /// <summary>
         /// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.

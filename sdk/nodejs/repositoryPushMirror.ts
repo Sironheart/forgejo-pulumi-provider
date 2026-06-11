@@ -140,11 +140,11 @@ export interface RepositoryPushMirrorArgs {
     /**
      * Optional branch filter for the push mirror. Leave empty to mirror all branches.
      */
-    branchFilter?: pulumi.Input<string>;
+    branchFilter?: pulumi.Input<string | undefined>;
     /**
      * Mirror sync interval, for example 8h30m0s. Leave empty to use Forgejo's default.
      */
-    interval?: pulumi.Input<string>;
+    interval?: pulumi.Input<string | undefined>;
     /**
      * Repository owner.
      */
@@ -156,11 +156,11 @@ export interface RepositoryPushMirrorArgs {
     /**
      * Password or token for authenticating to the remote.
      */
-    remotePassword?: pulumi.Input<string>;
+    remotePassword?: pulumi.Input<string | undefined>;
     /**
      * Username for authenticating to the remote.
      */
-    remoteUsername?: pulumi.Input<string>;
+    remoteUsername?: pulumi.Input<string | undefined>;
     /**
      * Repository name.
      */
@@ -168,9 +168,9 @@ export interface RepositoryPushMirrorArgs {
     /**
      * Whether pushes to this repository trigger the mirror.
      */
-    syncOnCommit?: pulumi.Input<boolean>;
+    syncOnCommit?: pulumi.Input<boolean | undefined>;
     /**
      * Whether Forgejo should use an SSH key for the push mirror remote.
      */
-    useSsh?: pulumi.Input<boolean>;
+    useSsh?: pulumi.Input<boolean | undefined>;
 }
