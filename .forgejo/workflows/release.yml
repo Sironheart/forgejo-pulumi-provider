@@ -29,9 +29,9 @@ env:
   # renovate: datasource=github-releases depName=microsoft/dotnet
   DOTNET_VERSION: "8.0.x"
   # renovate: datasource=docker depName=azul/zulu-openjdk
-  JAVA_VERSION: "17"
+  JAVA_VERSION: "11"
   # renovate: datasource=docker depName=gradle/gradle
-  GRADLE_VERSION: "9.5.1"
+  GRADLE_VERSION: "8.13"
   # renovate: datasource=github-releases depName=goreleaser/goreleaser
   GORELEASER_VERSION: "2.16.0"
   PACKAGE_OWNER: ${{ forgejo.repository_owner }}
