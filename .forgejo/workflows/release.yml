@@ -29,7 +29,7 @@ env:
   # renovate: datasource=github-releases depName=microsoft/dotnet
   DOTNET_VERSION: "8.0.x"
   # renovate: datasource=docker depName=azul/zulu-openjdk
-  JAVA_VERSION: "11"
+  JAVA_VERSION: "17"
   # renovate: datasource=docker depName=gradle/gradle
   GRADLE_VERSION: "9.5.1"
   # renovate: datasource=github-releases depName=goreleaser/goreleaser
