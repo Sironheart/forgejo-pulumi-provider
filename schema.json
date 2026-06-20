@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",

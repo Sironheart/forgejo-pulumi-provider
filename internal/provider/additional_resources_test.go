@@ -349,10 +349,14 @@ func assertDiffKind(t *testing.T, resp infer.DiffResponse, property string, kind
 
 func assertBoolPtr(t *testing.T, got *bool, want bool) {
 	t.Helper()
-	if got == nil {
-		t.Fatalf("expected bool pointer %v, got nil", want)
+	if got == nil || *got != want {
+		t.Fatalf("expected bool pointer %v, got %v", want, derefBoolPtr(got))
 	}
-	if *got != want {
-		t.Fatalf("expected bool pointer %v, got %v", want, *got)
+}
+
+func derefBoolPtr(p *bool) any {
+	if p == nil {
+		return nil
 	}
+	return *p
 }
