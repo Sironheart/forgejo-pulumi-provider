@@ -32,6 +32,9 @@ pkg.publishConfig = {
 };
 pkg.main = "bin/index.js";
 pkg.types = "bin/index.d.ts";
+pkg.scripts = Object.assign({}, pkg.scripts, {
+  postbuild: "node -e \"require('fs').copyFileSync('package.json', 'bin/package.json')\"",
+});
 pkg.files = [
   "bin",
   "package.json",
