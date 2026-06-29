@@ -140,7 +140,7 @@ jobs:
         run: go mod tidy
 
       - name: Lint Go code
-        uses: https://github.com/golangci/golangci-lint-action@v9.2.1
+        uses: https://github.com/golangci/golangci-lint-action@v9.3.0
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           args: ./cmd/... ./internal/...
