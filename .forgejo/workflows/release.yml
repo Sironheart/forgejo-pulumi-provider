@@ -25,7 +25,7 @@ env:
   # renovate: datasource=github-releases depName=caarlos0/svu
   SVU_VERSION: v3.4.1
   # renovate: datasource=github-releases depName=nodejs/node
-  NODE_VERSION: "v26.3.1"
+  NODE_VERSION: "v26.5.0"
   # renovate: datasource=github-releases depName=microsoft/dotnet
   DOTNET_VERSION: "8.0.x"
   # renovate: datasource=docker depName=azul/zulu-openjdk
