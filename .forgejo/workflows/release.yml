@@ -398,7 +398,7 @@ jobs:
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v7
 
-      - uses: https://github.com/actions/setup-dotnet@v5
+      - uses: https://github.com/actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
