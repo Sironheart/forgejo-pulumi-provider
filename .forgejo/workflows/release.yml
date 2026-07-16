@@ -55,7 +55,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
-      - uses: https://github.com/actions/setup-go@v6
+      - uses: https://github.com/actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
@@ -130,7 +130,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
-      - uses: https://github.com/actions/setup-go@v6
+      - uses: https://github.com/actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -174,7 +174,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
 
-      - uses: https://github.com/actions/setup-go@v6
+      - uses: https://github.com/actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -247,7 +247,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
 
-      - uses: https://github.com/actions/setup-go@v6
+      - uses: https://github.com/actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -357,7 +357,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
 
-      - uses: https://github.com/actions/setup-go@v6
+      - uses: https://github.com/actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
