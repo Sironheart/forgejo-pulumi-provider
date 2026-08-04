@@ -16,19 +16,19 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # renovate: datasource=github-releases depName=golang/go
-  GO_VERSION: "1.26.4"
+  # renovate: datasource=golang-version depName=go
+  GO_VERSION: "1.26.5"
   # renovate: datasource=github-releases depName=pulumi/pulumi
-  PULUMI_VERSION: "3.247.0"
+  PULUMI_VERSION: "3.256.0"
   # renovate: datasource=github-releases depName=golangci/golangci-lint
   GOLANGCI_LINT_VERSION: v2.12.2
   # renovate: datasource=github-releases depName=caarlos0/svu
   SVU_VERSION: v3.4.1
   # renovate: datasource=github-releases depName=nodejs/node
   NODE_VERSION: "v26.5.1"
-  # renovate: datasource=github-releases depName=microsoft/dotnet
-  DOTNET_VERSION: "8.0.x"
-  # renovate: datasource=docker depName=azul/zulu-openjdk
+  # renovate: datasource=dotnet-version depName=dotnet-sdk
+  DOTNET_VERSION: "8.0.423"
+  # renovate: datasource=java-version depName=java
   JAVA_VERSION: "11.0.31"
   # renovate: datasource=gradle-version depName=gradle
   GRADLE_VERSION: "8.14.5"

@@ -1,18 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Process annotated dependencies",
-      "managerFilePatterns": ["/\\.ya?ml$/"],
-      "matchStrings": [
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+(:\\s|=)(&\\S+\\s)?[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
-      ],
-      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}"
-    }
+    "config:recommended",
+    "customManagers:githubActionsVersions"
   ],
   "packageRules": [
     {
@@ -29,6 +19,18 @@
         "Pulumi",
         "com.pulumi:pulumi"
       ]
+    },
+    {
+      "description": "Keep workflow .NET SDK on 8.x",
+      "matchDatasources": ["dotnet-version"],
+      "matchPackageNames": ["dotnet-sdk"],
+      "allowedVersions": "/^8\\./"
+    },
+    {
+      "description": "Keep workflow Java on 11.x",
+      "matchDatasources": ["java-version"],
+      "matchPackageNames": ["java"],
+      "allowedVersions": "/^11\\./"
     }
   ],
   "ignorePaths": [
