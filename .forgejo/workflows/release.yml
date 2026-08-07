@@ -29,7 +29,7 @@ env:
   # renovate: datasource=dotnet-version depName=dotnet-sdk
   DOTNET_VERSION: "8.0.423"
   # renovate: datasource=java-version depName=java
-  JAVA_VERSION: "11.0.31"
+  JAVA_VERSION: "11.0.32+9"
   # renovate: datasource=gradle-version depName=gradle
   GRADLE_VERSION: "8.14.5"
   # renovate: datasource=github-releases depName=goreleaser/goreleaser
