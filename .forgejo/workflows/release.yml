@@ -194,13 +194,6 @@ jobs:
           fi
           echo "$HOME/.pulumi/bin" >> "${FORGEJO_PATH:-$GITHUB_PATH}"
 
-      - name: Install GoReleaser
-        uses: https://github.com/goreleaser/goreleaser-action@v7
-        with:
-          distribution: goreleaser
-          version: ${{ env.GORELEASER_VERSION }}
-          install-only: true
-
       - name: Build provider
         env:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
@@ -219,14 +212,14 @@ jobs:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
         run: scripts/gen-sdk.sh
 
-      - name: Check generated files
-        run: |
-          set -eu
-          if [ -n "$(git status --short)" ]; then
-            git status --short
-            git diff
-            exit 1
-          fi
+      - name: Archive SDKs
+        run: tar -czf sdks.tar.gz sdk/
+
+      - name: Upload SDKs
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: sdks
+          path: sdks.tar.gz
 
   forgejo-release:
     needs:
@@ -301,6 +294,7 @@ jobs:
   package-nodejs:
     needs:
       - version
+      - sdk-validation
       - forgejo-release
     if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -309,6 +303,14 @@ jobs:
       REGISTRY_URL: ${{ forgejo.server_url }}/api/packages/${{ forgejo.repository_owner }}/npm
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v7
+
+      - name: Download SDKs
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: sdks
+
+      - name: Extract SDKs
+        run: tar -xzf sdks.tar.gz
 
       - name: Install system tools
         run: |
@@ -342,6 +344,7 @@ jobs:
   package-go:
     needs:
       - version
+      - sdk-validation
       - forgejo-release
     if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -350,6 +353,14 @@ jobs:
       REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v7
+
+      - name: Download SDKs
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: sdks
+
+      - name: Extract SDKs
+        run: tar -xzf sdks.tar.gz
 
       - name: Install system tools
         run: |
@@ -389,6 +400,7 @@ jobs:
   package-dotnet:
     needs:
       - version
+      - sdk-validation
       - forgejo-release
     if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -397,6 +409,14 @@ jobs:
       REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v7
+
+      - name: Download SDKs
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: sdks
+
+      - name: Extract SDKs
+        run: tar -xzf sdks.tar.gz
 
       - uses: https://github.com/actions/setup-dotnet@v6
         with:
@@ -425,6 +445,7 @@ jobs:
   package-java:
     needs:
       - version
+      - sdk-validation
       - forgejo-release
     if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -433,6 +454,14 @@ jobs:
       REGISTRY_URL: https://forgejo.siron.casa/api/packages/${{ forgejo.repository_owner }}
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v7
+
+      - name: Download SDKs
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          name: sdks
+
+      - name: Extract SDKs
+        run: tar -xzf sdks.tar.gz
 
       - uses: https://github.com/actions/setup-java@v5
         with:

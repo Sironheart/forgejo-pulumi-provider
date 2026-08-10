@@ -13,14 +13,13 @@ before:
   hooks:
     - sh -c 'mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION#v} && go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo'
     - sh -c 'pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json'
-    - scripts/gen-sdk.sh
 
 builds:
   - id: pulumi-resource-forgejo
     main: ./cmd/pulumi-resource-forgejo
     binary: pulumi-resource-forgejo
     env:
-      - GOMAXPROCS=1
+      - GOMAXPROCS=4
       - CGO_ENABLED=0
     goos:
       - linux

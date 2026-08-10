@@ -197,16 +197,22 @@ jobs:
       - name: Export schema
         run: pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
 
+      - name: Upload schema
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: schema
+          path: schema.json
+
       - name: Generate SDKs
         env:
           FORGEJO_PROVIDER_VERSION: ${{ needs.version.outputs.version }}
         run: scripts/gen-sdk.sh
 
-      - name: Check generated files
-        run: |
-          set -eu
-          if [ -n "$(git status --short)" ]; then
-            git status --short
-            git diff
-            exit 1
-          fi
+      - name: Archive SDKs
+        run: tar -czf sdks.tar.gz sdk/
+
+      - name: Upload SDKs
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: sdks
+          path: sdks.tar.gz

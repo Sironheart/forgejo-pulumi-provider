@@ -37,7 +37,7 @@ run = "pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json"
 
 [tasks.sdk]
 description = "Generate SDKs for published Pulumi languages"
-depends = ["schema"]
+depends = ["build"]
 run = "scripts/gen-sdk.sh"
 
 [tasks.release-check]
@@ -67,18 +67,6 @@ depends = ["check-prepare"]
 run = "mkdir -p bin && version=${FORGEJO_PROVIDER_VERSION:-$(svu next)} && version=${version#v} && go build -trimpath -ldflags \"-s -w -X main.version=$version\" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo"
 hide = true
 
-[tasks.check-schema]
-description = "Export schema after check build"
-depends = ["check-build"]
-run = "pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json"
-hide = true
-
-[tasks.check-sdk]
-description = "Generate SDKs after check schema export"
-depends = ["check-schema"]
-run = "scripts/gen-sdk.sh"
-hide = true
-
 [tasks.check]
-description = "Run formatting, linting, tests, schema export, and published SDK generation"
-depends = ["check-lint", "check-test", "check-sdk"]
+description = "Run formatting, linting, tests, and provider build"
+depends = ["check-lint", "check-test", "check-build"]

@@ -1,5 +1,7 @@
 bin/
 dist/
+schema.json
+sdk/*
 node_modules/
 __pycache__/
 *.test
