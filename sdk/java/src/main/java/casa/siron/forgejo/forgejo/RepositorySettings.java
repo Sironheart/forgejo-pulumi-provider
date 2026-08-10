@@ -35,6 +35,76 @@ public class RepositorySettings extends com.pulumi.resources.CustomResource {
         return Codegen.optional(this.actions);
     }
     /**
+     * Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="allowFastForwardOnlyMerge", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> allowFastForwardOnlyMerge;
+
+    /**
+     * @return Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<Boolean>> allowFastForwardOnlyMerge() {
+        return Codegen.optional(this.allowFastForwardOnlyMerge);
+    }
+    /**
+     * Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="allowMergeCommits", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> allowMergeCommits;
+
+    /**
+     * @return Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<Boolean>> allowMergeCommits() {
+        return Codegen.optional(this.allowMergeCommits);
+    }
+    /**
+     * Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="allowRebase", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> allowRebase;
+
+    /**
+     * @return Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<Boolean>> allowRebase() {
+        return Codegen.optional(this.allowRebase);
+    }
+    /**
+     * Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="allowRebaseMerge", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> allowRebaseMerge;
+
+    /**
+     * @return Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<Boolean>> allowRebaseMerge() {
+        return Codegen.optional(this.allowRebaseMerge);
+    }
+    /**
+     * Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="allowSquashMerge", refs={Boolean.class}, tree="[0]")
+    private Output</* @Nullable */ Boolean> allowSquashMerge;
+
+    /**
+     * @return Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<Boolean>> allowSquashMerge() {
+        return Codegen.optional(this.allowSquashMerge);
+    }
+    /**
      * Whether the repository is archived. Leave unset to avoid managing it.
      * 
      */
@@ -61,6 +131,20 @@ public class RepositorySettings extends com.pulumi.resources.CustomResource {
      */
     public Output<Optional<Boolean>> defaultDeleteBranchAfterMerge() {
         return Codegen.optional(this.defaultDeleteBranchAfterMerge);
+    }
+    /**
+     * Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Export(name="defaultMergeStyle", refs={String.class}, tree="[0]")
+    private Output</* @Nullable */ String> defaultMergeStyle;
+
+    /**
+     * @return Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Output<Optional<String>> defaultMergeStyle() {
+        return Codegen.optional(this.defaultMergeStyle);
     }
     /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.

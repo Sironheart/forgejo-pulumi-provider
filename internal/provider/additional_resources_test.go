@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )
@@ -296,6 +297,95 @@ func TestRepositorySettingsEditOptionKeepsExplicitPullRequests(t *testing.T) {
 
 	assertBoolPtr(t, opt.DefaultDeleteBranchAfterMerge, true)
 	assertBoolPtr(t, opt.HasPullRequests, false)
+}
+
+func TestRepositorySettingsDiffUpdatesMergeStyle(t *testing.T) {
+	t.Parallel()
+
+	resp, err := (RepositorySettings{}).Diff(context.Background(), infer.DiffRequest[RepositorySettingsArgs, RepositorySettingsState]{
+		State: RepositorySettingsState{RepositorySettingsArgs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				AllowMergeCommits:         boolPtr(true),
+				AllowFastForwardOnlyMerge: boolPtr(false),
+				DefaultMergeStyle:         stringPtr("merge"),
+			},
+		}},
+		Inputs: RepositorySettingsArgs{
+			Owner:      "sironheart",
+			Repository: "infra",
+			RepositorySettingsConfig: RepositorySettingsConfig{
+				AllowMergeCommits:         boolPtr(false),
+				AllowFastForwardOnlyMerge: boolPtr(true),
+				DefaultMergeStyle:         stringPtr("fast-forward-only"),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("diff: %v", err)
+	}
+	assertDiffKind(t, resp, "allowMergeCommits", p.Update)
+	assertDiffKind(t, resp, "allowFastForwardOnlyMerge", p.Update)
+	assertDiffKind(t, resp, "defaultMergeStyle", p.Update)
+}
+
+func TestRepositorySettingsEditOptionPropagatesFastForwardOnlyMerge(t *testing.T) {
+	t.Parallel()
+
+	opt := repositorySettingsEditOption(RepositorySettingsArgs{RepositorySettingsConfig: RepositorySettingsConfig{
+		AllowMergeCommits:         boolPtr(false),
+		AllowRebase:               boolPtr(false),
+		AllowRebaseMerge:          boolPtr(false),
+		AllowSquashMerge:          boolPtr(false),
+		AllowFastForwardOnlyMerge: boolPtr(true),
+		DefaultMergeStyle:         stringPtr("fast-forward-only"),
+	}}, nil)
+
+	assertBoolPtr(t, opt.AllowMerge, false)
+	assertBoolPtr(t, opt.AllowRebase, false)
+	assertBoolPtr(t, opt.AllowRebaseMerge, false)
+	assertBoolPtr(t, opt.AllowSquash, false)
+	assertBoolPtr(t, opt.AllowFastForwardOnly, true)
+	if opt.DefaultMergeStyle == nil || *opt.DefaultMergeStyle != "fast-forward-only" {
+		t.Fatalf("expected default merge style fast-forward-only, got %v", opt.DefaultMergeStyle)
+	}
+	assertBoolPtr(t, opt.HasPullRequests, true)
+}
+
+func TestRepositorySettingsEditOptionKeepsExplicitPullRequestsForMergeSettings(t *testing.T) {
+	t.Parallel()
+
+	opt := repositorySettingsEditOption(RepositorySettingsArgs{RepositorySettingsConfig: RepositorySettingsConfig{
+		PullRequests:              boolPtr(false),
+		AllowFastForwardOnlyMerge: boolPtr(true),
+		DefaultMergeStyle:         stringPtr("fast-forward-only"),
+	}}, nil)
+
+	assertBoolPtr(t, opt.AllowFastForwardOnly, true)
+	assertBoolPtr(t, opt.HasPullRequests, false)
+}
+
+func TestRepositorySettingsConfigFromAPIPreservesAllowFastForwardOnlyMerge(t *testing.T) {
+	t.Parallel()
+
+	settings := repositorySettingsConfigFromAPI(RepositorySettingsConfig{
+		AllowMergeCommits:         boolPtr(false),
+		AllowFastForwardOnlyMerge: boolPtr(true),
+		DefaultMergeStyle:         stringPtr("fast-forward-only"),
+	}, &forgejo.Repository{
+		AllowMerge:        false,
+		AllowRebase:       false,
+		AllowRebaseMerge:  false,
+		AllowSquash:       false,
+		DefaultMergeStyle: "fast-forward-only",
+	})
+
+	assertBoolPtr(t, settings.AllowMergeCommits, false)
+	assertBoolPtr(t, settings.AllowFastForwardOnlyMerge, true)
+	if settings.DefaultMergeStyle == nil || *settings.DefaultMergeStyle != "fast-forward-only" {
+		t.Fatalf("expected default merge style fast-forward-only, got %v", settings.DefaultMergeStyle)
+	}
 }
 
 func TestRepositorySettingsDiffUpdatesArchived(t *testing.T) {

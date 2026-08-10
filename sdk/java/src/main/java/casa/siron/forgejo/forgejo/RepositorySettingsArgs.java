@@ -33,6 +33,81 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
     }
 
     /**
+     * Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="allowFastForwardOnlyMerge")
+    private @Nullable Output<Boolean> allowFastForwardOnlyMerge;
+
+    /**
+     * @return Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<Boolean>> allowFastForwardOnlyMerge() {
+        return Optional.ofNullable(this.allowFastForwardOnlyMerge);
+    }
+
+    /**
+     * Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="allowMergeCommits")
+    private @Nullable Output<Boolean> allowMergeCommits;
+
+    /**
+     * @return Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<Boolean>> allowMergeCommits() {
+        return Optional.ofNullable(this.allowMergeCommits);
+    }
+
+    /**
+     * Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="allowRebase")
+    private @Nullable Output<Boolean> allowRebase;
+
+    /**
+     * @return Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<Boolean>> allowRebase() {
+        return Optional.ofNullable(this.allowRebase);
+    }
+
+    /**
+     * Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="allowRebaseMerge")
+    private @Nullable Output<Boolean> allowRebaseMerge;
+
+    /**
+     * @return Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<Boolean>> allowRebaseMerge() {
+        return Optional.ofNullable(this.allowRebaseMerge);
+    }
+
+    /**
+     * Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="allowSquashMerge")
+    private @Nullable Output<Boolean> allowSquashMerge;
+
+    /**
+     * @return Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<Boolean>> allowSquashMerge() {
+        return Optional.ofNullable(this.allowSquashMerge);
+    }
+
+    /**
      * Whether the repository is archived. Leave unset to avoid managing it.
      * 
      */
@@ -60,6 +135,21 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
      */
     public Optional<Output<Boolean>> defaultDeleteBranchAfterMerge() {
         return Optional.ofNullable(this.defaultDeleteBranchAfterMerge);
+    }
+
+    /**
+     * Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    @Import(name="defaultMergeStyle")
+    private @Nullable Output<String> defaultMergeStyle;
+
+    /**
+     * @return Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Output<String>> defaultMergeStyle() {
+        return Optional.ofNullable(this.defaultMergeStyle);
     }
 
     /**
@@ -336,8 +426,14 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
 
     private RepositorySettingsArgs(RepositorySettingsArgs $) {
         this.actions = $.actions;
+        this.allowFastForwardOnlyMerge = $.allowFastForwardOnlyMerge;
+        this.allowMergeCommits = $.allowMergeCommits;
+        this.allowRebase = $.allowRebase;
+        this.allowRebaseMerge = $.allowRebaseMerge;
+        this.allowSquashMerge = $.allowSquashMerge;
         this.archived = $.archived;
         this.defaultDeleteBranchAfterMerge = $.defaultDeleteBranchAfterMerge;
+        this.defaultMergeStyle = $.defaultMergeStyle;
         this.externalTrackerFormat = $.externalTrackerFormat;
         this.externalTrackerRegexPattern = $.externalTrackerRegexPattern;
         this.externalTrackerStyle = $.externalTrackerStyle;
@@ -398,6 +494,111 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
         }
 
         /**
+         * @param allowFastForwardOnlyMerge Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowFastForwardOnlyMerge(@Nullable Output<Boolean> allowFastForwardOnlyMerge) {
+            $.allowFastForwardOnlyMerge = allowFastForwardOnlyMerge;
+            return this;
+        }
+
+        /**
+         * @param allowFastForwardOnlyMerge Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowFastForwardOnlyMerge(Boolean allowFastForwardOnlyMerge) {
+            return allowFastForwardOnlyMerge(Output.of(allowFastForwardOnlyMerge));
+        }
+
+        /**
+         * @param allowMergeCommits Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowMergeCommits(@Nullable Output<Boolean> allowMergeCommits) {
+            $.allowMergeCommits = allowMergeCommits;
+            return this;
+        }
+
+        /**
+         * @param allowMergeCommits Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowMergeCommits(Boolean allowMergeCommits) {
+            return allowMergeCommits(Output.of(allowMergeCommits));
+        }
+
+        /**
+         * @param allowRebase Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowRebase(@Nullable Output<Boolean> allowRebase) {
+            $.allowRebase = allowRebase;
+            return this;
+        }
+
+        /**
+         * @param allowRebase Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowRebase(Boolean allowRebase) {
+            return allowRebase(Output.of(allowRebase));
+        }
+
+        /**
+         * @param allowRebaseMerge Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowRebaseMerge(@Nullable Output<Boolean> allowRebaseMerge) {
+            $.allowRebaseMerge = allowRebaseMerge;
+            return this;
+        }
+
+        /**
+         * @param allowRebaseMerge Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowRebaseMerge(Boolean allowRebaseMerge) {
+            return allowRebaseMerge(Output.of(allowRebaseMerge));
+        }
+
+        /**
+         * @param allowSquashMerge Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowSquashMerge(@Nullable Output<Boolean> allowSquashMerge) {
+            $.allowSquashMerge = allowSquashMerge;
+            return this;
+        }
+
+        /**
+         * @param allowSquashMerge Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder allowSquashMerge(Boolean allowSquashMerge) {
+            return allowSquashMerge(Output.of(allowSquashMerge));
+        }
+
+        /**
          * @param archived Whether the repository is archived. Leave unset to avoid managing it.
          * 
          * @return builder
@@ -437,6 +638,27 @@ public final class RepositorySettingsArgs extends com.pulumi.resources.ResourceA
          */
         public Builder defaultDeleteBranchAfterMerge(Boolean defaultDeleteBranchAfterMerge) {
             return defaultDeleteBranchAfterMerge(Output.of(defaultDeleteBranchAfterMerge));
+        }
+
+        /**
+         * @param defaultMergeStyle Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder defaultMergeStyle(@Nullable Output<String> defaultMergeStyle) {
+            $.defaultMergeStyle = defaultMergeStyle;
+            return this;
+        }
+
+        /**
+         * @param defaultMergeStyle Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+         * 
+         * @return builder
+         * 
+         */
+        public Builder defaultMergeStyle(String defaultMergeStyle) {
+            return defaultMergeStyle(Output.of(defaultMergeStyle));
         }
 
         /**

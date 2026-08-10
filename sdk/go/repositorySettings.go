@@ -18,10 +18,22 @@ type RepositorySettings struct {
 
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrOutput `pulumi:"actions"`
+	// Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowFastForwardOnlyMerge pulumi.BoolPtrOutput `pulumi:"allowFastForwardOnlyMerge"`
+	// Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowMergeCommits pulumi.BoolPtrOutput `pulumi:"allowMergeCommits"`
+	// Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowRebase pulumi.BoolPtrOutput `pulumi:"allowRebase"`
+	// Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowRebaseMerge pulumi.BoolPtrOutput `pulumi:"allowRebaseMerge"`
+	// Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowSquashMerge pulumi.BoolPtrOutput `pulumi:"allowSquashMerge"`
 	// Whether the repository is archived. Leave unset to avoid managing it.
 	Archived pulumi.BoolPtrOutput `pulumi:"archived"`
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge pulumi.BoolPtrOutput `pulumi:"defaultDeleteBranchAfterMerge"`
+	// Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	DefaultMergeStyle pulumi.StringPtrOutput `pulumi:"defaultMergeStyle"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat pulumi.StringPtrOutput `pulumi:"externalTrackerFormat"`
 	// External issue tracker regular expression pattern.
@@ -108,10 +120,22 @@ func (RepositorySettingsState) ElementType() reflect.Type {
 type repositorySettingsArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions *bool `pulumi:"actions"`
+	// Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowFastForwardOnlyMerge *bool `pulumi:"allowFastForwardOnlyMerge"`
+	// Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowMergeCommits *bool `pulumi:"allowMergeCommits"`
+	// Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowRebase *bool `pulumi:"allowRebase"`
+	// Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowRebaseMerge *bool `pulumi:"allowRebaseMerge"`
+	// Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowSquashMerge *bool `pulumi:"allowSquashMerge"`
 	// Whether the repository is archived. Leave unset to avoid managing it.
 	Archived *bool `pulumi:"archived"`
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge *bool `pulumi:"defaultDeleteBranchAfterMerge"`
+	// Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	DefaultMergeStyle *string `pulumi:"defaultMergeStyle"`
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat *string `pulumi:"externalTrackerFormat"`
 	// External issue tracker regular expression pattern.
@@ -154,10 +178,22 @@ type repositorySettingsArgs struct {
 type RepositorySettingsArgs struct {
 	// Whether the actions unit is enabled. Leave unset to avoid managing it.
 	Actions pulumi.BoolPtrInput
+	// Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowFastForwardOnlyMerge pulumi.BoolPtrInput
+	// Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowMergeCommits pulumi.BoolPtrInput
+	// Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowRebase pulumi.BoolPtrInput
+	// Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowRebaseMerge pulumi.BoolPtrInput
+	// Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	AllowSquashMerge pulumi.BoolPtrInput
 	// Whether the repository is archived. Leave unset to avoid managing it.
 	Archived pulumi.BoolPtrInput
 	// Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 	DefaultDeleteBranchAfterMerge pulumi.BoolPtrInput
+	// Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+	DefaultMergeStyle pulumi.StringPtrInput
 	// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
 	ExternalTrackerFormat pulumi.StringPtrInput
 	// External issue tracker regular expression pattern.
@@ -238,6 +274,31 @@ func (o RepositorySettingsOutput) Actions() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.Actions }).(pulumi.BoolPtrOutput)
 }
 
+// Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) AllowFastForwardOnlyMerge() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.AllowFastForwardOnlyMerge }).(pulumi.BoolPtrOutput)
+}
+
+// Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) AllowMergeCommits() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.AllowMergeCommits }).(pulumi.BoolPtrOutput)
+}
+
+// Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) AllowRebase() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.AllowRebase }).(pulumi.BoolPtrOutput)
+}
+
+// Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) AllowRebaseMerge() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.AllowRebaseMerge }).(pulumi.BoolPtrOutput)
+}
+
+// Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) AllowSquashMerge() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.AllowSquashMerge }).(pulumi.BoolPtrOutput)
+}
+
 // Whether the repository is archived. Leave unset to avoid managing it.
 func (o RepositorySettingsOutput) Archived() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.Archived }).(pulumi.BoolPtrOutput)
@@ -246,6 +307,11 @@ func (o RepositorySettingsOutput) Archived() pulumi.BoolPtrOutput {
 // Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
 func (o RepositorySettingsOutput) DefaultDeleteBranchAfterMerge() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *RepositorySettings) pulumi.BoolPtrOutput { return v.DefaultDeleteBranchAfterMerge }).(pulumi.BoolPtrOutput)
+}
+
+// Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+func (o RepositorySettingsOutput) DefaultMergeStyle() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *RepositorySettings) pulumi.StringPtrOutput { return v.DefaultMergeStyle }).(pulumi.StringPtrOutput)
 }
 
 // External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.

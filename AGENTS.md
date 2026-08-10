@@ -21,7 +21,8 @@
 
 - `scripts/gen-sdk.sh` is the SDK source of truth: it runs `pulumi package gen-sdk`, removes `sdk/python`, fixes Node package metadata, maintains `sdk/go/go.mod`, escapes Java `${VERSION}`, and writes `sdk/dotnet/version.txt`.
 - If a change affects provider types, config, descriptions, package metadata, or resources, expect changes in `schema.json` and `sdk/*`; CI fails if generation leaves the tree dirty.
-- Build/codegen version defaults to `svu next`; set `FORGEJO_PROVIDER_VERSION=0.0.0-dev` or another explicit version when you need deterministic local generated output.
+- Build/codegen version defaults to `svu next`. For committed `schema.json` / `sdk/*` changes that CI will check, always regenerate with that default (or `FORGEJO_PROVIDER_VERSION` matching `svu next`, currently without the `v` prefix). Do **not** commit SDK version stamps as `0.0.0-dev` — CI regenerates with `svu next` and fails "Check generated files" on the mismatch.
+- Use `FORGEJO_PROVIDER_VERSION=0.0.0-dev` only for throwaway local experiments that you will not commit.
 - Current executable package metadata names the Node SDK `@sironheart/pulumi-forgejo-provider`; trust `internal/provider/provider.go`, `schema.json`, and generated package manifests over README examples if they disagree.
 
 ## CI Parity

@@ -11,6 +11,26 @@ export interface RepositorySettingsConfig {
      */
     actions?: boolean;
     /**
+     * Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowFastForwardOnlyMerge?: boolean;
+    /**
+     * Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowMergeCommits?: boolean;
+    /**
+     * Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowRebase?: boolean;
+    /**
+     * Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowRebaseMerge?: boolean;
+    /**
+     * Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowSquashMerge?: boolean;
+    /**
      * Whether the repository is archived. Leave unset to avoid managing it.
      */
     archived?: boolean;
@@ -18,6 +38,10 @@ export interface RepositorySettingsConfig {
      * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      */
     defaultDeleteBranchAfterMerge?: boolean;
+    /**
+     * Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    defaultMergeStyle?: string;
     /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      */

@@ -18,6 +18,31 @@ public final class RepositorySettingsConfig {
      */
     private @Nullable Boolean actions;
     /**
+     * @return Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable Boolean allowFastForwardOnlyMerge;
+    /**
+     * @return Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable Boolean allowMergeCommits;
+    /**
+     * @return Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable Boolean allowRebase;
+    /**
+     * @return Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable Boolean allowRebaseMerge;
+    /**
+     * @return Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable Boolean allowSquashMerge;
+    /**
      * @return Whether the repository is archived. Leave unset to avoid managing it.
      * 
      */
@@ -27,6 +52,11 @@ public final class RepositorySettingsConfig {
      * 
      */
     private @Nullable Boolean defaultDeleteBranchAfterMerge;
+    /**
+     * @return Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    private @Nullable String defaultMergeStyle;
     /**
      * @return External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      * 
@@ -117,6 +147,41 @@ public final class RepositorySettingsConfig {
         return Optional.ofNullable(this.actions);
     }
     /**
+     * @return Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Boolean> allowFastForwardOnlyMerge() {
+        return Optional.ofNullable(this.allowFastForwardOnlyMerge);
+    }
+    /**
+     * @return Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Boolean> allowMergeCommits() {
+        return Optional.ofNullable(this.allowMergeCommits);
+    }
+    /**
+     * @return Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Boolean> allowRebase() {
+        return Optional.ofNullable(this.allowRebase);
+    }
+    /**
+     * @return Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Boolean> allowRebaseMerge() {
+        return Optional.ofNullable(this.allowRebaseMerge);
+    }
+    /**
+     * @return Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<Boolean> allowSquashMerge() {
+        return Optional.ofNullable(this.allowSquashMerge);
+    }
+    /**
      * @return Whether the repository is archived. Leave unset to avoid managing it.
      * 
      */
@@ -129,6 +194,13 @@ public final class RepositorySettingsConfig {
      */
     public Optional<Boolean> defaultDeleteBranchAfterMerge() {
         return Optional.ofNullable(this.defaultDeleteBranchAfterMerge);
+    }
+    /**
+     * @return Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     * 
+     */
+    public Optional<String> defaultMergeStyle() {
+        return Optional.ofNullable(this.defaultMergeStyle);
     }
     /**
      * @return External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -253,8 +325,14 @@ public final class RepositorySettingsConfig {
     @CustomType.Builder
     public static final class Builder {
         private @Nullable Boolean actions;
+        private @Nullable Boolean allowFastForwardOnlyMerge;
+        private @Nullable Boolean allowMergeCommits;
+        private @Nullable Boolean allowRebase;
+        private @Nullable Boolean allowRebaseMerge;
+        private @Nullable Boolean allowSquashMerge;
         private @Nullable Boolean archived;
         private @Nullable Boolean defaultDeleteBranchAfterMerge;
+        private @Nullable String defaultMergeStyle;
         private @Nullable String externalTrackerFormat;
         private @Nullable String externalTrackerRegexPattern;
         private @Nullable String externalTrackerStyle;
@@ -275,8 +353,14 @@ public final class RepositorySettingsConfig {
         public Builder(RepositorySettingsConfig defaults) {
     	      Objects.requireNonNull(defaults);
     	      this.actions = defaults.actions;
+    	      this.allowFastForwardOnlyMerge = defaults.allowFastForwardOnlyMerge;
+    	      this.allowMergeCommits = defaults.allowMergeCommits;
+    	      this.allowRebase = defaults.allowRebase;
+    	      this.allowRebaseMerge = defaults.allowRebaseMerge;
+    	      this.allowSquashMerge = defaults.allowSquashMerge;
     	      this.archived = defaults.archived;
     	      this.defaultDeleteBranchAfterMerge = defaults.defaultDeleteBranchAfterMerge;
+    	      this.defaultMergeStyle = defaults.defaultMergeStyle;
     	      this.externalTrackerFormat = defaults.externalTrackerFormat;
     	      this.externalTrackerRegexPattern = defaults.externalTrackerRegexPattern;
     	      this.externalTrackerStyle = defaults.externalTrackerStyle;
@@ -302,6 +386,36 @@ public final class RepositorySettingsConfig {
             return this;
         }
         @CustomType.Setter
+        public Builder allowFastForwardOnlyMerge(@Nullable Boolean allowFastForwardOnlyMerge) {
+
+            this.allowFastForwardOnlyMerge = allowFastForwardOnlyMerge;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder allowMergeCommits(@Nullable Boolean allowMergeCommits) {
+
+            this.allowMergeCommits = allowMergeCommits;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder allowRebase(@Nullable Boolean allowRebase) {
+
+            this.allowRebase = allowRebase;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder allowRebaseMerge(@Nullable Boolean allowRebaseMerge) {
+
+            this.allowRebaseMerge = allowRebaseMerge;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder allowSquashMerge(@Nullable Boolean allowSquashMerge) {
+
+            this.allowSquashMerge = allowSquashMerge;
+            return this;
+        }
+        @CustomType.Setter
         public Builder archived(@Nullable Boolean archived) {
 
             this.archived = archived;
@@ -311,6 +425,12 @@ public final class RepositorySettingsConfig {
         public Builder defaultDeleteBranchAfterMerge(@Nullable Boolean defaultDeleteBranchAfterMerge) {
 
             this.defaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
+            return this;
+        }
+        @CustomType.Setter
+        public Builder defaultMergeStyle(@Nullable String defaultMergeStyle) {
+
+            this.defaultMergeStyle = defaultMergeStyle;
             return this;
         }
         @CustomType.Setter
@@ -412,8 +532,14 @@ public final class RepositorySettingsConfig {
         public RepositorySettingsConfig build() {
             final var _resultValue = new RepositorySettingsConfig();
             _resultValue.actions = actions;
+            _resultValue.allowFastForwardOnlyMerge = allowFastForwardOnlyMerge;
+            _resultValue.allowMergeCommits = allowMergeCommits;
+            _resultValue.allowRebase = allowRebase;
+            _resultValue.allowRebaseMerge = allowRebaseMerge;
+            _resultValue.allowSquashMerge = allowSquashMerge;
             _resultValue.archived = archived;
             _resultValue.defaultDeleteBranchAfterMerge = defaultDeleteBranchAfterMerge;
+            _resultValue.defaultMergeStyle = defaultMergeStyle;
             _resultValue.externalTrackerFormat = externalTrackerFormat;
             _resultValue.externalTrackerRegexPattern = externalTrackerRegexPattern;
             _resultValue.externalTrackerStyle = externalTrackerStyle;

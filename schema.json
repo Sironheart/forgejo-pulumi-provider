@@ -1,7 +1,7 @@
 {
   "name": "forgejo",
   "displayName": "Forgejo Pulumi Provider",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "A Pulumi provider for managing Forgejo resources.",
   "keywords": [
     "pulumi",
@@ -67,6 +67,26 @@
           "type": "boolean",
           "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
         },
+        "allowFastForwardOnlyMerge": {
+          "type": "boolean",
+          "description": "Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowMergeCommits": {
+          "type": "boolean",
+          "description": "Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowRebase": {
+          "type": "boolean",
+          "description": "Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowRebaseMerge": {
+          "type": "boolean",
+          "description": "Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowSquashMerge": {
+          "type": "boolean",
+          "description": "Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
         "archived": {
           "type": "boolean",
           "description": "Whether the repository is archived. Leave unset to avoid managing it."
@@ -74,6 +94,10 @@
         "defaultDeleteBranchAfterMerge": {
           "type": "boolean",
           "description": "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set."
+        },
+        "defaultMergeStyle": {
+          "type": "string",
+          "description": "Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
         },
         "externalTrackerFormat": {
           "type": "string",
@@ -1225,6 +1249,26 @@
           "type": "boolean",
           "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
         },
+        "allowFastForwardOnlyMerge": {
+          "type": "boolean",
+          "description": "Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowMergeCommits": {
+          "type": "boolean",
+          "description": "Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowRebase": {
+          "type": "boolean",
+          "description": "Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowRebaseMerge": {
+          "type": "boolean",
+          "description": "Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowSquashMerge": {
+          "type": "boolean",
+          "description": "Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
         "archived": {
           "type": "boolean",
           "description": "Whether the repository is archived. Leave unset to avoid managing it."
@@ -1232,6 +1276,10 @@
         "defaultDeleteBranchAfterMerge": {
           "type": "boolean",
           "description": "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set."
+        },
+        "defaultMergeStyle": {
+          "type": "string",
+          "description": "Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
         },
         "externalTrackerFormat": {
           "type": "string",
@@ -1315,6 +1363,26 @@
           "type": "boolean",
           "description": "Whether the actions unit is enabled. Leave unset to avoid managing it."
         },
+        "allowFastForwardOnlyMerge": {
+          "type": "boolean",
+          "description": "Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowMergeCommits": {
+          "type": "boolean",
+          "description": "Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowRebase": {
+          "type": "boolean",
+          "description": "Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowRebaseMerge": {
+          "type": "boolean",
+          "description": "Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
+        "allowSquashMerge": {
+          "type": "boolean",
+          "description": "Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
+        },
         "archived": {
           "type": "boolean",
           "description": "Whether the repository is archived. Leave unset to avoid managing it."
@@ -1322,6 +1390,10 @@
         "defaultDeleteBranchAfterMerge": {
           "type": "boolean",
           "description": "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set."
+        },
+        "defaultMergeStyle": {
+          "type": "string",
+          "description": "Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set."
         },
         "externalTrackerFormat": {
           "type": "string",

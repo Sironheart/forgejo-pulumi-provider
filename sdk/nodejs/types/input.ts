@@ -11,6 +11,26 @@ export interface RepositorySettingsConfigArgs {
      */
     actions?: pulumi.Input<boolean | undefined>;
     /**
+     * Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowFastForwardOnlyMerge?: pulumi.Input<boolean | undefined>;
+    /**
+     * Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowMergeCommits?: pulumi.Input<boolean | undefined>;
+    /**
+     * Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowRebase?: pulumi.Input<boolean | undefined>;
+    /**
+     * Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowRebaseMerge?: pulumi.Input<boolean | undefined>;
+    /**
+     * Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    allowSquashMerge?: pulumi.Input<boolean | undefined>;
+    /**
      * Whether the repository is archived. Leave unset to avoid managing it.
      */
     archived?: pulumi.Input<boolean | undefined>;
@@ -18,6 +38,10 @@ export interface RepositorySettingsConfigArgs {
      * Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.
      */
     defaultDeleteBranchAfterMerge?: pulumi.Input<boolean | undefined>;
+    /**
+     * Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+     */
+    defaultMergeStyle?: pulumi.Input<string | undefined>;
     /**
      * External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
      */

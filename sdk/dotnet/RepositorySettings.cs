@@ -22,6 +22,36 @@ namespace Pulumi.Forgejo
         public Output<bool?> Actions { get; private set; } = null!;
 
         /// <summary>
+        /// Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("allowFastForwardOnlyMerge")]
+        public Output<bool?> AllowFastForwardOnlyMerge { get; private set; } = null!;
+
+        /// <summary>
+        /// Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("allowMergeCommits")]
+        public Output<bool?> AllowMergeCommits { get; private set; } = null!;
+
+        /// <summary>
+        /// Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("allowRebase")]
+        public Output<bool?> AllowRebase { get; private set; } = null!;
+
+        /// <summary>
+        /// Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("allowRebaseMerge")]
+        public Output<bool?> AllowRebaseMerge { get; private set; } = null!;
+
+        /// <summary>
+        /// Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("allowSquashMerge")]
+        public Output<bool?> AllowSquashMerge { get; private set; } = null!;
+
+        /// <summary>
         /// Whether the repository is archived. Leave unset to avoid managing it.
         /// </summary>
         [Output("archived")]
@@ -32,6 +62,12 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Output("defaultDeleteBranchAfterMerge")]
         public Output<bool?> DefaultDeleteBranchAfterMerge { get; private set; } = null!;
+
+        /// <summary>
+        /// Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Output("defaultMergeStyle")]
+        public Output<string?> DefaultMergeStyle { get; private set; } = null!;
 
         /// <summary>
         /// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.
@@ -194,6 +230,36 @@ namespace Pulumi.Forgejo
         public Input<bool>? Actions { get; set; }
 
         /// <summary>
+        /// Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("allowFastForwardOnlyMerge")]
+        public Input<bool>? AllowFastForwardOnlyMerge { get; set; }
+
+        /// <summary>
+        /// Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("allowMergeCommits")]
+        public Input<bool>? AllowMergeCommits { get; set; }
+
+        /// <summary>
+        /// Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("allowRebase")]
+        public Input<bool>? AllowRebase { get; set; }
+
+        /// <summary>
+        /// Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("allowRebaseMerge")]
+        public Input<bool>? AllowRebaseMerge { get; set; }
+
+        /// <summary>
+        /// Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("allowSquashMerge")]
+        public Input<bool>? AllowSquashMerge { get; set; }
+
+        /// <summary>
         /// Whether the repository is archived. Leave unset to avoid managing it.
         /// </summary>
         [Input("archived")]
@@ -204,6 +270,12 @@ namespace Pulumi.Forgejo
         /// </summary>
         [Input("defaultDeleteBranchAfterMerge")]
         public Input<bool>? DefaultDeleteBranchAfterMerge { get; set; }
+
+        /// <summary>
+        /// Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.
+        /// </summary>
+        [Input("defaultMergeStyle")]
+        public Input<string>? DefaultMergeStyle { get; set; }
 
         /// <summary>
         /// External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.

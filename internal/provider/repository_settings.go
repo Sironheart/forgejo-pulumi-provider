@@ -16,6 +16,12 @@ type RepositorySettingsConfig struct {
 	Issues                                          *bool   `pulumi:"issues,optional"`
 	PullRequests                                    *bool   `pulumi:"pullRequests,optional"`
 	DefaultDeleteBranchAfterMerge                   *bool   `pulumi:"defaultDeleteBranchAfterMerge,optional"`
+	AllowMergeCommits                               *bool   `pulumi:"allowMergeCommits,optional"`
+	AllowRebase                                     *bool   `pulumi:"allowRebase,optional"`
+	AllowRebaseMerge                                *bool   `pulumi:"allowRebaseMerge,optional"`
+	AllowSquashMerge                                *bool   `pulumi:"allowSquashMerge,optional"`
+	AllowFastForwardOnlyMerge                       *bool   `pulumi:"allowFastForwardOnlyMerge,optional"`
+	DefaultMergeStyle                               *string `pulumi:"defaultMergeStyle,optional"`
 	Archived                                        *bool   `pulumi:"archived,optional"`
 	Wiki                                            *bool   `pulumi:"wiki,optional"`
 	Projects                                        *bool   `pulumi:"projects,optional"`
@@ -64,6 +70,12 @@ func annotateRepositorySettingsConfig(a *RepositorySettingsConfig, ann infer.Ann
 	ann.Describe(&a.Issues, "Whether the issue tracker unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.PullRequests, "Whether the pull request unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.DefaultDeleteBranchAfterMerge, "Whether Forgejo deletes pull request branches by default after merge. Setting this also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.AllowMergeCommits, "Whether merge commits are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.AllowRebase, "Whether rebase merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.AllowRebaseMerge, "Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.AllowSquashMerge, "Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.AllowFastForwardOnlyMerge, "Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.DefaultMergeStyle, "Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
 	ann.Describe(&a.Archived, "Whether the repository is archived. Leave unset to avoid managing it.")
 	ann.Describe(&a.Wiki, "Whether the wiki unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.Projects, "Whether the projects unit is enabled. Leave unset to avoid managing it.")
@@ -133,6 +145,12 @@ func (RepositorySettings) Diff(_ context.Context, req infer.DiffRequest[Reposito
 	addUpdateDiff(diff, "issues", !equalBoolPtr(req.State.Issues, req.Inputs.Issues))
 	addUpdateDiff(diff, "pullRequests", !equalBoolPtr(req.State.PullRequests, req.Inputs.PullRequests))
 	addUpdateDiff(diff, "defaultDeleteBranchAfterMerge", !equalBoolPtr(req.State.DefaultDeleteBranchAfterMerge, req.Inputs.DefaultDeleteBranchAfterMerge))
+	addUpdateDiff(diff, "allowMergeCommits", !equalBoolPtr(req.State.AllowMergeCommits, req.Inputs.AllowMergeCommits))
+	addUpdateDiff(diff, "allowRebase", !equalBoolPtr(req.State.AllowRebase, req.Inputs.AllowRebase))
+	addUpdateDiff(diff, "allowRebaseMerge", !equalBoolPtr(req.State.AllowRebaseMerge, req.Inputs.AllowRebaseMerge))
+	addUpdateDiff(diff, "allowSquashMerge", !equalBoolPtr(req.State.AllowSquashMerge, req.Inputs.AllowSquashMerge))
+	addUpdateDiff(diff, "allowFastForwardOnlyMerge", !equalBoolPtr(req.State.AllowFastForwardOnlyMerge, req.Inputs.AllowFastForwardOnlyMerge))
+	addUpdateDiff(diff, "defaultMergeStyle", !equalStringPtr(req.State.DefaultMergeStyle, req.Inputs.DefaultMergeStyle))
 	addUpdateDiff(diff, "archived", !equalBoolPtr(req.State.Archived, req.Inputs.Archived))
 	addUpdateDiff(diff, "wiki", !equalBoolPtr(req.State.Wiki, req.Inputs.Wiki))
 	addUpdateDiff(diff, "projects", !equalBoolPtr(req.State.Projects, req.Inputs.Projects))
@@ -186,6 +204,11 @@ func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo 
 		HasIssues:                     settings.Issues,
 		HasPullRequests:               settings.PullRequests,
 		DefaultDeleteBranchAfterMerge: settings.DefaultDeleteBranchAfterMerge,
+		AllowMerge:                    settings.AllowMergeCommits,
+		AllowRebase:                   settings.AllowRebase,
+		AllowRebaseMerge:              settings.AllowRebaseMerge,
+		AllowSquash:                   settings.AllowSquashMerge,
+		AllowFastForwardOnly:          settings.AllowFastForwardOnlyMerge,
 		Archived:                      settings.Archived,
 		HasWiki:                       settings.Wiki,
 		HasProjects:                   settings.Projects,
@@ -195,7 +218,11 @@ func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo 
 		GloballyEditableWiki:          settings.GloballyEditableWiki,
 		WikiBranch:                    settings.WikiBranch,
 	}
-	if settings.DefaultDeleteBranchAfterMerge != nil && opt.HasPullRequests == nil {
+	if settings.DefaultMergeStyle != nil {
+		style := forgejo.MergeStyle(*settings.DefaultMergeStyle)
+		opt.DefaultMergeStyle = &style
+	}
+	if (settings.DefaultDeleteBranchAfterMerge != nil || hasMergeSettings(settings)) && opt.HasPullRequests == nil {
 		opt.HasPullRequests = boolPtr(true)
 	}
 	if settings.ExternalWikiURL != nil {
@@ -276,6 +303,26 @@ func repositorySettingsConfigFromAPI(template RepositorySettingsConfig, repo *fo
 	if template.DefaultDeleteBranchAfterMerge != nil {
 		settings.DefaultDeleteBranchAfterMerge = template.DefaultDeleteBranchAfterMerge
 	}
+	if template.AllowMergeCommits != nil {
+		settings.AllowMergeCommits = boolPtr(repo.AllowMerge)
+	}
+	if template.AllowRebase != nil {
+		settings.AllowRebase = boolPtr(repo.AllowRebase)
+	}
+	if template.AllowRebaseMerge != nil {
+		settings.AllowRebaseMerge = boolPtr(repo.AllowRebaseMerge)
+	}
+	if template.AllowSquashMerge != nil {
+		settings.AllowSquashMerge = boolPtr(repo.AllowSquash)
+	}
+	// The pinned SDK can set this field but does not expose it on repository reads,
+	// so preserve the desired value in state rather than inventing a default.
+	if template.AllowFastForwardOnlyMerge != nil {
+		settings.AllowFastForwardOnlyMerge = template.AllowFastForwardOnlyMerge
+	}
+	if template.DefaultMergeStyle != nil {
+		settings.DefaultMergeStyle = stringPtr(string(repo.DefaultMergeStyle))
+	}
 	if template.Archived != nil {
 		settings.Archived = boolPtr(repo.Archived)
 	}
@@ -341,6 +388,24 @@ func repositorySettingsReadArgs(owner, repo string, req infer.ReadRequest[Reposi
 	}
 	if args.DefaultDeleteBranchAfterMerge == nil {
 		args.DefaultDeleteBranchAfterMerge = req.State.DefaultDeleteBranchAfterMerge
+	}
+	if args.AllowMergeCommits == nil {
+		args.AllowMergeCommits = req.State.AllowMergeCommits
+	}
+	if args.AllowRebase == nil {
+		args.AllowRebase = req.State.AllowRebase
+	}
+	if args.AllowRebaseMerge == nil {
+		args.AllowRebaseMerge = req.State.AllowRebaseMerge
+	}
+	if args.AllowSquashMerge == nil {
+		args.AllowSquashMerge = req.State.AllowSquashMerge
+	}
+	if args.AllowFastForwardOnlyMerge == nil {
+		args.AllowFastForwardOnlyMerge = req.State.AllowFastForwardOnlyMerge
+	}
+	if args.DefaultMergeStyle == nil {
+		args.DefaultMergeStyle = req.State.DefaultMergeStyle
 	}
 	if args.Archived == nil {
 		args.Archived = req.State.Archived
@@ -422,6 +487,15 @@ func hasInternalTrackerSettings(args RepositorySettingsConfig) bool {
 	return args.InternalTrackerEnableTimeTracker != nil || args.InternalTrackerAllowOnlyContributorsToTrackTime != nil || args.InternalTrackerEnableIssueDependencies != nil
 }
 
+func hasMergeSettings(args RepositorySettingsConfig) bool {
+	return args.AllowMergeCommits != nil ||
+		args.AllowRebase != nil ||
+		args.AllowRebaseMerge != nil ||
+		args.AllowSquashMerge != nil ||
+		args.AllowFastForwardOnlyMerge != nil ||
+		args.DefaultMergeStyle != nil
+}
+
 func hasExternalTrackerSettings(args RepositorySettingsConfig) bool {
 	return args.ExternalTrackerURL != nil || args.ExternalTrackerFormat != nil || args.ExternalTrackerStyle != nil || args.ExternalTrackerRegexPattern != nil
 }
@@ -469,6 +543,12 @@ func equalRepositorySettingsConfigPtr(a, b *RepositorySettingsConfig) bool {
 	return equalBoolPtr(a.Issues, b.Issues) &&
 		equalBoolPtr(a.PullRequests, b.PullRequests) &&
 		equalBoolPtr(a.DefaultDeleteBranchAfterMerge, b.DefaultDeleteBranchAfterMerge) &&
+		equalBoolPtr(a.AllowMergeCommits, b.AllowMergeCommits) &&
+		equalBoolPtr(a.AllowRebase, b.AllowRebase) &&
+		equalBoolPtr(a.AllowRebaseMerge, b.AllowRebaseMerge) &&
+		equalBoolPtr(a.AllowSquashMerge, b.AllowSquashMerge) &&
+		equalBoolPtr(a.AllowFastForwardOnlyMerge, b.AllowFastForwardOnlyMerge) &&
+		equalStringPtr(a.DefaultMergeStyle, b.DefaultMergeStyle) &&
 		equalBoolPtr(a.Archived, b.Archived) &&
 		equalBoolPtr(a.Wiki, b.Wiki) &&
 		equalBoolPtr(a.Projects, b.Projects) &&
@@ -496,6 +576,24 @@ func mergeRepositoryEditOption(base *forgejo.EditRepoOption, settings forgejo.Ed
 	}
 	if settings.DefaultDeleteBranchAfterMerge != nil {
 		base.DefaultDeleteBranchAfterMerge = settings.DefaultDeleteBranchAfterMerge
+	}
+	if settings.AllowMerge != nil {
+		base.AllowMerge = settings.AllowMerge
+	}
+	if settings.AllowRebase != nil {
+		base.AllowRebase = settings.AllowRebase
+	}
+	if settings.AllowRebaseMerge != nil {
+		base.AllowRebaseMerge = settings.AllowRebaseMerge
+	}
+	if settings.AllowSquash != nil {
+		base.AllowSquash = settings.AllowSquash
+	}
+	if settings.AllowFastForwardOnly != nil {
+		base.AllowFastForwardOnly = settings.AllowFastForwardOnly
+	}
+	if settings.DefaultMergeStyle != nil {
+		base.DefaultMergeStyle = settings.DefaultMergeStyle
 	}
 	if settings.Archived != nil {
 		base.Archived = settings.Archived
