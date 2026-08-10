@@ -8,9 +8,6 @@
     {
       "description": "Group pulumi/pulumi updates into a single PR and keep versions in sync across all managers",
       "groupName": "pulumi",
-      "matchSourceUrlPrefixes": [
-        "https://github.com/pulumi/pulumi"
-      ],
       "matchPackageNames": [
         "github.com/pulumi/pulumi{/,}**",
         "pulumi/pulumi",
@@ -18,6 +15,9 @@
         "@pulumi/pulumi",
         "Pulumi",
         "com.pulumi:pulumi"
+      ],
+      "matchSourceUrls": [
+        "https://github.com/pulumi/pulumi{/,}**"
       ]
     },
     {
