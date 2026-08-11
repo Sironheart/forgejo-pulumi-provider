@@ -19,7 +19,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: https://data.forgejo.org/actions/checkout@v7
+      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -111,7 +111,7 @@ jobs:
   go-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: https://data.forgejo.org/actions/checkout@v7
+      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Go validation tools
         run: |
@@ -156,7 +156,7 @@ jobs:
       - go-validation
     runs-on: ubuntu-latest
     steps:
-      - uses: https://data.forgejo.org/actions/checkout@v7
+      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install SDK validation tools
         run: |
