@@ -463,7 +463,7 @@ jobs:
       - name: Extract SDKs
         run: tar -xzf sdks.tar.gz
 
-      - uses: https://github.com/actions/setup-java@v5
+      - uses: https://github.com/actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
