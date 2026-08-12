@@ -27,7 +27,7 @@ env:
   # renovate: datasource=github-releases depName=nodejs/node
   NODE_VERSION: "v26.5.1"
   # renovate: datasource=dotnet-version depName=dotnet-sdk
-  DOTNET_VERSION: "8.0.423"
+  DOTNET_VERSION: "8.0.424"
   # renovate: datasource=java-version depName=java
   JAVA_VERSION: "11.0.32+9"
   # renovate: datasource=gradle-version depName=gradle
