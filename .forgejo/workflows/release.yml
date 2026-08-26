@@ -25,7 +25,7 @@ env:
   # renovate: datasource=github-releases depName=caarlos0/svu
   SVU_VERSION: v3.4.1
   # renovate: datasource=github-releases depName=nodejs/node
-  NODE_VERSION: "v26.5.1"
+  NODE_VERSION: "v26.8.1"
   # renovate: datasource=dotnet-version depName=dotnet-sdk
   DOTNET_VERSION: "8.0.424"
   # renovate: datasource=java-version depName=java
