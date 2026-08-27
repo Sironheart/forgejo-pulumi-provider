@@ -4,7 +4,7 @@ pulumi = "3.256.0"
 jq = "1.8.2"
 "github:caarlos0/svu" = "3.4.1"
 goreleaser = "2.17.1"
-golangci-lint = "2.13.1"
+golangci-lint = "2.13.2"
 
 [tasks.fmt]
 description = "Format Go sources with golangci-lint"
