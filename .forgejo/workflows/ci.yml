@@ -2,7 +2,7 @@ name: CI
 
 env:
   # renovate: datasource=golang-version depName=go
-  GO_VERSION: "1.26.5"
+  GO_VERSION: "1.27.1"
   # renovate: datasource=github-releases depName=pulumi/pulumi
   PULUMI_VERSION: "3.256.0"
   # renovate: datasource=github-releases depName=golangci/golangci-lint
