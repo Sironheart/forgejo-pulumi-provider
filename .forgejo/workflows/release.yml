@@ -305,7 +305,7 @@ jobs:
       - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download SDKs
-        uses: https://code.forgejo.org/forgejo/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e # v4 (patched: GHES check disabled)
         with:
           name: sdks
 
@@ -355,7 +355,7 @@ jobs:
       - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download SDKs
-        uses: https://code.forgejo.org/forgejo/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e # v4 (patched: GHES check disabled)
         with:
           name: sdks
 
@@ -411,7 +411,7 @@ jobs:
       - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download SDKs
-        uses: https://code.forgejo.org/forgejo/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e # v4 (patched: GHES check disabled)
         with:
           name: sdks
 
@@ -456,7 +456,7 @@ jobs:
       - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download SDKs
-        uses: https://code.forgejo.org/forgejo/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e # v4 (patched: GHES check disabled)
         with:
           name: sdks
 
