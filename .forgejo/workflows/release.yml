@@ -55,7 +55,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
-      - uses: https://github.com/actions/setup-go@v7
+      - uses: https://github.com/actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
@@ -130,7 +130,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git
 
-      - uses: https://github.com/actions/setup-go@v7
+      - uses: https://github.com/actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -140,7 +140,7 @@ jobs:
         run: go mod tidy
 
       - name: Lint Go code
-        uses: https://github.com/golangci/golangci-lint-action@v9.3.0
+        uses: https://github.com/golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           args: ./cmd/... ./internal/...
@@ -174,7 +174,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
 
-      - uses: https://github.com/actions/setup-go@v7
+      - uses: https://github.com/actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -216,7 +216,7 @@ jobs:
         run: tar -czf sdks.tar.gz sdk/
 
       - name: Upload SDKs
-        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e # v4
         with:
           name: sdks
           path: sdks.tar.gz
@@ -240,7 +240,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
 
-      - uses: https://github.com/actions/setup-go@v7
+      - uses: https://github.com/actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -318,7 +318,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip
 
-      - uses: https://github.com/actions/setup-node@v7
+      - uses: https://github.com/actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -368,7 +368,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ca-certificates curl git perl unzip zip
 
-      - uses: https://github.com/actions/setup-go@v7
+      - uses: https://github.com/actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -418,7 +418,7 @@ jobs:
       - name: Extract SDKs
         run: tar -xzf sdks.tar.gz
 
-      - uses: https://github.com/actions/setup-dotnet@v6
+      - uses: https://github.com/actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
