@@ -5,7 +5,7 @@ go 1.26.6
 require (
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0
 	github.com/pulumi/pulumi-go-provider v1.7.0
-	github.com/pulumi/pulumi/sdk/v3 v3.268.0
+	github.com/pulumi/pulumi/sdk/v3 v3.270.0
 )
 
 require (
