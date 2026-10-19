@@ -2,7 +2,7 @@
 
 A native Pulumi provider for managing Forgejo resources through the Forgejo REST API.
 
-This provider is released only through this repository's Forgejo instance. Provider plugins are attached to Forgejo Releases and generated SDKs are published to the same instance's package registries.
+Provider plugins are attached to this repository's Forgejo Releases and generated SDKs are published to the same instance's package registries. The GitHub mirror also publishes SDKs to GitHub Packages and attaches the schema and SDK sources to GitHub Releases.
 
 ## Supported Languages
 
@@ -325,3 +325,27 @@ The release workflow:
 - Publishes the SDK packages for Go, npm, NuGet, and Maven after the Forgejo Release is created.
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.
+
+### GitHub Mirror Releases
+
+`.github/workflows/release.yml` runs only on github.com when a `vX.Y.Z` tag (optionally with a prerelease suffix) is pushed by the Forgejo push mirror. It does not run for branch pushes or on Forgejo, and never creates commits or changes mirrored tags.
+
+The workflow builds the provider at the tag, generates the schema and the existing four SDKs using `scripts/gen-sdk.sh`, then publishes:
+
+| Destination | Artifacts |
+| --- | --- |
+| GitHub Release | `schema.json` and `forgejo-sdk-<language>-<tag>.tar.gz` source archives for Node.js, Go, .NET and Java |
+| GitHub Packages (npm) | `@sironheart/pulumi-forgejo-provider` |
+| GitHub Packages (NuGet) | `Pulumi.Forgejo` |
+| GitHub Packages (Maven) | `casa.siron.forgejo:forgejo` |
+
+Go is distributed as a source archive only; GitHub Packages has no Go module registry. Plugin binaries and their SDK download URLs remain hosted on Forgejo. Attaching the schema does not by itself register the provider in the Pulumi Registry.
+
+Setup:
+
+- Enable GitHub Actions on the mirror. Publishing uses the automatic `GITHUB_TOKEN` with `contents: write` for releases and `packages: write` for packages; no additional publishing secrets are needed.
+- Configure the Forgejo push mirror to include tags and use credentials allowed to push GitHub workflow files. The npm scope in `internal/provider/provider.go` must match the GitHub repository owner (currently `sironheart`).
+- Ensure this workflow is included in the tagged commit. Existing tags are not rebuilt automatically, and [GitHub does not emit tag push events when more than three tags are pushed together](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push).
+- Check package visibility after first publication. GitHub npm and NuGet packages default to private, and [installation requires authentication even for public packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
+
+Prereleases become GitHub prereleases and use npm's `next` dist-tag instead of `latest`. Package publishing runs independently per language, so use **Re-run failed jobs** after a partial failure; published npm/Maven versions cannot be overwritten. Release assets can be uploaded again.

@@ -1,0 +1,209 @@
+name: Publish GitHub packages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: github-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # renovate: datasource=golang-version depName=go
+  GO_VERSION: "1.27.2"
+  # renovate: datasource=github-releases depName=pulumi/pulumi
+  PULUMI_VERSION: "3.270.0"
+  # renovate: datasource=github-releases depName=nodejs/node
+  NODE_VERSION: "v26.11.1"
+  # renovate: datasource=dotnet-version depName=dotnet-sdk
+  DOTNET_VERSION: "8.0.426"
+  # renovate: datasource=java-version depName=java
+  JAVA_VERSION: "11.0.32+101"
+  # renovate: datasource=gradle-version depName=gradle
+  GRADLE_VERSION: "8.14.6"
+
+jobs:
+  generate:
+    if: github.server_url == 'https://github.com' && github.event.deleted == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate release tag
+        run: '[[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]'
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Pulumi
+        run: |
+          curl -fsSL https://get.pulumi.com | sh -s -- --version "$PULUMI_VERSION"
+          echo "$HOME/.pulumi/bin" >> "$GITHUB_PATH"
+
+      - name: Install Java code generator
+        run: pulumi plugin install language java
+
+      - name: Generate schema and SDKs
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          mkdir -p bin
+          go build -trimpath -ldflags "-s -w -X main.version=$version" -o bin/pulumi-resource-forgejo ./cmd/pulumi-resource-forgejo
+          pulumi package get-schema ./bin/pulumi-resource-forgejo > schema.json
+          jq -e --arg version "$version" '.name == "forgejo" and .version == $version' schema.json
+          FORGEJO_PROVIDER_VERSION="$version" scripts/gen-sdk.sh
+
+      - name: Configure npm package for GitHub
+        run: |
+          node <<'NODE'
+          const assert = require("node:assert/strict");
+          const fs = require("node:fs");
+          const path = "sdk/nodejs/package.json";
+          const pkg = JSON.parse(fs.readFileSync(path, "utf8"));
+          assert.equal(pkg.name.split("/")[0], `@${process.env.GITHUB_REPOSITORY_OWNER.toLowerCase()}`, "npm scope must match the GitHub repository owner");
+          assert.equal(pkg.version, process.env.GITHUB_REF_NAME.slice(1));
+          pkg.repository = { type: "git", url: `git+https://github.com/${process.env.GITHUB_REPOSITORY}.git` };
+          pkg.publishConfig = { registry: "https://npm.pkg.github.com" };
+          fs.writeFileSync(path, `${JSON.stringify(pkg, null, 4)}\n`);
+          NODE
+
+      - name: Archive release assets
+        run: |
+          mkdir -p .tmp/release
+          cp schema.json .tmp/release/
+          for language in nodejs go dotnet java; do
+            tar -czf ".tmp/release/forgejo-sdk-${language}-${GITHUB_REF_NAME}.tar.gz" -C sdk "$language"
+          done
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: github-release
+          path: .tmp/release/
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+
+      - name: Publish GitHub Release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            flags=(--verify-tag --generate-notes)
+            if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+              flags+=(--prerelease)
+            fi
+            gh release create "$GITHUB_REF_NAME" "${flags[@]}"
+          fi
+          gh release upload "$GITHUB_REF_NAME" .tmp/release/* --clobber
+
+  publish:
+    needs: generate
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [nodejs, dotnet, java]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: github-release
+          path: .tmp/release/
+
+      - name: Extract SDK
+        env:
+          SDK_LANGUAGE: ${{ matrix.language }}
+        run: |
+          mkdir -p sdk
+          tar -xzf ".tmp/release/forgejo-sdk-${SDK_LANGUAGE}-${GITHUB_REF_NAME}.tar.gz" -C sdk
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: matrix.language == 'nodejs'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://npm.pkg.github.com
+          scope: "@${{ github.repository_owner }}"
+
+      - name: Build Node.js package
+        if: matrix.language == 'nodejs'
+        working-directory: sdk/nodejs
+        run: |
+          npm install --ignore-scripts
+          npm run build
+
+      - name: Publish Node.js package
+        if: matrix.language == 'nodejs'
+        working-directory: sdk/nodejs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=latest
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            tag=next
+          fi
+          npm publish --registry=https://npm.pkg.github.com --tag "$tag"
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        if: matrix.language == 'dotnet'
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Pack .NET SDK
+        if: matrix.language == 'dotnet'
+        run: |
+          dotnet pack sdk/dotnet/Pulumi.Forgejo.csproj --configuration Release \
+            -p:GeneratePackageOnBuild=false -p:Version="${GITHUB_REF_NAME#v}" \
+            -p:RepositoryUrl="https://github.com/$GITHUB_REPOSITORY" --output .tmp/nuget
+
+      - name: Publish .NET package
+        if: matrix.language == 'dotnet'
+        env:
+          PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/$GITHUB_REPOSITORY_OWNER/index.json" \
+            --name github --username "$GITHUB_ACTOR" --password "$PACKAGE_TOKEN" --store-password-in-clear-text
+          dotnet nuget push '.tmp/nuget/*.nupkg' --source github --api-key "$PACKAGE_TOKEN" --skip-duplicate
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        if: matrix.language == 'java'
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        if: matrix.language == 'java'
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Publish Java package
+        if: matrix.language == 'java'
+        env:
+          PUBLISH_REPO_USERNAME: ${{ github.actor }}
+          PUBLISH_REPO_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export PUBLISH_REPO_URL="https://maven.pkg.github.com/${GITHUB_REPOSITORY,,}"
+          PACKAGE_VERSION="${GITHUB_REF_NAME#v}" gradle --no-daemon -p sdk/java publish
