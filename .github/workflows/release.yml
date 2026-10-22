@@ -20,7 +20,7 @@ env:
   # renovate: datasource=golang-version depName=go
   GO_VERSION: "1.27.3"
   # renovate: datasource=github-releases depName=pulumi/pulumi
-  PULUMI_VERSION: "3.270.0"
+  PULUMI_VERSION: "3.272.0"
   # renovate: datasource=github-releases depName=nodejs/node
   NODE_VERSION: "v26.12.1"
   # renovate: datasource=dotnet-version depName=dotnet-sdk

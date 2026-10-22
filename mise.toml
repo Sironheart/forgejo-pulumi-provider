@@ -1,6 +1,6 @@
 [tools]
 go = "1.27.3"
-pulumi = "3.270.0"
+pulumi = "3.272.0"
 jq = "1.8.2"
 "github:caarlos0/svu" = "3.4.1"
 goreleaser = "2.19.0"
