@@ -373,12 +373,14 @@ func TestRepositorySettingsConfigFromAPIPreservesAllowFastForwardOnlyMerge(t *te
 		AllowMergeCommits:         boolPtr(false),
 		AllowFastForwardOnlyMerge: boolPtr(true),
 		DefaultMergeStyle:         stringPtr("fast-forward-only"),
-	}, &forgejo.Repository{
-		AllowMerge:        false,
-		AllowRebase:       false,
-		AllowRebaseMerge:  false,
-		AllowSquash:       false,
-		DefaultMergeStyle: "fast-forward-only",
+	}, &repositoryAPIResponse{
+		Repository: forgejo.Repository{
+			AllowMerge:        false,
+			AllowRebase:       false,
+			AllowRebaseMerge:  false,
+			AllowSquash:       false,
+			DefaultMergeStyle: "fast-forward-only",
+		},
 	})
 
 	assertBoolPtr(t, settings.AllowMergeCommits, false)

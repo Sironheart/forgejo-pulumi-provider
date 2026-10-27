@@ -66,7 +66,7 @@ func TestRepositoryDiffMigratesLegacyUnitState(t *testing.T) {
 	}
 }
 
-func TestRepositoryDiffIgnoresInitializeWithReadmeChange(t *testing.T) {
+func TestRepositoryDiffIgnoresCreationOnlyChanges(t *testing.T) {
 	t.Parallel()
 
 	resp, err := (Repository{}).Diff(context.Background(), infer.DiffRequest[RepositoryArgs, RepositoryState]{
@@ -78,13 +78,19 @@ func TestRepositoryDiffIgnoresInitializeWithReadmeChange(t *testing.T) {
 		Inputs: RepositoryArgs{
 			Name:                 "infra",
 			InitializeWithReadme: true,
+			Gitignores:           "Go",
+			License:              "MIT",
+			Readme:               "Default",
+			IssueLabels:          "Default",
+			TrustModel:           "committer",
+			ObjectFormatName:     "sha256",
 		},
 	})
 	if err != nil {
 		t.Fatalf("diff: %v", err)
 	}
 	if resp.HasChanges {
-		t.Fatalf("expected no diff for initializeWithReadme change, got %#v", resp.DetailedDiff)
+		t.Fatalf("expected no diff for creation-only changes, got %#v", resp.DetailedDiff)
 	}
 }
 

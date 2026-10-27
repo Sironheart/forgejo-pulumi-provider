@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
@@ -64,7 +65,7 @@ func (a *OrganizationActionSecretArgs) Annotate(ann infer.Annotator) {
 }
 
 func annotateActionSecretArgs(a *ActionSecretArgs, ann infer.Annotator) {
-	ann.Describe(&a.Name, "Actions secret name.")
+	ann.Describe(&a.Name, "Actions secret name, case-insensitive and stored in uppercase.")
 	ann.Describe(&a.Value, "Actions secret value.")
 }
 
@@ -115,7 +116,7 @@ func (RepositoryActionSecret) Diff(_ context.Context, req infer.DiffRequest[Repo
 	diff := map[string]p.PropertyDiff{}
 	addReplaceDiff(diff, "owner", req.State.Owner != req.Inputs.Owner)
 	addReplaceDiff(diff, "repository", req.State.Repository != req.Inputs.Repository)
-	addReplaceDiff(diff, "name", req.State.Name != req.Inputs.Name)
+	addReplaceDiff(diff, "name", !strings.EqualFold(req.State.Name, req.Inputs.Name))
 	addUpdateDiff(diff, "value", req.State.Value != req.Inputs.Value)
 	return p.DiffResponse{HasChanges: len(diff) > 0, DeleteBeforeReplace: true, DetailedDiff: diff}, nil
 }
@@ -200,7 +201,7 @@ func (OrganizationActionSecret) Read(ctx context.Context, req infer.ReadRequest[
 func (OrganizationActionSecret) Diff(_ context.Context, req infer.DiffRequest[OrganizationActionSecretArgs, OrganizationActionSecretState]) (infer.DiffResponse, error) {
 	diff := map[string]p.PropertyDiff{}
 	addReplaceDiff(diff, "organization", req.State.Organization != req.Inputs.Organization)
-	addReplaceDiff(diff, "name", req.State.Name != req.Inputs.Name)
+	addReplaceDiff(diff, "name", !strings.EqualFold(req.State.Name, req.Inputs.Name))
 	addUpdateDiff(diff, "value", req.State.Value != req.Inputs.Value)
 	return p.DiffResponse{HasChanges: len(diff) > 0, DeleteBeforeReplace: true, DetailedDiff: diff}, nil
 }
@@ -245,7 +246,7 @@ func findRepositoryActionSecret(client *forgejo.Client, owner, repo, name string
 		return nil, resp, err
 	}
 	for _, secret := range secrets {
-		if secret.Name == name {
+		if strings.EqualFold(secret.Name, name) {
 			return secret, resp, nil
 		}
 	}
@@ -258,7 +259,7 @@ func findOrganizationActionSecret(client *forgejo.Client, org, name string) (*fo
 		return nil, resp, err
 	}
 	for _, secret := range secrets {
-		if secret.Name == name {
+		if strings.EqualFold(secret.Name, name) {
 			return secret, resp, nil
 		}
 	}
@@ -274,11 +275,12 @@ func repositoryActionSecretStateFromAPI(args RepositoryActionSecretArgs, secret 
 }
 
 func repositoryActionSecretStateFromArgs(args RepositoryActionSecretArgs, created string) RepositoryActionSecretState {
+	args.Name = strings.ToUpper(args.Name)
 	return RepositoryActionSecretState{RepositoryActionSecretArgs: args, Created: created}
 }
 
 func repositoryActionSecretID(owner, repo, name string) string {
-	return fmt.Sprintf("%s/%s/%s", owner, repo, name)
+	return fmt.Sprintf("%s/%s/%s", owner, repo, strings.ToUpper(name))
 }
 
 func organizationActionSecretStateFromAPI(args OrganizationActionSecretArgs, secret *forgejo.Secret) OrganizationActionSecretState {
@@ -290,11 +292,12 @@ func organizationActionSecretStateFromAPI(args OrganizationActionSecretArgs, sec
 }
 
 func organizationActionSecretStateFromArgs(args OrganizationActionSecretArgs, created string) OrganizationActionSecretState {
+	args.Name = strings.ToUpper(args.Name)
 	return OrganizationActionSecretState{OrganizationActionSecretArgs: args, Created: created}
 }
 
 func organizationActionSecretID(org, name string) string {
-	return fmt.Sprintf("%s/%s", org, name)
+	return fmt.Sprintf("%s/%s", org, strings.ToUpper(name))
 }
 
 func formatForgejoTime(value time.Time) string {

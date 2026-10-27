@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -22,6 +24,12 @@ type RepositoryArgs struct {
 	Website              string                    `pulumi:"website,optional"`
 	Template             bool                      `pulumi:"template,optional"`
 	InitializeWithReadme bool                      `pulumi:"initializeWithReadme,optional"`
+	Gitignores           string                    `pulumi:"gitignores,optional"`
+	License              string                    `pulumi:"license,optional"`
+	Readme               string                    `pulumi:"readme,optional"`
+	IssueLabels          string                    `pulumi:"issueLabels,optional"`
+	TrustModel           string                    `pulumi:"trustModel,optional"`
+	ObjectFormatName     string                    `pulumi:"objectFormatName,optional"`
 	Topics               []string                  `pulumi:"topics,optional"`
 	Settings             *RepositorySettingsConfig `pulumi:"settings,optional"`
 }
@@ -59,8 +67,14 @@ func (a *RepositoryArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Website, "Repository website URL.")
 	ann.Describe(&a.Template, "Whether the repository can be used as a template.")
 	ann.Describe(&a.InitializeWithReadme, "Whether Forgejo should initialize the repository with a README on creation. This property is only used when the repository is first created; changing it later has no effect.")
+	ann.Describe(&a.Gitignores, "Comma-separated gitignore template names. Requires initializeWithReadme. Only used on creation; changing it later has no effect.")
+	ann.Describe(&a.License, "License template name. Requires initializeWithReadme. Only used on creation; changing it later has no effect.")
+	ann.Describe(&a.Readme, "README template name, not literal contents. Requires initializeWithReadme; Forgejo defaults to Default. Only used on creation; changing it later has no effect.")
+	ann.Describe(&a.IssueLabels, "Initial issue-label template set. Only used on creation; changing it later has no effect.")
+	ann.Describe(&a.TrustModel, "Signature trust model: default, collaborator, committer, or collaboratorcommitter. Only used on creation; changing it later has no effect.")
+	ann.Describe(&a.ObjectFormatName, "Git object format: sha1 (Forgejo's default) or sha256. Only used on creation; changing it later has no effect.")
 	ann.Describe(&a.Topics, "Repository topics.")
-	ann.Describe(&a.Settings, "Optional repository unit, wiki, and issue tracker settings to manage with this repository.")
+	ann.Describe(&a.Settings, "Optional repository unit, merge, wiki, issue tracker, and pull-mirror settings to manage with this repository.")
 }
 
 func (Repository) StateMigrations(context.Context) []infer.StateMigrationFunc[RepositoryState] {
@@ -110,25 +124,36 @@ func (Repository) Create(ctx context.Context, req infer.CreateRequest[Repository
 		return infer.CreateResponse[RepositoryState]{}, err
 	}
 
-	create := forgejo.CreateRepoOption{
-		Name:          req.Inputs.Name,
-		Description:   req.Inputs.Description,
-		Private:       req.Inputs.Private,
-		DefaultBranch: req.Inputs.DefaultBranch,
-		Template:      req.Inputs.Template,
-		AutoInit:      req.Inputs.InitializeWithReadme,
-	}
-	repo, err := createRepository(client, req.Inputs.Owner, create)
+	api, err := forgejoAPIClientFromConfig(ctx)
 	if err != nil {
 		return infer.CreateResponse[RepositoryState]{}, err
 	}
-	repo, err = editRepository(client, repo, repositoryEditOption(req.Inputs, false, repo))
+	create := repositoryCreateOption{
+		CreateRepoOption: forgejo.CreateRepoOption{
+			Name:          req.Inputs.Name,
+			Description:   req.Inputs.Description,
+			Private:       req.Inputs.Private,
+			DefaultBranch: req.Inputs.DefaultBranch,
+			Template:      req.Inputs.Template,
+			AutoInit:      req.Inputs.InitializeWithReadme,
+			Gitignores:    req.Inputs.Gitignores,
+			License:       req.Inputs.License,
+			Readme:        req.Inputs.Readme,
+			IssueLabels:   req.Inputs.IssueLabels,
+			TrustModel:    forgejo.TrustModel(req.Inputs.TrustModel),
+		},
+		ObjectFormatName: req.Inputs.ObjectFormatName,
+	}
+	repo, err := createRepository(client, api, req.Inputs.Owner, create)
+	if err != nil {
+		return infer.CreateResponse[RepositoryState]{}, err
+	}
+	repo, err = editRepository(api, repo, repositoryEditOption(req.Inputs, false, repo))
 	if err != nil {
 		return infer.CreateResponse[RepositoryState]{}, err
 	}
 
-	state := repositoryStateFromAPI(repo, req.Inputs.Settings)
-	state.InitializeWithReadme = req.Inputs.InitializeWithReadme
+	state := repositoryStateFromAPI(repo, req.Inputs)
 	if req.Inputs.Topics != nil {
 		_, err = client.SetRepoTopics(state.Owner, state.Name, req.Inputs.Topics)
 		if err != nil {
@@ -150,7 +175,11 @@ func (Repository) Read(ctx context.Context, req infer.ReadRequest[RepositoryArgs
 		return infer.ReadResponse[RepositoryArgs, RepositoryState]{}, err
 	}
 
-	repo, resp, err := client.GetRepo(owner, name)
+	api, err := forgejoAPIClientFromConfig(ctx)
+	if err != nil {
+		return infer.ReadResponse[RepositoryArgs, RepositoryState]{}, err
+	}
+	repo, resp, err := api.getRepository(owner, name)
 	if isNotFound(resp) {
 		return infer.ReadResponse[RepositoryArgs, RepositoryState]{}, nil
 	}
@@ -158,8 +187,10 @@ func (Repository) Read(ctx context.Context, req infer.ReadRequest[RepositoryArgs
 		return infer.ReadResponse[RepositoryArgs, RepositoryState]{}, err
 	}
 
-	state := repositoryStateFromAPI(repo, repositorySettingsTemplate(req.Inputs.Settings, req.State.Settings))
-	state.InitializeWithReadme = req.State.InitializeWithReadme
+	template := req.State.RepositoryArgs
+	template.Settings = repositorySettingsTemplate(req.Inputs.Settings, req.State.Settings)
+	template.Topics = req.Inputs.Topics
+	state := repositoryStateFromAPI(repo, template)
 	if req.Inputs.Topics != nil {
 		topics, _, err := client.ListRepoTopics(owner, name, forgejo.ListRepoTopicsOptions{})
 		if err != nil {
@@ -207,14 +238,18 @@ func (Repository) Update(ctx context.Context, req infer.UpdateRequest[Repository
 		return infer.UpdateResponse[RepositoryState]{}, err
 	}
 
-	var current *forgejo.Repository
+	api, err := forgejoAPIClientFromConfig(ctx)
+	if err != nil {
+		return infer.UpdateResponse[RepositoryState]{}, err
+	}
+	var current *repositoryAPIResponse
 	if req.Inputs.Settings != nil {
-		current, _, err = client.GetRepo(owner, name)
+		current, _, err = api.getRepository(owner, name)
 		if err != nil {
 			return infer.UpdateResponse[RepositoryState]{}, err
 		}
 	}
-	repo, _, err := client.EditRepo(owner, name, repositoryEditOption(req.Inputs, true, current))
+	repo, _, err := api.editRepository(owner, name, repositoryEditOption(req.Inputs, true, current))
 	if err != nil {
 		return infer.UpdateResponse[RepositoryState]{}, err
 	}
@@ -226,9 +261,10 @@ func (Repository) Update(ctx context.Context, req infer.UpdateRequest[Repository
 		}
 	}
 
-	state := repositoryStateFromAPI(repo, req.Inputs.Settings)
-	state.InitializeWithReadme = req.State.InitializeWithReadme
-	state.Topics = req.Inputs.Topics
+	template := req.State.RepositoryArgs
+	template.Settings = req.Inputs.Settings
+	template.Topics = req.Inputs.Topics
+	state := repositoryStateFromAPI(repo, template)
 	return infer.UpdateResponse[RepositoryState]{Output: state}, nil
 }
 
@@ -250,7 +286,7 @@ func (Repository) Delete(ctx context.Context, req infer.DeleteRequest[Repository
 	return infer.DeleteResponse{}, err
 }
 
-func repositoryStateFromAPI(repo *forgejo.Repository, settingsTemplate ...*RepositorySettingsConfig) RepositoryState {
+func repositoryStateFromAPI(repo *repositoryAPIResponse, template ...RepositoryArgs) RepositoryState {
 	owner := ""
 	if repo.Owner != nil {
 		owner = repo.Owner.UserName
@@ -259,17 +295,22 @@ func repositoryStateFromAPI(repo *forgejo.Repository, settingsTemplate ...*Repos
 		owner, _, _ = strings.Cut(repo.FullName, "/")
 	}
 
-	args := RepositoryArgs{
-		Name:          repo.Name,
-		Owner:         owner,
-		Description:   repo.Description,
-		Private:       repo.Private,
-		DefaultBranch: repo.DefaultBranch,
-		Website:       repo.Website,
-		Template:      repo.Template,
+	var args RepositoryArgs
+	if len(template) > 0 {
+		args = template[0]
 	}
-	if len(settingsTemplate) > 0 && settingsTemplate[0] != nil {
-		settings := repositorySettingsConfigFromAPI(*settingsTemplate[0], repo)
+	args.Name = repo.Name
+	args.Owner = owner
+	args.Description = repo.Description
+	args.Private = repo.Private
+	args.DefaultBranch = repo.DefaultBranch
+	args.Website = repo.Website
+	args.Template = repo.Template
+	if repo.ObjectFormatName != "" {
+		args.ObjectFormatName = repo.ObjectFormatName
+	}
+	if args.Settings != nil {
+		settings := repositorySettingsConfigFromAPI(*args.Settings, repo)
 		args.Settings = &settings
 	}
 
@@ -282,49 +323,48 @@ func repositoryStateFromAPI(repo *forgejo.Repository, settingsTemplate ...*Repos
 	}
 }
 
-func createRepository(client *forgejo.Client, owner string, opt forgejo.CreateRepoOption) (*forgejo.Repository, error) {
-	if strings.TrimSpace(owner) == "" {
-		repo, _, err := client.CreateRepo(opt)
-		return repo, err
-	}
-
-	user, _, err := client.GetMyUserInfo()
-	if err != nil {
+func createRepository(client *forgejo.Client, api *forgejoAPIClient, owner string, opt repositoryCreateOption) (*repositoryAPIResponse, error) {
+	if err := opt.Validate(client); err != nil {
 		return nil, err
 	}
-	if user == nil {
-		return nil, fmt.Errorf("current Forgejo user response was empty")
+	path := "/user/repos"
+	if strings.TrimSpace(owner) != "" {
+		user, _, err := client.GetMyUserInfo()
+		if err != nil {
+			return nil, err
+		}
+		if user == nil {
+			return nil, fmt.Errorf("current Forgejo user response was empty")
+		}
+		if user.UserName != owner {
+			path = "/orgs/" + url.PathEscape(owner) + "/repos"
+		}
 	}
-	if user.UserName == owner {
-		repo, _, err := client.CreateRepo(opt)
-		return repo, err
-	}
-	repo, _, err := client.CreateOrgRepo(owner, opt)
+	repo := new(repositoryAPIResponse)
+	_, err := api.do(http.MethodPost, path, opt, repo)
 	return repo, err
 }
 
-func editRepository(client *forgejo.Client, repo *forgejo.Repository, opt forgejo.EditRepoOption) (*forgejo.Repository, error) {
-	if repo == nil {
+func editRepository(client *forgejoAPIClient, repo *repositoryAPIResponse, opt forgejo.EditRepoOption) (*repositoryAPIResponse, error) {
+	if repo == nil || repo.Name == "" {
 		return nil, fmt.Errorf("forgejo repository response was empty")
 	}
 	state := repositoryStateFromAPI(repo)
-	updated, _, err := client.EditRepo(state.Owner, state.Name, opt)
+	updated, _, err := client.editRepository(state.Owner, state.Name, opt)
 	return updated, err
 }
 
-func repositoryEditOption(args RepositoryArgs, includeDefaultBranch bool, repo *forgejo.Repository) forgejo.EditRepoOption {
-	opt := forgejo.EditRepoOption{
-		Description: &args.Description,
-		Private:     &args.Private,
-		Website:     &args.Website,
-		Template:    &args.Template,
+func repositoryEditOption(args RepositoryArgs, includeDefaultBranch bool, repo *repositoryAPIResponse) forgejo.EditRepoOption {
+	var opt forgejo.EditRepoOption
+	if args.Settings != nil {
+		opt = repositorySettingsConfigEditOption(*args.Settings, repo)
 	}
+	opt.Description = &args.Description
+	opt.Private = &args.Private
+	opt.Website = &args.Website
+	opt.Template = &args.Template
 	if includeDefaultBranch && args.DefaultBranch != "" {
 		opt.DefaultBranch = &args.DefaultBranch
-	}
-	if args.Settings != nil {
-		settings := repositorySettingsConfigEditOption(*args.Settings, repo)
-		mergeRepositoryEditOption(&opt, settings)
 	}
 	return opt
 }

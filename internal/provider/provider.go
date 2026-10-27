@@ -121,10 +121,13 @@ func normalizeForgejoURL(rawURL string) (string, error) {
 
 	parsed, err := url.Parse(trimmed)
 	if err != nil {
-		return "", fmt.Errorf("parse forgejo url: %w", err)
+		return "", errors.New("forgejo url is malformed")
 	}
-	if parsed.Scheme == "" || parsed.Host == "" {
-		return "", fmt.Errorf("forgejo url must be absolute: %q", rawURL)
+	if (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Hostname() == "" {
+		return "", errors.New("forgejo url must be an absolute HTTP(S) URL")
+	}
+	if parsed.User != nil || parsed.RawQuery != "" || parsed.ForceQuery || strings.Contains(trimmed, "#") {
+		return "", errors.New("forgejo url must not contain user information, a query, or a fragment")
 	}
 
 	parsed.Path = strings.TrimRight(parsed.Path, "/")

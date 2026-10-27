@@ -109,10 +109,11 @@ func (RepositoryTagProtection) Update(ctx context.Context, req infer.UpdateReque
 		return infer.UpdateResponse[RepositoryTagProtectionState]{}, err
 	}
 
+	// PATCH null preserves a list; an omitted Pulumi list must instead clear it with [].
 	protection, _, err := client.EditTagProtection(req.State.Owner, req.State.Repository, protectionID, forgejo.EditTagProtectionOption{
 		NamePattern:        &req.Inputs.NamePattern,
-		WhitelistUsernames: req.Inputs.WhitelistUsernames,
-		WhitelistTeams:     req.Inputs.WhitelistTeams,
+		WhitelistUsernames: append([]string{}, req.Inputs.WhitelistUsernames...),
+		WhitelistTeams:     append([]string{}, req.Inputs.WhitelistTeams...),
 	})
 	if err != nil {
 		return infer.UpdateResponse[RepositoryTagProtectionState]{}, err

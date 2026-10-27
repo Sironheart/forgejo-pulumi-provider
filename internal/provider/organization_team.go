@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"net/http"
 	"strconv"
 
 	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
@@ -37,7 +38,7 @@ func (a *OrganizationTeamArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Organization, "Organization username/slug.")
 	ann.Describe(&a.Name, "Team name.")
 	ann.Describe(&a.Description, "Team description.")
-	ann.Describe(&a.Permission, "Team repository permission: read, write, or admin.")
+	ann.Describe(&a.Permission, "Team repository permission: read, write, or admin. The owner alias is treated as admin.")
 	ann.Describe(&a.CanCreateOrgRepo, "Whether team members can create organization repositories.")
 	ann.Describe(&a.IncludesAllRepositories, "Whether the team includes all organization repositories.")
 	ann.Describe(&a.UnitsMap, "Per-repository-unit permissions, for example repo.code=read or repo.issues=write.")
@@ -54,14 +55,7 @@ func (OrganizationTeam) Create(ctx context.Context, req infer.CreateRequest[Orga
 		return infer.CreateResponse[OrganizationTeamState]{}, err
 	}
 
-	team, _, err := client.CreateTeam(req.Inputs.Organization, forgejo.CreateTeamOption{
-		Name:                    req.Inputs.Name,
-		Description:             req.Inputs.Description,
-		Permission:              forgejo.AccessMode(req.Inputs.Permission),
-		CanCreateOrgRepo:        req.Inputs.CanCreateOrgRepo,
-		IncludesAllRepositories: req.Inputs.IncludesAllRepositories,
-		UnitsMap:                req.Inputs.UnitsMap,
-	})
+	team, _, err := client.CreateTeam(req.Inputs.Organization, organizationTeamCreateOption(req.Inputs))
 	if err != nil {
 		return infer.CreateResponse[OrganizationTeamState]{}, err
 	}
@@ -98,7 +92,7 @@ func (OrganizationTeam) Diff(_ context.Context, req infer.DiffRequest[Organizati
 	addReplaceDiff(diff, "organization", req.State.Organization != req.Inputs.Organization)
 	addUpdateDiff(diff, "name", req.State.Name != req.Inputs.Name)
 	addUpdateDiff(diff, "description", req.State.Description != req.Inputs.Description)
-	addUpdateDiff(diff, "permission", req.State.Permission != req.Inputs.Permission)
+	addUpdateDiff(diff, "permission", organizationTeamPermission(req.State.Permission) != organizationTeamPermission(req.Inputs.Permission))
 	addUpdateDiff(diff, "canCreateOrgRepo", req.State.CanCreateOrgRepo != req.Inputs.CanCreateOrgRepo)
 	addUpdateDiff(diff, "includesAllRepositories", req.State.IncludesAllRepositories != req.Inputs.IncludesAllRepositories)
 	addUpdateDiff(diff, "unitsMap", !maps.Equal(req.State.UnitsMap, req.Inputs.UnitsMap))
@@ -114,23 +108,23 @@ func (OrganizationTeam) Update(ctx context.Context, req infer.UpdateRequest[Orga
 	if err != nil {
 		return infer.UpdateResponse[OrganizationTeamState]{}, err
 	}
-	client, err := clientFromConfig(ctx)
+	client, err := forgejoAPIClientFromConfig(ctx)
 	if err != nil {
 		return infer.UpdateResponse[OrganizationTeamState]{}, err
 	}
 
-	_, err = client.EditTeam(teamID, forgejo.EditTeamOption{
-		Name:                    req.Inputs.Name,
-		Description:             &req.Inputs.Description,
-		Permission:              forgejo.AccessMode(req.Inputs.Permission),
-		CanCreateOrgRepo:        &req.Inputs.CanCreateOrgRepo,
-		IncludesAllRepositories: &req.Inputs.IncludesAllRepositories,
-		UnitsMap:                req.Inputs.UnitsMap,
-	})
+	// Create validation matches Forgejo's 255-character limit; SDK edit validation caps names at 30.
+	opt := organizationTeamCreateOption(req.Inputs)
+	if err := opt.Validate(); err != nil {
+		return infer.UpdateResponse[OrganizationTeamState]{}, err
+	}
+	path := fmt.Sprintf("/teams/%d", teamID)
+	_, err = client.do(http.MethodPatch, path, opt, nil)
 	if err != nil {
 		return infer.UpdateResponse[OrganizationTeamState]{}, err
 	}
-	team, _, err := client.GetTeam(teamID)
+	team := new(forgejo.Team)
+	_, err = client.do(http.MethodGet, path, nil, team)
 	if err != nil {
 		return infer.UpdateResponse[OrganizationTeamState]{}, err
 	}
@@ -172,7 +166,26 @@ func organizationTeamStateFromAPI(team *forgejo.Team, fallbackOrg string) Organi
 }
 
 func organizationTeamStateFromArgs(args OrganizationTeamArgs, teamID int64) OrganizationTeamState {
+	args.Permission = organizationTeamPermission(args.Permission)
 	return OrganizationTeamState{OrganizationTeamArgs: args, TeamID: teamID}
+}
+
+func organizationTeamCreateOption(args OrganizationTeamArgs) forgejo.CreateTeamOption {
+	return forgejo.CreateTeamOption{
+		Name:                    args.Name,
+		Description:             args.Description,
+		Permission:              forgejo.AccessMode(organizationTeamPermission(args.Permission)),
+		CanCreateOrgRepo:        args.CanCreateOrgRepo,
+		IncludesAllRepositories: args.IncludesAllRepositories,
+		UnitsMap:                args.UnitsMap,
+	}
+}
+
+func organizationTeamPermission(permission string) string {
+	if permission == "owner" {
+		return "admin"
+	}
+	return permission
 }
 
 func organizationTeamID(id string, state OrganizationTeamState) (int64, error) {

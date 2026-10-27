@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	p "github.com/pulumi/pulumi-go-provider"
@@ -22,6 +23,14 @@ type RepositorySettingsConfig struct {
 	AllowSquashMerge                                *bool   `pulumi:"allowSquashMerge,optional"`
 	AllowFastForwardOnlyMerge                       *bool   `pulumi:"allowFastForwardOnlyMerge,optional"`
 	DefaultMergeStyle                               *string `pulumi:"defaultMergeStyle,optional"`
+	IgnoreWhitespaceConflicts                       *bool   `pulumi:"ignoreWhitespaceConflicts,optional"`
+	AllowManualMerge                                *bool   `pulumi:"allowManualMerge,optional"`
+	AutodetectManualMerge                           *bool   `pulumi:"autodetectManualMerge,optional"`
+	AllowRebaseUpdate                               *bool   `pulumi:"allowRebaseUpdate,optional"`
+	DefaultUpdateStyle                              *string `pulumi:"defaultUpdateStyle,optional"`
+	DefaultAllowMaintainerEdit                      *bool   `pulumi:"defaultAllowMaintainerEdit,optional"`
+	MirrorInterval                                  *string `pulumi:"mirrorInterval,optional"`
+	EnablePrune                                     *bool   `pulumi:"enablePrune,optional"`
 	Archived                                        *bool   `pulumi:"archived,optional"`
 	Wiki                                            *bool   `pulumi:"wiki,optional"`
 	Projects                                        *bool   `pulumi:"projects,optional"`
@@ -52,7 +61,7 @@ type RepositorySettingsState struct {
 }
 
 func (s *RepositorySettings) Annotate(a infer.Annotator) {
-	a.Describe(s, "Settings for enabled Forgejo repository units and their wiki or issue tracker configuration.")
+	a.Describe(s, "Settings for Forgejo repository units, merges, wiki, issue tracking, and pull mirrors.")
 	a.SetToken("index", "RepositorySettings")
 }
 
@@ -75,7 +84,15 @@ func annotateRepositorySettingsConfig(a *RepositorySettingsConfig, ann infer.Ann
 	ann.Describe(&a.AllowRebaseMerge, "Whether rebase-merge (rebase with merge commit) is allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
 	ann.Describe(&a.AllowSquashMerge, "Whether squash merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
 	ann.Describe(&a.AllowFastForwardOnlyMerge, "Whether fast-forward-only merges are allowed. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
-	ann.Describe(&a.DefaultMergeStyle, "Default merge style: merge, rebase, rebase-merge, squash, or fast-forward-only. Setting any merge option also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.DefaultMergeStyle, "Default merge style: merge, rebase, rebase-merge, squash, fast-forward-only, or manually-merged. Forgejo also accepts rebase-update-only, which updates a branch rather than merging it. Enable the corresponding allow option separately. Setting this also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.IgnoreWhitespaceConflicts, "Whether to ignore whitespace conflicts when merging pull requests. Setting this also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.AllowManualMerge, "Whether pull requests can be marked as manually merged. Setting this also enables pull requests unless pullRequests is explicitly set. Forgejo does not return this setting, so refresh preserves its configured value.")
+	ann.Describe(&a.AutodetectManualMerge, "Whether Forgejo automatically detects manually merged pull requests. Setting this also enables pull requests unless pullRequests is explicitly set. Forgejo does not return this setting, so refresh preserves its configured value.")
+	ann.Describe(&a.AllowRebaseUpdate, "Whether pull request branches can be updated by rebase. Setting this also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.DefaultUpdateStyle, "Default pull request branch update style: merge or rebase. Setting this also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.DefaultAllowMaintainerEdit, "Whether maintainer edits are allowed by default on pull requests. Setting this also enables pull requests unless pullRequests is explicitly set.")
+	ann.Describe(&a.MirrorInterval, "Pull mirror synchronization interval, for example 8h30m0s. Only applies to repositories that are already pull mirrors.")
+	ann.Describe(&a.EnablePrune, "Whether pull mirroring removes obsolete remote-tracking references. Only applies to repositories that are already pull mirrors. Forgejo does not return this setting, so refresh preserves its configured value.")
 	ann.Describe(&a.Archived, "Whether the repository is archived. Leave unset to avoid managing it.")
 	ann.Describe(&a.Wiki, "Whether the wiki unit is enabled. Leave unset to avoid managing it.")
 	ann.Describe(&a.Projects, "Whether the projects unit is enabled. Leave unset to avoid managing it.")
@@ -90,7 +107,7 @@ func annotateRepositorySettingsConfig(a *RepositorySettingsConfig, ann infer.Ann
 	ann.Describe(&a.InternalTrackerEnableIssueDependencies, "Whether issue dependencies are enabled in the internal issue tracker.")
 	ann.Describe(&a.ExternalTrackerURL, "External issue tracker URL. Setting this also enables issues unless issues is explicitly set.")
 	ann.Describe(&a.ExternalTrackerFormat, "External issue tracker URL format. Forgejo supports placeholders such as {user}, {repo}, and {index}.")
-	ann.Describe(&a.ExternalTrackerStyle, "External issue tracker number style, for example numeric or alphanumeric.")
+	ann.Describe(&a.ExternalTrackerStyle, "External issue tracker number style: numeric, alphanumeric, or regexp.")
 	ann.Describe(&a.ExternalTrackerRegexPattern, "External issue tracker regular expression pattern.")
 }
 
@@ -99,15 +116,15 @@ func (RepositorySettings) Create(ctx context.Context, req infer.CreateRequest[Re
 		return infer.CreateResponse[RepositorySettingsState]{ID: repositorySettingsID(req.Inputs.Owner, req.Inputs.Repository), Output: repositorySettingsStateFromArgs(req.Inputs)}, nil
 	}
 
-	client, err := clientFromConfig(ctx)
+	client, err := forgejoAPIClientFromConfig(ctx)
 	if err != nil {
 		return infer.CreateResponse[RepositorySettingsState]{}, err
 	}
-	repo, _, err := client.GetRepo(req.Inputs.Owner, req.Inputs.Repository)
+	repo, _, err := client.getRepository(req.Inputs.Owner, req.Inputs.Repository)
 	if err != nil {
 		return infer.CreateResponse[RepositorySettingsState]{}, err
 	}
-	updated, _, err := client.EditRepo(req.Inputs.Owner, req.Inputs.Repository, repositorySettingsEditOption(req.Inputs, repo))
+	updated, _, err := client.editRepository(req.Inputs.Owner, req.Inputs.Repository, repositorySettingsEditOption(req.Inputs, repo))
 	if err != nil {
 		return infer.CreateResponse[RepositorySettingsState]{}, err
 	}
@@ -121,12 +138,12 @@ func (RepositorySettings) Read(ctx context.Context, req infer.ReadRequest[Reposi
 	if err != nil {
 		return infer.ReadResponse[RepositorySettingsArgs, RepositorySettingsState]{}, err
 	}
-	client, err := clientFromConfig(ctx)
+	client, err := forgejoAPIClientFromConfig(ctx)
 	if err != nil {
 		return infer.ReadResponse[RepositorySettingsArgs, RepositorySettingsState]{}, err
 	}
 
-	repo, resp, err := client.GetRepo(owner, repoName)
+	repo, resp, err := client.getRepository(owner, repoName)
 	if isNotFound(resp) {
 		return infer.ReadResponse[RepositorySettingsArgs, RepositorySettingsState]{}, nil
 	}
@@ -151,6 +168,14 @@ func (RepositorySettings) Diff(_ context.Context, req infer.DiffRequest[Reposito
 	addUpdateDiff(diff, "allowSquashMerge", !equalBoolPtr(req.State.AllowSquashMerge, req.Inputs.AllowSquashMerge))
 	addUpdateDiff(diff, "allowFastForwardOnlyMerge", !equalBoolPtr(req.State.AllowFastForwardOnlyMerge, req.Inputs.AllowFastForwardOnlyMerge))
 	addUpdateDiff(diff, "defaultMergeStyle", !equalStringPtr(req.State.DefaultMergeStyle, req.Inputs.DefaultMergeStyle))
+	addUpdateDiff(diff, "ignoreWhitespaceConflicts", !equalBoolPtr(req.State.IgnoreWhitespaceConflicts, req.Inputs.IgnoreWhitespaceConflicts))
+	addUpdateDiff(diff, "allowManualMerge", !equalBoolPtr(req.State.AllowManualMerge, req.Inputs.AllowManualMerge))
+	addUpdateDiff(diff, "autodetectManualMerge", !equalBoolPtr(req.State.AutodetectManualMerge, req.Inputs.AutodetectManualMerge))
+	addUpdateDiff(diff, "allowRebaseUpdate", !equalBoolPtr(req.State.AllowRebaseUpdate, req.Inputs.AllowRebaseUpdate))
+	addUpdateDiff(diff, "defaultUpdateStyle", !equalStringPtr(req.State.DefaultUpdateStyle, req.Inputs.DefaultUpdateStyle))
+	addUpdateDiff(diff, "defaultAllowMaintainerEdit", !equalBoolPtr(req.State.DefaultAllowMaintainerEdit, req.Inputs.DefaultAllowMaintainerEdit))
+	addUpdateDiff(diff, "mirrorInterval", !equalDurationPtr(req.State.MirrorInterval, req.Inputs.MirrorInterval))
+	addUpdateDiff(diff, "enablePrune", !equalBoolPtr(req.State.EnablePrune, req.Inputs.EnablePrune))
 	addUpdateDiff(diff, "archived", !equalBoolPtr(req.State.Archived, req.Inputs.Archived))
 	addUpdateDiff(diff, "wiki", !equalBoolPtr(req.State.Wiki, req.Inputs.Wiki))
 	addUpdateDiff(diff, "projects", !equalBoolPtr(req.State.Projects, req.Inputs.Projects))
@@ -175,15 +200,15 @@ func (RepositorySettings) Update(ctx context.Context, req infer.UpdateRequest[Re
 		return infer.UpdateResponse[RepositorySettingsState]{Output: repositorySettingsStateFromArgs(req.Inputs)}, nil
 	}
 
-	client, err := clientFromConfig(ctx)
+	client, err := forgejoAPIClientFromConfig(ctx)
 	if err != nil {
 		return infer.UpdateResponse[RepositorySettingsState]{}, err
 	}
-	repo, _, err := client.GetRepo(req.State.Owner, req.State.Repository)
+	repo, _, err := client.getRepository(req.State.Owner, req.State.Repository)
 	if err != nil {
 		return infer.UpdateResponse[RepositorySettingsState]{}, err
 	}
-	updated, _, err := client.EditRepo(req.State.Owner, req.State.Repository, repositorySettingsEditOption(req.Inputs, repo))
+	updated, _, err := client.editRepository(req.State.Owner, req.State.Repository, repositorySettingsEditOption(req.Inputs, repo))
 	if err != nil {
 		return infer.UpdateResponse[RepositorySettingsState]{}, err
 	}
@@ -195,11 +220,11 @@ func (RepositorySettings) Delete(_ context.Context, _ infer.DeleteRequest[Reposi
 	return infer.DeleteResponse{}, nil
 }
 
-func repositorySettingsEditOption(args RepositorySettingsArgs, repo *forgejo.Repository) forgejo.EditRepoOption {
+func repositorySettingsEditOption(args RepositorySettingsArgs, repo *repositoryAPIResponse) forgejo.EditRepoOption {
 	return repositorySettingsConfigEditOption(args.RepositorySettingsConfig, repo)
 }
 
-func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo *forgejo.Repository) forgejo.EditRepoOption {
+func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo *repositoryAPIResponse) forgejo.EditRepoOption {
 	opt := forgejo.EditRepoOption{
 		HasIssues:                     settings.Issues,
 		HasPullRequests:               settings.PullRequests,
@@ -209,6 +234,14 @@ func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo 
 		AllowRebaseMerge:              settings.AllowRebaseMerge,
 		AllowSquash:                   settings.AllowSquashMerge,
 		AllowFastForwardOnly:          settings.AllowFastForwardOnlyMerge,
+		IgnoreWhitespaceConflicts:     settings.IgnoreWhitespaceConflicts,
+		AllowManualMerge:              settings.AllowManualMerge,
+		AutodetectManualMerge:         settings.AutodetectManualMerge,
+		AllowRebaseUpdate:             settings.AllowRebaseUpdate,
+		DefaultUpdateStyle:            settings.DefaultUpdateStyle,
+		DefaultAllowMaintainerEdit:    settings.DefaultAllowMaintainerEdit,
+		MirrorInterval:                settings.MirrorInterval,
+		EnablePrune:                   settings.EnablePrune,
 		Archived:                      settings.Archived,
 		HasWiki:                       settings.Wiki,
 		HasProjects:                   settings.Projects,
@@ -275,7 +308,7 @@ func repositorySettingsConfigEditOption(settings RepositorySettingsConfig, repo 
 	return opt
 }
 
-func repositorySettingsStateFromAPI(template RepositorySettingsArgs, repo *forgejo.Repository) RepositorySettingsState {
+func repositorySettingsStateFromAPI(template RepositorySettingsArgs, repo *repositoryAPIResponse) RepositorySettingsState {
 	args := template
 	if repo == nil {
 		return repositorySettingsStateFromArgs(args)
@@ -287,7 +320,8 @@ func repositorySettingsStateFromAPI(template RepositorySettingsArgs, repo *forge
 	return repositorySettingsStateFromArgs(args)
 }
 
-func repositorySettingsConfigFromAPI(template RepositorySettingsConfig, repo *forgejo.Repository) RepositorySettingsConfig {
+func repositorySettingsConfigFromAPI(template RepositorySettingsConfig, repo *repositoryAPIResponse) RepositorySettingsConfig {
+	// shortcut: Forgejo omits manual-merge and prune settings from reads; preserve inputs until the API exposes them.
 	settings := template
 	if repo == nil {
 		return settings
@@ -298,10 +332,8 @@ func repositorySettingsConfigFromAPI(template RepositorySettingsConfig, repo *fo
 	if template.PullRequests != nil {
 		settings.PullRequests = boolPtr(repo.HasPullRequests)
 	}
-	// The pinned SDK can set this field but does not expose it on repository reads,
-	// so preserve the desired value in state rather than inventing a default.
-	if template.DefaultDeleteBranchAfterMerge != nil {
-		settings.DefaultDeleteBranchAfterMerge = template.DefaultDeleteBranchAfterMerge
+	if template.DefaultDeleteBranchAfterMerge != nil && repo.DefaultDeleteBranchAfterMerge != nil {
+		settings.DefaultDeleteBranchAfterMerge = repo.DefaultDeleteBranchAfterMerge
 	}
 	if template.AllowMergeCommits != nil {
 		settings.AllowMergeCommits = boolPtr(repo.AllowMerge)
@@ -315,19 +347,38 @@ func repositorySettingsConfigFromAPI(template RepositorySettingsConfig, repo *fo
 	if template.AllowSquashMerge != nil {
 		settings.AllowSquashMerge = boolPtr(repo.AllowSquash)
 	}
-	// The pinned SDK can set this field but does not expose it on repository reads,
-	// so preserve the desired value in state rather than inventing a default.
-	if template.AllowFastForwardOnlyMerge != nil {
-		settings.AllowFastForwardOnlyMerge = template.AllowFastForwardOnlyMerge
+	if template.AllowFastForwardOnlyMerge != nil && repo.AllowFastForwardOnly != nil {
+		settings.AllowFastForwardOnlyMerge = repo.AllowFastForwardOnly
 	}
 	if template.DefaultMergeStyle != nil {
 		settings.DefaultMergeStyle = stringPtr(string(repo.DefaultMergeStyle))
+	}
+	if template.IgnoreWhitespaceConflicts != nil {
+		settings.IgnoreWhitespaceConflicts = boolPtr(repo.IgnoreWhitespaceConflicts)
+	}
+	if template.MirrorInterval != nil {
+		settings.MirrorInterval = stringPtr(repo.MirrorInterval)
+	}
+	if template.AllowRebaseUpdate != nil && repo.AllowRebaseUpdate != nil {
+		settings.AllowRebaseUpdate = repo.AllowRebaseUpdate
+	}
+	if template.DefaultUpdateStyle != nil && repo.DefaultUpdateStyle != nil {
+		settings.DefaultUpdateStyle = repo.DefaultUpdateStyle
+	}
+	if template.DefaultAllowMaintainerEdit != nil && repo.DefaultAllowMaintainerEdit != nil {
+		settings.DefaultAllowMaintainerEdit = repo.DefaultAllowMaintainerEdit
 	}
 	if template.Archived != nil {
 		settings.Archived = boolPtr(repo.Archived)
 	}
 	if template.Wiki != nil {
 		settings.Wiki = boolPtr(repo.HasWiki)
+	}
+	if template.GloballyEditableWiki != nil && repo.GloballyEditableWiki != nil {
+		settings.GloballyEditableWiki = repo.GloballyEditableWiki
+	}
+	if template.WikiBranch != nil && repo.WikiBranch != nil {
+		settings.WikiBranch = repo.WikiBranch
 	}
 	if template.Projects != nil {
 		settings.Projects = boolPtr(repo.HasProjects)
@@ -406,6 +457,30 @@ func repositorySettingsReadArgs(owner, repo string, req infer.ReadRequest[Reposi
 	}
 	if args.DefaultMergeStyle == nil {
 		args.DefaultMergeStyle = req.State.DefaultMergeStyle
+	}
+	if args.IgnoreWhitespaceConflicts == nil {
+		args.IgnoreWhitespaceConflicts = req.State.IgnoreWhitespaceConflicts
+	}
+	if args.AllowManualMerge == nil {
+		args.AllowManualMerge = req.State.AllowManualMerge
+	}
+	if args.AutodetectManualMerge == nil {
+		args.AutodetectManualMerge = req.State.AutodetectManualMerge
+	}
+	if args.AllowRebaseUpdate == nil {
+		args.AllowRebaseUpdate = req.State.AllowRebaseUpdate
+	}
+	if args.DefaultUpdateStyle == nil {
+		args.DefaultUpdateStyle = req.State.DefaultUpdateStyle
+	}
+	if args.DefaultAllowMaintainerEdit == nil {
+		args.DefaultAllowMaintainerEdit = req.State.DefaultAllowMaintainerEdit
+	}
+	if args.MirrorInterval == nil {
+		args.MirrorInterval = req.State.MirrorInterval
+	}
+	if args.EnablePrune == nil {
+		args.EnablePrune = req.State.EnablePrune
 	}
 	if args.Archived == nil {
 		args.Archived = req.State.Archived
@@ -493,14 +568,20 @@ func hasMergeSettings(args RepositorySettingsConfig) bool {
 		args.AllowRebaseMerge != nil ||
 		args.AllowSquashMerge != nil ||
 		args.AllowFastForwardOnlyMerge != nil ||
-		args.DefaultMergeStyle != nil
+		args.DefaultMergeStyle != nil ||
+		args.IgnoreWhitespaceConflicts != nil ||
+		args.AllowManualMerge != nil ||
+		args.AutodetectManualMerge != nil ||
+		args.AllowRebaseUpdate != nil ||
+		args.DefaultUpdateStyle != nil ||
+		args.DefaultAllowMaintainerEdit != nil
 }
 
 func hasExternalTrackerSettings(args RepositorySettingsConfig) bool {
 	return args.ExternalTrackerURL != nil || args.ExternalTrackerFormat != nil || args.ExternalTrackerStyle != nil || args.ExternalTrackerRegexPattern != nil
 }
 
-func repositoryExternalTrackerValue(repo *forgejo.Repository, value func(*forgejo.ExternalTracker) string) string {
+func repositoryExternalTrackerValue(repo *repositoryAPIResponse, value func(*forgejo.ExternalTracker) string) string {
 	if repo == nil || repo.ExternalTracker == nil {
 		return ""
 	}
@@ -529,6 +610,18 @@ func equalStringPtr(a, b *string) bool {
 	return *a == *b
 }
 
+func equalDurationPtr(a, b *string) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	if *a == *b {
+		return true
+	}
+	left, leftErr := time.ParseDuration(*a)
+	right, rightErr := time.ParseDuration(*b)
+	return leftErr == nil && rightErr == nil && left == right
+}
+
 func repositorySettingsTemplate(inputs, state *RepositorySettingsConfig) *RepositorySettingsConfig {
 	if inputs != nil {
 		return inputs
@@ -549,6 +642,14 @@ func equalRepositorySettingsConfigPtr(a, b *RepositorySettingsConfig) bool {
 		equalBoolPtr(a.AllowSquashMerge, b.AllowSquashMerge) &&
 		equalBoolPtr(a.AllowFastForwardOnlyMerge, b.AllowFastForwardOnlyMerge) &&
 		equalStringPtr(a.DefaultMergeStyle, b.DefaultMergeStyle) &&
+		equalBoolPtr(a.IgnoreWhitespaceConflicts, b.IgnoreWhitespaceConflicts) &&
+		equalBoolPtr(a.AllowManualMerge, b.AllowManualMerge) &&
+		equalBoolPtr(a.AutodetectManualMerge, b.AutodetectManualMerge) &&
+		equalBoolPtr(a.AllowRebaseUpdate, b.AllowRebaseUpdate) &&
+		equalStringPtr(a.DefaultUpdateStyle, b.DefaultUpdateStyle) &&
+		equalBoolPtr(a.DefaultAllowMaintainerEdit, b.DefaultAllowMaintainerEdit) &&
+		equalDurationPtr(a.MirrorInterval, b.MirrorInterval) &&
+		equalBoolPtr(a.EnablePrune, b.EnablePrune) &&
 		equalBoolPtr(a.Archived, b.Archived) &&
 		equalBoolPtr(a.Wiki, b.Wiki) &&
 		equalBoolPtr(a.Projects, b.Projects) &&
@@ -565,67 +666,4 @@ func equalRepositorySettingsConfigPtr(a, b *RepositorySettingsConfig) bool {
 		equalStringPtr(a.ExternalTrackerFormat, b.ExternalTrackerFormat) &&
 		equalStringPtr(a.ExternalTrackerStyle, b.ExternalTrackerStyle) &&
 		equalStringPtr(a.ExternalTrackerRegexPattern, b.ExternalTrackerRegexPattern)
-}
-
-func mergeRepositoryEditOption(base *forgejo.EditRepoOption, settings forgejo.EditRepoOption) {
-	if settings.HasIssues != nil {
-		base.HasIssues = settings.HasIssues
-	}
-	if settings.HasPullRequests != nil {
-		base.HasPullRequests = settings.HasPullRequests
-	}
-	if settings.DefaultDeleteBranchAfterMerge != nil {
-		base.DefaultDeleteBranchAfterMerge = settings.DefaultDeleteBranchAfterMerge
-	}
-	if settings.AllowMerge != nil {
-		base.AllowMerge = settings.AllowMerge
-	}
-	if settings.AllowRebase != nil {
-		base.AllowRebase = settings.AllowRebase
-	}
-	if settings.AllowRebaseMerge != nil {
-		base.AllowRebaseMerge = settings.AllowRebaseMerge
-	}
-	if settings.AllowSquash != nil {
-		base.AllowSquash = settings.AllowSquash
-	}
-	if settings.AllowFastForwardOnly != nil {
-		base.AllowFastForwardOnly = settings.AllowFastForwardOnly
-	}
-	if settings.DefaultMergeStyle != nil {
-		base.DefaultMergeStyle = settings.DefaultMergeStyle
-	}
-	if settings.Archived != nil {
-		base.Archived = settings.Archived
-	}
-	if settings.HasWiki != nil {
-		base.HasWiki = settings.HasWiki
-	}
-	if settings.HasProjects != nil {
-		base.HasProjects = settings.HasProjects
-	}
-	if settings.HasReleases != nil {
-		base.HasReleases = settings.HasReleases
-	}
-	if settings.HasPackages != nil {
-		base.HasPackages = settings.HasPackages
-	}
-	if settings.HasActions != nil {
-		base.HasActions = settings.HasActions
-	}
-	if settings.ExternalWiki != nil {
-		base.ExternalWiki = settings.ExternalWiki
-	}
-	if settings.GloballyEditableWiki != nil {
-		base.GloballyEditableWiki = settings.GloballyEditableWiki
-	}
-	if settings.WikiBranch != nil {
-		base.WikiBranch = settings.WikiBranch
-	}
-	if settings.InternalTracker != nil {
-		base.InternalTracker = settings.InternalTracker
-	}
-	if settings.ExternalTracker != nil {
-		base.ExternalTracker = settings.ExternalTracker
-	}
 }

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	p "github.com/pulumi/pulumi-go-provider"
@@ -17,13 +18,15 @@ import (
 
 type RepositoryPushMirror struct{}
 
+var _ infer.CustomCheck[RepositoryPushMirrorArgs] = RepositoryPushMirror{}
+
 type RepositoryPushMirrorArgs struct {
 	Owner          string `pulumi:"owner"`
 	Repository     string `pulumi:"repository"`
 	RemoteAddress  string `pulumi:"remoteAddress"`
 	RemoteUsername string `pulumi:"remoteUsername,optional"`
 	RemotePassword string `pulumi:"remotePassword,optional" provider:"secret"`
-	Interval       string `pulumi:"interval,optional"`
+	Interval       string `pulumi:"interval"`
 	BranchFilter   string `pulumi:"branchFilter,optional"`
 	SyncOnCommit   bool   `pulumi:"syncOnCommit,optional"`
 	UseSSH         bool   `pulumi:"useSsh,optional"`
@@ -40,7 +43,7 @@ type RepositoryPushMirrorState struct {
 
 type repositoryPushMirrorCreateOption struct {
 	BranchFilter   string `json:"branch_filter,omitempty"`
-	Interval       string `json:"interval,omitempty"`
+	Interval       string `json:"interval"`
 	RemoteAddress  string `json:"remote_address"`
 	RemotePassword string `json:"remote_password,omitempty"`
 	RemoteUsername string `json:"remote_username,omitempty"`
@@ -77,17 +80,44 @@ func (a *RepositoryPushMirrorArgs) Annotate(ann infer.Annotator) {
 	ann.Describe(&a.Owner, "Repository owner.")
 	ann.Describe(&a.Repository, "Repository name.")
 	ann.Describe(&a.RemoteAddress, "Target remote URL for the push mirror.")
-	ann.Describe(&a.RemoteUsername, "Username for authenticating to the remote.")
-	ann.Describe(&a.RemotePassword, "Password or token for authenticating to the remote.")
-	ann.Describe(&a.Interval, "Mirror sync interval, for example 8h30m0s. Leave empty to use Forgejo's default.")
-	ann.Describe(&a.BranchFilter, "Optional branch filter for the push mirror. Leave empty to mirror all branches.")
+	ann.Describe(&a.RemoteUsername, "Username for authenticating to the remote. Mutually exclusive with useSsh.")
+	ann.Describe(&a.RemotePassword, "Password or token for authenticating to the remote. Mutually exclusive with useSsh.")
+	ann.Describe(&a.Interval, "Mirror sync interval as a non-negative Go duration, for example 8h30m0s. Use 0s to disable scheduled syncing. Nonzero intervals must meet the Forgejo instance's minimum mirror interval.")
+	ann.Describe(&a.BranchFilter, "Comma-separated branch names or glob patterns, for example main,release/*. Leave empty to mirror all branches. Tags are always mirrored.")
 	ann.Describe(&a.SyncOnCommit, "Whether pushes to this repository trigger the mirror.")
-	ann.Describe(&a.UseSSH, "Whether Forgejo should use an SSH key for the push mirror remote.")
+	ann.Describe(&a.UseSSH, "Whether Forgejo should generate an SSH key for the push mirror remote. Mutually exclusive with remoteUsername and remotePassword.")
+}
+
+func (RepositoryPushMirror) Check(ctx context.Context, req infer.CheckRequest) (infer.CheckResponse[RepositoryPushMirrorArgs], error) {
+	inputs, failures, err := infer.DefaultCheck[RepositoryPushMirrorArgs](ctx, req.NewInputs)
+	if err != nil || len(failures) > 0 {
+		return infer.CheckResponse[RepositoryPushMirrorArgs]{Inputs: inputs, Failures: failures}, err
+	}
+	if req.NewInputs.Get("interval").IsString() {
+		if err := validateRepositoryPushMirrorInterval(inputs.Interval); err != nil {
+			failures = append(failures, p.CheckFailure{Property: "interval", Reason: err.Error()})
+		}
+	}
+	return infer.CheckResponse[RepositoryPushMirrorArgs]{Inputs: inputs, Failures: failures}, nil
+}
+
+func validateRepositoryPushMirrorInterval(interval string) error {
+	duration, err := time.ParseDuration(interval)
+	if err != nil {
+		return fmt.Errorf("interval must be a Go duration such as 1h or 0s: %w", err)
+	}
+	if duration < 0 {
+		return fmt.Errorf("interval must not be negative")
+	}
+	return nil
 }
 
 func (RepositoryPushMirror) Create(ctx context.Context, req infer.CreateRequest[RepositoryPushMirrorArgs]) (infer.CreateResponse[RepositoryPushMirrorState], error) {
 	if req.DryRun {
 		return infer.CreateResponse[RepositoryPushMirrorState]{ID: repositoryPushMirrorPreviewID(req.Inputs), Output: repositoryPushMirrorStateFromArgs(req.Inputs, "", "", "", "", "")}, nil
+	}
+	if err := validateRepositoryPushMirrorInterval(req.Inputs.Interval); err != nil {
+		return infer.CreateResponse[RepositoryPushMirrorState]{}, err
 	}
 
 	client, err := forgejoAPIClientFromConfig(ctx)
@@ -144,13 +174,19 @@ func (RepositoryPushMirror) Read(ctx context.Context, req infer.ReadRequest[Repo
 }
 
 func (RepositoryPushMirror) Diff(_ context.Context, req infer.DiffRequest[RepositoryPushMirrorArgs, RepositoryPushMirrorState]) (infer.DiffResponse, error) {
+	intervalChanged := req.State.Interval != req.Inputs.Interval
+	oldInterval, oldErr := time.ParseDuration(req.State.Interval)
+	newInterval, newErr := time.ParseDuration(req.Inputs.Interval)
+	if oldErr == nil && newErr == nil && oldInterval >= 0 && newInterval >= 0 {
+		intervalChanged = oldInterval != newInterval
+	}
 	diff := map[string]p.PropertyDiff{}
 	addReplaceDiff(diff, "owner", req.State.Owner != req.Inputs.Owner)
 	addReplaceDiff(diff, "repository", req.State.Repository != req.Inputs.Repository)
 	addReplaceDiff(diff, "remoteAddress", req.State.RemoteAddress != req.Inputs.RemoteAddress)
 	addReplaceDiff(diff, "remoteUsername", req.State.RemoteUsername != req.Inputs.RemoteUsername)
 	addReplaceDiff(diff, "remotePassword", req.State.RemotePassword != req.Inputs.RemotePassword)
-	addReplaceDiff(diff, "interval", req.State.Interval != req.Inputs.Interval)
+	addReplaceDiff(diff, "interval", intervalChanged)
 	addReplaceDiff(diff, "branchFilter", req.State.BranchFilter != req.Inputs.BranchFilter)
 	addReplaceDiff(diff, "syncOnCommit", req.State.SyncOnCommit != req.Inputs.SyncOnCommit)
 	addReplaceDiff(diff, "useSsh", req.State.UseSSH != req.Inputs.UseSSH)

@@ -10,23 +10,25 @@ The provider schema generates SDKs for the published Pulumi languages:
 
 | Language | SDK path | Package or namespace |
 | --- | --- | --- |
-| TypeScript / JavaScript | `sdk/nodejs` | `@sironheart/pulumi-forgejo` |
+| TypeScript / JavaScript | `sdk/nodejs` | `@sironheart/pulumi-forgejo-provider` |
 | Go | `sdk/go` | `forgejo.siron.casa/sironheart/forgejo-pulumi-provider/sdk/go` |
 | .NET | `sdk/dotnet` | `Pulumi.Forgejo` |
-| Java | `sdk/java` | `casa.siron.pulumi.forgejo` |
+| Java | `sdk/java` | `casa.siron.forgejo.forgejo` |
 | YAML | no SDK required | uses the provider schema directly |
 
 ## Provider Resources
 
 `forgejo:index:Repository` manages a Forgejo repository.
 
-Inputs: `name`, `owner`, `description`, `private`, `defaultBranch`, `website`, `template`, `settings`.
+Inputs: `name`, `owner`, `description`, `private`, `defaultBranch`, `website`, `template`, `topics`, `settings`.
+
+Creation-only inputs: `initializeWithReadme`, `gitignores`, `license`, `readme`, `issueLabels`, `trustModel`, `objectFormatName`. `readme` selects a template, not literal contents; generating README, gitignore, or license files requires `initializeWithReadme`. Changing these inputs on an existing repository has no effect.
 
 Outputs: `fullName`, `htmlUrl`, `sshUrl`, `cloneUrl`.
 
 `forgejo:index:Organization` manages a Forgejo organization.
 
-Inputs: `name`, `fullName`, `description`, `website`, `location`, `visibility`.
+Inputs: `name`, `fullName`, `description`, `email`, `website`, `location`, `visibility`, `repoAdminChangeTeamAccess`.
 
 Outputs: `avatarUrl`.
 
@@ -86,13 +88,15 @@ Outputs: `protectionId`.
 
 `forgejo:index:RepositoryBranchProtection` manages a repository branch protection rule.
 
-Inputs include `owner`, `repository`, `name`, push and merge whitelists, status-check settings, review approval settings, signed-commit requirements, and protected/unprotected file patterns.
+Inputs include `owner`, `repository`, `name`, push and merge whitelists, status-check settings, review approval settings, `applyToAdmins`, `ignoreStaleApprovals`, signed-commit requirements, and protected/unprotected file patterns.
 
 Outputs: `created`, `updated`.
 
-`forgejo:index:RepositorySettings` manages repository unit flags and wiki or issue tracker settings.
+`forgejo:index:RepositorySettings` manages repository units, merge behavior, archiving, wiki and issue trackers, and pull-mirror settings. The same settings are available through `Repository.settings`; leave optional fields unset to avoid managing them.
 
 Inputs include `owner`, `repository`, `issues`, `pullRequests`, `defaultDeleteBranchAfterMerge`, `wiki`, `projects`, `releases`, `packages`, `actions`, `externalWikiUrl`, internal tracker settings, and external tracker settings.
+
+Merge settings include `allowMergeCommits`, `allowRebase`, `allowRebaseMerge`, `allowSquashMerge`, `allowFastForwardOnlyMerge`, `defaultMergeStyle`, `ignoreWhitespaceConflicts`, `allowManualMerge`, `autodetectManualMerge`, `allowRebaseUpdate`, `defaultUpdateStyle`, and `defaultAllowMaintainerEdit`. `mirrorInterval` and `enablePrune` apply to existing **pull mirrors**.
 
 `forgejo:index:RepositoryPushMirror` manages a repository push mirror and can limit it to matching branches.
 
@@ -100,9 +104,15 @@ Inputs: `owner`, `repository`, `remoteAddress`, `remoteUsername`, `remotePasswor
 
 Outputs: `remoteName`, `publicKey`, `created`, `lastUpdate`, `lastError`.
 
+`interval` is required; use `0s` to disable periodic synchronization. Equivalent durations such as `1h` and `1h0m0s` do not trigger replacement. Other mirror changes require replacement; SSH mirror replacement generates a new key.
+
 `forgejo:index:getCurrentUser` returns information about the authenticated Forgejo user.
 
 Outputs: `userId`, `login`, `fullName`, `email`, `isAdmin`.
+
+### API Compatibility
+
+Validated against Forgejo **17.0.1**. See [API compatibility findings](docs/api-compatibility.md) for upstream sources, supported values, and version limitations. Forgejo does not return `allowManualMerge`, `autodetectManualMerge`, or `enablePrune`, so refresh preserves their configured values rather than detecting external changes.
 
 ## Configuration
 
@@ -144,7 +154,7 @@ TypeScript / JavaScript:
 
 ```sh
 npm config set @sironheart:registry https://forgejo.siron.casa/api/packages/sironheart/npm/
-npm install @sironheart/pulumi-forgejo
+npm install @sironheart/pulumi-forgejo-provider
 ```
 
 Go:
@@ -168,7 +178,7 @@ repositories {
 }
 
 dependencies {
-    implementation "casa.siron.pulumi:forgejo:0.1.0"
+    implementation "casa.siron.forgejo:forgejo:0.1.0"
 }
 ```
 
@@ -176,7 +186,7 @@ dependencies {
 
 ```ts
 import * as pulumi from "@pulumi/pulumi";
-import * as forgejo from "@sironheart/pulumi-forgejo";
+import * as forgejo from "@sironheart/pulumi-forgejo-provider";
 
 const repo = new forgejo.Repository("example", {
     name: "example",
@@ -243,8 +253,8 @@ return await Deployment.RunAsync(() =>
 package myproject;
 
 import com.pulumi.Pulumi;
-import casa.siron.pulumi.forgejo.Repository;
-import casa.siron.pulumi.forgejo.RepositoryArgs;
+import casa.siron.forgejo.forgejo.Repository;
+import casa.siron.forgejo.forgejo.RepositoryArgs;
 
 public class App {
     public static void main(String[] args) {
@@ -300,7 +310,7 @@ Useful tasks:
 | `mise run schema` | Export `schema.json`. |
 | `mise run sdk` | Generate all standard Pulumi SDKs. |
 | `mise run release-check` | Validate the GoReleaser configuration. |
-| `mise run check` | Run formatting, linting, tests, schema export, and SDK generation. |
+| `mise run check` | Run formatting, linting, tests, and the provider build. |
 
 Build release artifacts locally:
 
