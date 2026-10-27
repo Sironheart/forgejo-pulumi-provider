@@ -2,7 +2,9 @@
 
 A native Pulumi provider for managing Forgejo resources through the Forgejo REST API.
 
-Provider plugins are attached to this repository's Forgejo Releases and generated SDKs are published to the same instance's package registries. The GitHub mirror also publishes SDKs to GitHub Packages and attaches the schema and SDK sources to GitHub Releases.
+Provider plugins are attached to this repository's Forgejo Releases and generated SDKs are published to the same instance's package registries. The GitHub repository also publishes SDKs to GitHub Packages and attaches the schema and SDK sources to GitHub Releases.
+
+For GitHub installation instructions, see [Using GitHub releases](docs/github-releases.md).
 
 ## Supported Languages
 
@@ -336,7 +338,9 @@ The release workflow:
 
 The workflow expects `FORGEJO_TOKEN` to be configured as a repository secret. The token must be allowed to create releases/tags and publish packages for the `sironheart` owner.
 
-### GitHub Mirror Releases
+### GitHub Releases
+
+To install a released version, follow [Using GitHub releases](docs/github-releases.md). The following section describes the publishing workflow.
 
 `.github/workflows/release.yml` runs only on github.com when a `vX.Y.Z` tag (optionally with a prerelease suffix) is pushed by the Forgejo push mirror. It does not run for branch pushes or on Forgejo, and never creates commits or changes mirrored tags.
 
@@ -353,7 +357,7 @@ Go is distributed as a source archive only; GitHub Packages has no Go module reg
 
 Setup:
 
-- Enable GitHub Actions on the mirror. Publishing uses the automatic `GITHUB_TOKEN` with `contents: write` for releases and `packages: write` for packages; no additional publishing secrets are needed.
+- Enable Actions in the GitHub repository. Publishing uses the automatic `GITHUB_TOKEN` with `contents: write` for releases and `packages: write` for packages; no additional publishing secrets are needed.
 - Configure the Forgejo push mirror to include tags and use credentials allowed to push GitHub workflow files. The npm scope in `internal/provider/provider.go` must match the GitHub repository owner (currently `sironheart`).
 - Ensure this workflow is included in the tagged commit. Existing tags are not rebuilt automatically, and [GitHub does not emit tag push events when more than three tags are pushed together](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push).
 - Check package visibility after first publication. GitHub npm and NuGet packages default to private, and [installation requires authentication even for public packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
