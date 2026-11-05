@@ -3,13 +3,13 @@ module forgejo.siron.casa/sironheart/forgejo-pulumi-provider
 go 1.27.3
 
 require (
-	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0
+	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0
 	github.com/pulumi/pulumi-go-provider v1.8.0
 	github.com/pulumi/pulumi/sdk/v3 v3.273.0
 )
 
 require (
-	github.com/42wim/httpsig v1.2.3 // indirect
+	github.com/42wim/httpsig v1.3.0 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.5.2 // indirect
@@ -37,7 +37,6 @@ require (
 	github.com/edsrzf/mmap-go v1.1.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
-	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/go-git/gcfg/v2 v2.0.2 // indirect
 	github.com/go-git/go-billy/v6 v6.0.0-beta.1 // indirect
 	github.com/go-git/go-git/v6 v6.0.0-beta.1 // indirect
@@ -46,7 +45,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/errors v0.22.9 // indirect
 	github.com/go-openapi/jsonpointer v1.0.1 // indirect
-	github.com/go-openapi/strfmt v0.27.3 // indirect
+	github.com/go-openapi/strfmt v0.27.4 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
 	github.com/go-openapi/swag/cmdutils v0.29.2 // indirect
 	github.com/go-openapi/swag/conv v0.29.2 // indirect

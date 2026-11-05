@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
 )

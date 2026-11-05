@@ -1,7 +1,7 @@
-codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0 h1:s2fK+FBwvcYsmKDjNhmoe7B8q9zsgs0UrSlYe9r4XjM=
-codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0/go.mod h1:Is2jTpS1dizeXm4skQv/ES3QVqnzcNhn2GzZXpiw9f8=
-github.com/42wim/httpsig v1.2.3 h1:xb0YyWhkYj57SPtfSttIobJUPJZB9as1nsfo7KWVcEs=
-github.com/42wim/httpsig v1.2.3/go.mod h1:nZq9OlYKDrUBhptd77IHx4/sZZD+IxTBADvAPI9G/EM=
+codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0 h1:pPTSB6usa7x1VWOBt1ZXhnVhEU9zMKTqj6l/u8GIU24=
+codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0/go.mod h1:GQzE4Nf0dWOUVALtweMVK5D1Gbyh6SGS9NkEzyBGEpA=
+github.com/42wim/httpsig v1.3.0 h1:HK2bieeZ99X9IvOoc1ST6yrhLek0f4MqlEGES2JCP3g=
+github.com/42wim/httpsig v1.3.0/go.mod h1:lgC3Yrvp4lxi1odEF1ge3kQBu/VM+SRcZQu5YwiR3dU=
 github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
 github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2 h1:5IcZpTvzydCQeHzK4Ef/D5rrSqwxob0t8PQPMybUNFM=
@@ -69,8 +69,6 @@ github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f h1:Y/CXytFA4m6
 github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f/go.mod h1:vw97MGsxSvLiUE2X8qFplwetxpGLQrlU1Q9AUEIzCaM=
 github.com/gliderlabs/ssh v0.3.8 h1:a4YXD1V7xMF9g5nTkdfnja3Sxy1PVDCj1Zg4Wb8vY6c=
 github.com/gliderlabs/ssh v0.3.8/go.mod h1:xYoytBv1sV0aL3CavoDuJIQNURXkkfPA/wxQ1pL1fAU=
-github.com/go-fed/httpsig v1.1.0 h1:9M+hb0jkEICD8/cAiNqEB66R87tTINszBRTjwjQzWcI=
-github.com/go-fed/httpsig v1.1.0/go.mod h1:RCMrTZvN1bJYtofsG4rd5NaO5obxQ5xBkdiS7xsT7bM=
 github.com/go-git/gcfg/v2 v2.0.2 h1:MY5SIIfTGGEMhdA7d7JePuVVxtKL7Hp+ApGDJAJ7dpo=
 github.com/go-git/gcfg/v2 v2.0.2/go.mod h1:/lv2NsxvhepuMrldsFilrgct6pxzpGdSRC13ydTLSLs=
 github.com/go-git/go-billy/v6 v6.0.0-beta.1 h1:OJ4r207zcEbeq/DJNajQUOMd+pph3r9A7hRq1Sjl1bA=
@@ -90,8 +88,8 @@ github.com/go-openapi/errors v0.22.9 h1:HI9+SyVYiRzyeBQGv0CbWbQa+u2S0nny7G7AhY+U
 github.com/go-openapi/errors v0.22.9/go.mod h1:R73q66sXP2smzAGgFOI4nqtusRK2xN5pYCjsij+KX58=
 github.com/go-openapi/jsonpointer v1.0.1 h1:2KxywRmNwJkT/FMBa3iRNHEaAxSJvjqoufQZy3au1Mg=
 github.com/go-openapi/jsonpointer v1.0.1/go.mod h1:wI7ZYsFmbIi9nBXOZqgDaS/bqOchRGZjqxFli7FBYxY=
-github.com/go-openapi/strfmt v0.27.3 h1:cyf4J5Wjpd6bFpAs44MF8PsbWF/mWXhn82Ck/hgQZgw=
-github.com/go-openapi/strfmt v0.27.3/go.mod h1:Bl+xadPLa3nhBiaCAxNND1vrQfzyEjF0vBrLx96n/4E=
+github.com/go-openapi/strfmt v0.27.4 h1:E1xsvHb8R9vsuYru4TP2PVVTv9AIgSFAUACUZrFQfCI=
+github.com/go-openapi/strfmt v0.27.4/go.mod h1:SCOff81PPhU26acBiW96jHaFycEbT2nkQRvojM+V2z0=
 github.com/go-openapi/swag v0.29.2 h1:9n8frkcsuQRA0INU31VbxNxt1zBaHxrHYGEf5BUjFi4=
 github.com/go-openapi/swag v0.29.2/go.mod h1:RkCiX1gCVXWgLOavDXE3ALJrQ/VO2ziiIzOUs3z10xo=
 github.com/go-openapi/swag/cmdutils v0.29.2 h1:cXEzX/nWCODon251f+1HgL75/R4XXML5IZxgLCWMoro=

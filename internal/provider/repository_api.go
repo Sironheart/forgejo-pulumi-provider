@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	forgejo "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 )
 
 // These response fields are exposed by Forgejo but missing from the SDK.
