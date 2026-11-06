@@ -23,7 +23,7 @@ env:
   # renovate: datasource=github-releases depName=golangci/golangci-lint
   GOLANGCI_LINT_VERSION: v2.15.0
   # renovate: datasource=github-releases depName=caarlos0/svu
-  SVU_VERSION: v3.4.1
+  SVU_VERSION: v3.4.4
   # renovate: datasource=github-releases depName=nodejs/node
   NODE_VERSION: "v26.13.0"
   # renovate: datasource=dotnet-version depName=dotnet-sdk
