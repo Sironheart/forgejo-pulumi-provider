@@ -1,6 +1,6 @@
 module forgejo.siron.casa/sironheart/forgejo-pulumi-provider
 
-go 1.27.3
+go 1.27.4
 
 require (
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0
