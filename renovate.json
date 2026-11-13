@@ -20,6 +20,14 @@
       ]
     },
     {
+      "description": "Forgejo patches out the GHES check only on bare major tags; exact tags are unpatched upstream",
+      "matchDepNames": [
+        "https://code.forgejo.org/forgejo/upload-artifact",
+        "https://code.forgejo.org/forgejo/download-artifact"
+      ],
+      "versioning": "regex:^v(?<major>\\d+)$"
+    },
+    {
       "description": "Keep workflow .NET SDK on 8.x",
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
