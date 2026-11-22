@@ -28,7 +28,7 @@ env:
   # renovate: datasource=java-version depName=java
   JAVA_VERSION: "11.0.33+100000001"
   # renovate: datasource=gradle-version depName=gradle
-  GRADLE_VERSION: "8.14.7"
+  GRADLE_VERSION: "8.14.8"
 
 jobs:
   generate:
